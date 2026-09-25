@@ -17,5 +17,17 @@
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.1",
     "vite": "^5.4.1"
-  }
+  },
+  "description": "",
+  "main": "vite.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/amosopatoyinbo-web/care-integrity-project.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/amosopatoyinbo-web/care-integrity-project/issues"
+  },
+  "homepage": "https://github.com/amosopatoyinbo-web/care-integrity-project#readme"
 }
