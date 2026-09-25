@@ -1,0 +1,277 @@
+/* ============================================
+   LOGIN PAGE
+   ============================================ */
+
+.login-page {
+  min-height: 100vh;
+  background: var(--soft-cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+}
+
+.login-card {
+  background: #fff;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid rgba(0,0,0,0.06);
+  padding: 44px 40px 36px;
+  width: 100%;
+  max-width: 460px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@media (max-width: 480px) {
+  .login-card { padding: 32px 22px 28px; }
+}
+
+/* ── Logo ── */
+.login-logo-link { display: block; margin-bottom: 32px; }
+.login-logo      { height: 56px; width: auto; display: block; }
+
+/* ── Tabs ── */
+.login-tabs {
+  display: flex;
+  background: var(--soft-cream);
+  border-radius: var(--radius-pill);
+  padding: 4px;
+  gap: 4px;
+  width: 100%;
+  margin-bottom: 28px;
+}
+
+.login-tab {
+  flex: 1;
+  padding: 10px 20px;
+  border-radius: var(--radius-pill);
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  color: var(--charcoal-light);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+}
+.login-tab:hover { color: var(--trust-blue); }
+.login-tab--active {
+  background: #fff;
+  color: var(--trust-blue);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* ── Heading ── */
+.login-heading {
+  font-family: var(--font-heading);
+  font-size: 1.6rem;
+  color: var(--trust-blue);
+  margin: 0 0 8px;
+  text-align: center;
+  width: 100%;
+}
+.login-sub {
+  font-size: 0.88rem;
+  color: var(--charcoal-light);
+  text-align: center;
+  margin: 0 0 28px;
+  line-height: 1.6;
+  width: 100%;
+}
+
+/* ── Error ── */
+.login-error {
+  width: 100%;
+  background: rgba(192,57,43,0.07);
+  border: 1px solid rgba(192,57,43,0.25);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  font-size: 0.84rem;
+  color: #c0392b;
+  text-align: center;
+  margin-bottom: 18px;
+  line-height: 1.5;
+}
+
+/* ── Form ── */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+}
+
+.login-field { display: flex; flex-direction: column; gap: 6px; }
+
+/* Label + Forgot password on same row */
+.login-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.login-label {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--charcoal);
+  letter-spacing: 0.01em;
+}
+
+.login-forgot {
+  font-size: 0.76rem;
+  color: var(--trust-blue);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.15s;
+}
+.login-forgot:hover { color: var(--integrity-green); }
+
+.login-input {
+  width: 100%;
+  padding: 13px 16px;
+  border: 1.5px solid rgba(15,76,129,0.2);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  color: var(--charcoal);
+  background: #fff;
+  transition: border-color 0.18s, box-shadow 0.18s;
+  appearance: none;
+}
+.login-input:focus {
+  outline: none;
+  border-color: var(--trust-blue);
+  box-shadow: 0 0 0 3px rgba(15,76,129,0.1);
+}
+.login-input::placeholder { color: var(--charcoal-pale); }
+
+/* ── Submit ── */
+.login-submit {
+  width: 100%;
+  padding: 15px;
+  font-size: 0.96rem;
+  margin-top: 4px;
+  justify-content: center;
+}
+.login-submit:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none !important;
+  filter: none !important;
+}
+
+/* ── Divider ── */
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin: 28px 0 18px;
+}
+.login-divider::before,
+.login-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(0,0,0,0.08);
+}
+.login-divider span {
+  font-size: 0.78rem;
+  color: var(--charcoal-pale);
+  white-space: nowrap;
+}
+
+/* ── Registration options — clearly separate from sign-in ── */
+.login-register-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 100%;
+}
+
+.login-register-option {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid rgba(0,0,0,0.08);
+  background: var(--soft-cream);
+  text-decoration: none;
+  transition: border-color 0.18s, background 0.18s, transform 0.18s;
+}
+.login-register-option:hover {
+  transform: translateY(-2px);
+}
+
+.login-register-option--cg { border-color: rgba(46,175,143,0.25); }
+.login-register-option--cg:hover { background: rgba(46,175,143,0.06); border-color: var(--integrity-green); }
+
+.login-register-option--ag { border-color: rgba(15,76,129,0.2); }
+.login-register-option--ag:hover { background: rgba(15,76,129,0.05); border-color: var(--trust-blue); }
+
+.login-register-option__label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--charcoal);
+}
+.login-register-option--cg .login-register-option__label { color: var(--integrity-green-dark); }
+.login-register-option--ag .login-register-option__label { color: var(--trust-blue); }
+
+.login-register-option__action {
+  font-size: 0.75rem;
+  color: var(--charcoal-pale);
+}
+
+/* ── Wrong page link ── */
+.login-switch {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(0,0,0,0.06);
+  font-size: 0.82rem;
+  color: var(--charcoal-light);
+  text-align: center;
+}
+.login-switch a {
+  color: var(--trust-blue);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-weight: 600;
+  transition: color 0.15s;
+}
+.login-switch a:hover { color: var(--integrity-green); }
+
+/* ── Back link ── */
+.login-back {
+  display: block;
+  margin-top: 16px;
+  font-size: 0.78rem;
+  color: var(--charcoal-pale);
+  text-decoration: none;
+  transition: color 0.15s;
+  text-align: center;
+}
+.login-back:hover { color: var(--trust-blue); }
+
+/* ── Forgot / Reset success state ── */
+.fp-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+.fp-success__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--integrity-green);
+  color: #fff;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 16px rgba(46,175,143,0.3);
+}

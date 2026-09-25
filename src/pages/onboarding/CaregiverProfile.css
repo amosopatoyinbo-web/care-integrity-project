@@ -1,0 +1,285 @@
+/* ============================================
+   CAREGIVER PROFILE
+   ============================================ */
+
+.cp-page { min-height: 100vh; background: var(--soft-cream); }
+
+/* ── Topbar ── */
+.cp-topbar {
+  background: #fff;
+  border-bottom: 1px solid rgba(0,0,0,0.07);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+}
+.cp-topbar__logo img { height: 42px; width: auto; }
+.cp-topbar__right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+/* ── Preview banner ── */
+.cp-preview-banner {
+  background: var(--trust-blue);
+  color: #fff;
+  font-size: 0.84rem;
+  font-weight: 600;
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  text-align: center;
+}
+.cp-preview-banner__close {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: #fff;
+  border-radius: var(--radius-pill);
+  padding: 4px 14px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: background 0.15s;
+}
+.cp-preview-banner__close:hover { background: rgba(255,255,255,0.25); }
+
+/* ── Layout ── */
+.cp-layout {
+  max-width: 1100px;
+  margin: 28px auto;
+  padding: 0 20px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+@media (min-width: 860px) {
+  .cp-layout { grid-template-columns: 272px 1fr; align-items: start; }
+}
+
+/* ── Sidebar ── */
+.cp-sidebar {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(0,0,0,0.05);
+  padding: 28px 22px;
+  text-align: center;
+  position: sticky;
+  top: 80px;
+}
+
+.cp-avatar-wrap { position: relative; display: inline-block; margin-bottom: 14px; }
+.cp-avatar {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: var(--trust-blue); color: #fff;
+  font-family: var(--font-heading); font-size: 1.6rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.cp-verified-ring {
+  position: absolute; inset: -3px; border-radius: 50%;
+  border: 2.5px solid var(--integrity-green); pointer-events: none;
+}
+
+.cp-name  { font-family: var(--font-heading); font-size: 1.2rem; color: var(--trust-blue); margin-bottom: 3px; }
+.cp-role  { font-size: 0.88rem; font-weight: 600; color: var(--integrity-green); margin-bottom: 3px; }
+.cp-meta  { font-size: 0.8rem; color: var(--charcoal-light); margin-bottom: 3px; }
+.cp-member{ font-size: 0.75rem; color: var(--charcoal-pale); margin-bottom: 18px; }
+
+.cp-interview-btn { width: 100%; margin-bottom: 20px; }
+
+/* Private block */
+.cp-private-block {
+  background: rgba(212,175,55,0.06);
+  border: 1px solid rgba(212,175,55,0.22);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  text-align: left;
+  margin-bottom: 18px;
+}
+.cp-private-block__label {
+  font-size: 0.66rem; font-weight: 800; letter-spacing: 0.12em;
+  text-transform: uppercase; color: #8a6d00; margin-bottom: 8px;
+}
+.cp-private-block__row {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 0.8rem; color: var(--charcoal); margin-bottom: 5px;
+}
+
+.cp-sidebar-section {
+  text-align: left; border-top: 1px solid rgba(0,0,0,0.07);
+  padding-top: 14px; margin-top: 4px; margin-bottom: 14px;
+}
+.cp-sidebar-label {
+  font-size: 0.66rem; font-weight: 800; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--charcoal-pale); margin-bottom: 10px;
+}
+
+.cp-standards-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.cp-std-chip {
+  background: rgba(15,76,129,0.07); color: var(--trust-blue);
+  border-radius: var(--radius-pill); font-size: 0.72rem; font-weight: 600; padding: 4px 10px;
+}
+
+.cp-recognition-item { margin-bottom: 10px; }
+.cp-recognition-standard { display: block; font-size: 0.82rem; font-weight: 700; color: var(--trust-blue); }
+.cp-recognition-from     { font-size: 0.74rem; color: var(--charcoal-pale); }
+
+/* ── Main ── */
+.cp-main { display: flex; flex-direction: column; gap: 16px; }
+
+.cp-section {
+  background: #fff; border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm); border: 1px solid rgba(0,0,0,0.05); padding: 26px 26px 22px;
+}
+
+.cp-section-title {
+  font-family: var(--font-heading); font-size: 1.02rem; color: var(--trust-blue);
+  margin-bottom: 14px; padding-bottom: 10px; border-bottom: 2px solid rgba(15,76,129,0.08);
+}
+.cp-subsection-title {
+  font-family: var(--font-heading); font-size: 0.9rem; color: var(--charcoal); margin: 14px 0 5px;
+}
+.cp-bio { font-size: 0.92rem; color: var(--charcoal); line-height: 1.85; }
+
+/* Chips */
+.cp-chips-group { margin-bottom: 14px; }
+.cp-chips-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--charcoal-pale); margin-bottom: 7px; }
+.cp-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.cp-chip { padding: 5px 12px; border-radius: var(--radius-pill); font-size: 0.78rem; font-weight: 500; }
+.cp-chip--blue  { background: rgba(15,76,129,0.07);  color: var(--trust-blue); }
+.cp-chip--green { background: rgba(46,175,143,0.1);  color: var(--integrity-green-dark); }
+.cp-chip--aqua  { background: rgba(126,208,201,0.15); color: #2a7d79; }
+
+/* Entry cards */
+.cp-entry-card {
+  border: 1px solid rgba(0,0,0,0.07); border-radius: var(--radius-md);
+  padding: 14px 16px; margin-bottom: 10px; background: var(--soft-cream);
+}
+.cp-entry-card:last-of-type { margin-bottom: 0; }
+.cp-entry-card__top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.cp-entry-card__title { font-weight: 700; font-size: 0.9rem; color: var(--trust-blue); margin-bottom: 2px; }
+.cp-entry-card__sub   { font-size: 0.82rem; color: var(--charcoal); margin-bottom: 2px; }
+.cp-entry-card__dates { font-size: 0.75rem; color: var(--charcoal-pale); }
+
+.cp-add-link {
+  display: inline-block; margin-top: 12px; font-size: 0.82rem;
+  font-weight: 600; color: var(--trust-blue); text-decoration: underline;
+}
+
+/* Badges */
+.cp-badge {
+  display: inline-flex; align-items: center; padding: 3px 9px;
+  border-radius: var(--radius-pill); font-size: 0.67rem; font-weight: 700;
+  letter-spacing: 0.03em; white-space: nowrap; flex-shrink: 0;
+}
+.badge--verified  { background: rgba(46,175,143,0.1);   color: var(--integrity-green-dark); border: 1px solid rgba(46,175,143,0.25); }
+.badge--reported  { background: rgba(212,175,55,0.1);   color: #8a6d00;                    border: 1px solid rgba(212,175,55,0.3);  }
+.badge--employer  { background: rgba(15,76,129,0.07);   color: var(--trust-blue);           border: 1px solid rgba(15,76,129,0.2);  }
+.badge--pending   { background: rgba(126,208,201,0.15); color: #2a7d79;                    border: 1px solid rgba(126,208,201,0.35);}
+.badge--disputed  { background: rgba(192,57,43,0.08);   color: #c0392b;                    border: 1px solid rgba(192,57,43,0.2);  }
+
+/* Privacy banner */
+.cp-privacy-banner {
+  background: rgba(126,208,201,0.08); border: 1px solid rgba(126,208,201,0.28);
+  border-radius: var(--radius-md); padding: 16px 18px;
+  display: flex; gap: 12px; align-items: flex-start;
+}
+.cp-privacy-banner__lock { font-size: 1.1rem; flex-shrink: 0; margin-top: 2px; }
+.cp-privacy-banner strong { display: block; font-size: 0.86rem; color: var(--trust-blue); margin-bottom: 3px; }
+.cp-privacy-banner p { font-size: 0.8rem; color: var(--charcoal-light); line-height: 1.6; margin: 0; }
+
+/* ── Care Integrity Standards Certificates ── */
+.cp-certificates-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.cp-certificate-badge {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  padding: 20px;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.cp-certificate-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+}
+
+.cp-certificate-badge__icon {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 80px;
+  height: 80px;
+  opacity: 0.15;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cp-certificate-badge__content {
+  position: relative;
+  z-index: 1;
+}
+
+.cp-certificate-badge__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+
+.cp-certificate-badge__category {
+  font-size: 0.8rem;
+  opacity: 0.9;
+  margin-bottom: 10px;
+  text-transform: capitalize;
+}
+
+.cp-certificate-badge__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+  opacity: 0.95;
+}
+
+.cp-certificate-badge__score {
+  font-weight: 600;
+}
+
+.cp-certificate-badge__date {
+  font-size: 0.8rem;
+}
+
+.cp-certificate-badge__number {
+  font-family: 'Courier New', monospace;
+  font-size: 0.75rem;
+  opacity: 0.8;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,0.2);
+}
+
+.cp-certificate-badge__status {
+  margin-top: 12px;
+}
+
+.cp-certificate-badge__status .cp-badge {
+  background: rgba(255,255,255,0.25);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: white;
+  font-weight: 600;
+}

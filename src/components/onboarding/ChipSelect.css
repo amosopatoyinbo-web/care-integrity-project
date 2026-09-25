@@ -1,0 +1,41 @@
+.chip-select {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 9999px;
+  border: 1.5px solid rgba(15, 76, 129, 0.22);
+  background: #fff;
+  color: var(--charcoal);
+  font-size: 0.82rem;
+  font-weight: 500;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  line-height: 1;
+}
+
+.chip:hover {
+  border-color: var(--trust-blue);
+  color: var(--trust-blue);
+  background: rgba(15, 76, 129, 0.04);
+}
+
+.chip--selected {
+  background: var(--trust-blue);
+  border-color: var(--trust-blue);
+  color: #fff;
+  font-weight: 600;
+}
+
+.chip--selected:hover {
+  background: var(--trust-blue-mid);
+  border-color: var(--trust-blue-mid);
+  color: #fff;
+}

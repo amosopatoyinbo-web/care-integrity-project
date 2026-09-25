@@ -1,0 +1,362 @@
+/* ============================================
+   FOR CAREGIVERS PAGE
+   ============================================ */
+
+/* Hero */
+.caregivers__hero {
+  background-image: linear-gradient(135deg, rgba(15, 76, 129, 0.72) 0%, rgba(29, 138, 112, 0.62) 100%),
+    url('/for-caregivers hero background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: #fff;
+  padding: 80px 24px 70px;
+  text-align: center;
+}
+
+@media (min-width: 768px) {
+  .caregivers__hero {
+    padding: 100px 60px 90px;
+  }
+}
+
+.caregivers__hero-inner {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.caregivers__hero-title {
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  color: #fff;
+  margin-bottom: 20px;
+  line-height: 1.15;
+}
+
+.caregivers__hero-emphasis {
+  color: rgba(255, 255, 255, 0.85);
+  font-style: italic;
+}
+
+.caregivers__hero-sub {
+  font-size: clamp(0.95rem, 1.8vw, 1.1rem);
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.8;
+  margin-bottom: 36px;
+}
+
+.caregivers__hero-btn {
+  font-size: 1rem;
+  padding: 16px 36px;
+}
+
+/* Features Grid */
+.caregivers__features {
+  background: var(--soft-cream);
+}
+
+.caregivers__features-sub {
+  margin-bottom: 40px;
+}
+
+.caregivers__features-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+@media (min-width: 600px) {
+  .caregivers__features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .caregivers__features-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.caregivers__feature-card {
+  padding: 28px 24px;
+}
+
+.caregivers__feature-icon {
+  font-size: 2.2rem;
+  color: var(--integrity-green);
+  display: flex;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.caregivers__feature-title {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  color: var(--trust-blue);
+  margin-bottom: 10px;
+}
+
+.caregivers__feature-desc {
+  font-size: 0.85rem;
+  color: #666;
+  line-height: 1.8;
+}
+
+/* Profile Section */
+.caregivers__profile {
+  background: #fff;
+}
+
+.caregivers__profile-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 48px;
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .caregivers__profile-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: center;
+  }
+}
+
+.caregivers__profile-text {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.caregivers__profile-text .section-heading {
+  margin-bottom: 8px;
+}
+
+.caregivers__profile-text p {
+  font-size: 0.95rem;
+  color: var(--charcoal);
+  line-height: 1.9;
+}
+
+.caregivers__profile-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: rgba(46, 175, 143, 0.08);
+  border-left: 4px solid var(--integrity-green);
+  border-radius: 0 8px 8px 0;
+  padding: 14px 16px;
+  font-size: 0.875rem;
+  color: var(--charcoal);
+  line-height: 1.7;
+  margin-top: 8px;
+}
+
+.caregivers__profile-note-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* Mock Profile Card */
+.caregivers__mock-profile {
+  display: flex;
+  justify-content: center;
+}
+
+.mock-card {
+  background: #fff;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  padding: 28px;
+  width: 100%;
+  max-width: 360px;
+  border: 1px solid rgba(0,0,0,0.06);
+}
+
+.mock-card__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.mock-card__avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--trust-blue), var(--integrity-green));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.mock-card__identity {
+  flex: 1;
+}
+
+.mock-card__name {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  color: var(--trust-blue);
+  margin-bottom: 2px;
+}
+
+.mock-card__role {
+  font-size: 0.82rem;
+  color: var(--integrity-green);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.mock-card__location {
+  font-size: 0.78rem;
+  color: #888;
+}
+
+.mock-card__badge {
+  background: rgba(212, 175, 55, 0.12);
+  color: #9a7a0a;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 50px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.mock-card__section {
+  margin-bottom: 18px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+
+.mock-card__section:last-of-type {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.mock-card__label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #999;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.mock-card__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.mock-card__standard-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 50px;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.mock-card__employment {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+  color: var(--charcoal);
+}
+
+.mock-card__recognition {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 1.2rem;
+}
+
+.mock-card__recognition-count {
+  font-size: 0.78rem;
+  color: #888;
+  font-weight: 600;
+}
+
+.mock-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 1px solid rgba(0,0,0,0.06);
+  margin-top: 18px;
+}
+
+.mock-card__member {
+  font-size: 0.72rem;
+  color: #aaa;
+}
+
+.mock-card__verified {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--integrity-green);
+}
+
+/* CTA Bar */
+.caregivers__cta {
+  background: var(--trust-blue-dark);
+  position: relative;
+  overflow: hidden;
+  padding: 80px 24px;
+  text-align: center;
+}
+
+.caregivers__cta::before,
+.caregivers__cta::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.caregivers__cta::before {
+  width: 420px;
+  height: 420px;
+  bottom: -160px;
+  left: -120px;
+  background: rgba(126, 208, 201, 0.08);
+}
+.caregivers__cta::after {
+  width: 360px;
+  height: 360px;
+  top: -120px;
+  right: -80px;
+  background: rgba(46, 175, 143, 0.1);
+}
+
+.caregivers__cta-inner {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.caregivers__cta-heading {
+  font-family: var(--font-heading);
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  color: #fff;
+  margin-bottom: 12px;
+}
+
+.caregivers__cta-sub {
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 28px;
+  font-size: 1rem;
+}
+
+.caregivers__cta-btn {
+  font-size: 1rem;
+  padding: 16px 40px;
+}

@@ -1,0 +1,229 @@
+/* ============================================
+   CAREGIVER BROWSE — Agency view
+   ============================================ */
+
+.cbr-page { min-height: 100vh; background: var(--soft-cream); }
+
+/* ── Topbar ── */
+.cbr-topbar {
+  background: #fff;
+  border-bottom: 1px solid rgba(0,0,0,0.07);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.cbr-topbar__logo img { height: 42px; width: auto; }
+.cbr-topbar__right { display: flex; gap: 10px; align-items: center; }
+
+.cbr-logout-btn {
+  border: 1.5px solid rgba(192,57,43,0.3);
+  color: #c0392b;
+  background: transparent;
+  font-size: 0.78rem;
+}
+.cbr-logout-btn:hover { background: rgba(192,57,43,0.06); transform: none; }
+
+/* ── Inner ── */
+.cbr-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 36px 24px 60px;
+}
+
+/* ── Header ── */
+.cbr-header { margin-bottom: 28px; }
+.cbr-heading {
+  font-family: var(--font-heading);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  color: var(--trust-blue);
+  margin-bottom: 8px;
+}
+.cbr-sub {
+  font-size: 0.92rem;
+  color: var(--charcoal-light);
+  line-height: 1.65;
+  margin-bottom: 14px;
+}
+.cbr-privacy-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(126,208,201,0.1);
+  border: 1px solid rgba(126,208,201,0.3);
+  border-radius: var(--radius-sm);
+  padding: 10px 16px;
+  font-size: 0.82rem;
+  color: var(--charcoal-light);
+}
+
+/* ── Search ── */
+.cbr-search-wrap { margin-bottom: 28px; }
+.cbr-search {
+  width: 100%;
+  max-width: 480px;
+  padding: 12px 16px;
+  border: 1.5px solid rgba(15,76,129,0.18);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--charcoal);
+  background: #fff;
+  transition: border-color 0.18s, box-shadow 0.18s;
+}
+.cbr-search:focus {
+  outline: none;
+  border-color: var(--trust-blue);
+  box-shadow: 0 0 0 3px rgba(15,76,129,0.1);
+}
+
+/* ── State ── */
+.cbr-state {
+  text-align: center;
+  padding: 60px 24px;
+  font-size: 0.95rem;
+  color: var(--charcoal-light);
+}
+.cbr-state--error { color: #c0392b; }
+
+/* ── Grid ── */
+.cbr-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+/* ── Card ── */
+.cbr-card {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(0,0,0,0.05);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.cbr-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+
+.cbr-card__avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--trust-blue);
+  margin: 24px auto 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.cbr-card__photo { width: 100%; height: 100%; object-fit: cover; }
+.cbr-card__initials {
+  color: #fff;
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.cbr-card__body { padding: 14px 20px 12px; flex: 1; }
+.cbr-card__name {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  color: var(--trust-blue);
+  margin-bottom: 3px;
+  text-align: center;
+}
+.cbr-card__role  { font-size: 0.82rem; font-weight: 600; color: var(--integrity-green); text-align: center; margin-bottom: 3px; }
+.cbr-card__area  { font-size: 0.78rem; color: var(--charcoal-light); text-align: center; margin-bottom: 3px; }
+.cbr-card__years { font-size: 0.75rem; color: var(--charcoal-pale); text-align: center; margin-bottom: 10px; }
+
+.cbr-card__standards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+.cbr-card__std-chip {
+  background: rgba(15,76,129,0.07);
+  color: var(--trust-blue);
+  border-radius: var(--radius-pill);
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 3px 9px;
+}
+.cbr-card__std-more {
+  font-size: 0.68rem;
+  color: var(--charcoal-pale);
+  padding: 3px 6px;
+}
+
+.cbr-card__skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  justify-content: center;
+}
+.cbr-card__skill {
+  background: rgba(46,175,143,0.08);
+  color: var(--integrity-green-dark);
+  border-radius: var(--radius-pill);
+  font-size: 0.68rem;
+  font-weight: 500;
+  padding: 3px 8px;
+}
+
+.cbr-card__footer {
+  padding: 12px 20px 18px;
+  display: flex;
+  justify-content: center;
+}
+.cbr-card__view-btn { width: 100%; justify-content: center; }
+
+/* ── Badges ── */
+.cbr-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 0.67rem;
+  font-weight: 700;
+}
+.cbr-badge--verified { background: rgba(46,175,143,0.1); color: var(--integrity-green-dark); border: 1px solid rgba(46,175,143,0.25); }
+.cbr-badge--reported { background: rgba(212,175,55,0.1); color: #8a6d00; border: 1px solid rgba(212,175,55,0.3); }
+.cbr-badge--pending  { background: rgba(126,208,201,0.15); color: #2a7d79; border: 1px solid rgba(126,208,201,0.35); }
+
+/* ── Pagination ── */
+.cbr-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 40px;
+  flex-wrap: wrap;
+}
+.cbr-pagination__label { font-size: 0.84rem; color: var(--charcoal-light); }
+
+
+/* ── Training Certificates Badge ── */
+.cbr-card__certificates {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  border: 1.5px solid rgba(118, 75, 162, 0.3);
+  border-radius: var(--radius-md);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #764ba2;
+  margin-top: 8px;
+}
+
+.cbr-card__certificates svg {
+  flex-shrink: 0;
+}

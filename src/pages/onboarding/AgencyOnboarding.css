@@ -1,0 +1,60 @@
+/* AgencyOnboarding inherits from CaregiverOnboarding.css via ob-* classes */
+/* Agency-specific additions below */
+
+.ob-photo-upload__preview--square {
+  border-radius: var(--radius-sm);
+  width: 72px;
+  height: 72px;
+  font-size: 1.6rem;
+}
+
+.ag-pending-notice {
+  background: rgba(212,175,55,0.08);
+  border: 1.5px solid rgba(212,175,55,0.28);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-top: 28px;
+  text-align: center;
+}
+
+.ag-pending-badge {
+  display: inline-block;
+  background: rgba(212,175,55,0.15);
+  color: #8a6d00;
+  border: 1px solid rgba(212,175,55,0.35);
+  border-radius: var(--radius-pill);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 5px 14px;
+  margin-bottom: 12px;
+}
+
+.ag-pending-notice p {
+  font-size: 0.84rem;
+  color: var(--charcoal-light);
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* ── Top bar sign-in link (mirrors CaregiverOnboarding) ── */
+.ob-page__top-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+.ob-page__signin {
+  font-size: 0.78rem;
+  color: var(--charcoal-pale);
+  margin: 0;
+}
+.ob-page__signin-link {
+  color: var(--trust-blue);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.15s;
+}
+.ob-page__signin-link:hover { color: var(--integrity-green); }
