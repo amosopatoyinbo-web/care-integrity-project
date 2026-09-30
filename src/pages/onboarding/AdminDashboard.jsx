@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { authApi, agencyApi, auth } from '../../lib/api'
+import { authApi, agencyApi, caregiverApi, auth } from '../../lib/api'
 import trainingApi from '../../lib/trainingApi'
 import './AgencyDashboard.css'
 
@@ -8,6 +8,7 @@ export default function AdminDashboard() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [agencies, setAgencies] = useState([])
+  const [caregivers, setCaregivers] = useState([])
   const [trainingStats, setTrainingStats] = useState(null)
   const [error, setError] = useState('')
 
@@ -22,7 +23,11 @@ export default function AdminDashboard() {
 
         // Load all agencies
         const agencyData = await agencyApi.list()
-        setAgencies(agencyData.agencies || [])
+        setAgencies(agencyData.data || [])  // ✅ Fixed: Use .data not .agencies
+        
+        // Load all caregivers
+        const caregiverData = await caregiverApi.list()
+        setCaregivers(caregiverData.data || [])
         
         // Load training statistics
         try {
