@@ -134,6 +134,7 @@ export const caregiverApi = {
 /* ── Agency endpoints ────────────────────────────────────── */
 
 export const agencyApi = {
+  register: (data)      => api.post('/agencies/register', data),
   list:     (page = 1)  => api.get(`/agencies?page=${page}`),
   getById:  (id)        => api.get(`/agencies/${id}`),
   getMe:    ()          => api.get('/agencies/me'),

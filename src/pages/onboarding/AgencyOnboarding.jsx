@@ -178,16 +178,6 @@ export default function AgencyOnboarding() {
     setApiError('')
 
     try {
-      // Register account
-      const { user, accessToken, refreshToken } = await authApi.register({
-        email:    s1.email,
-        password: s1.password,
-        role:     'agency',
-        phone:    s1.phone,
-      })
-      auth.setTokens(accessToken, refreshToken)
-      auth.setUser(user)
-
       // Upload logo if provided
       let logoUrl = ''
       if (s2.logo) {
@@ -202,8 +192,13 @@ export default function AgencyOnboarding() {
         verificationDocUrl = path
       }
 
-      // Create agency profile
-      await agencyApi.create({
+      // Create agency account and profile atomically
+      const { user, accessToken, refreshToken } = await agencyApi.register({
+        // Auth data
+        email:    s1.email,
+        password: s1.password,
+        phone:    s1.phone,
+        // Agency profile data
         name:             s2.orgName,
         orgType:          s2.orgType,
         location:         s2.location,
@@ -214,7 +209,7 @@ export default function AgencyOnboarding() {
         description:      s2.desc,
         logoUrl,
         careTypes:        s3.careTypes,
-        serviceAreas:     s3.areas,       // ← was being dropped
+        serviceAreas:     s3.areas,
         settings:         s3.settings,
         focus:            s3.focus,
         legalName:        s4.legalName,
@@ -224,6 +219,10 @@ export default function AgencyOnboarding() {
         businessEmail:    s4.bizEmail,
         verificationDocUrl,
       })
+
+      // Set auth tokens and user
+      auth.setTokens(accessToken, refreshToken)
+      auth.setUser(user)
 
       navigate('/agency/dashboard')
     } catch (err) {
