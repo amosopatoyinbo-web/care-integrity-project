@@ -61,7 +61,7 @@ export default function AdminDashboard() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${auth.getAccess()}`
         },
-        body: JSON.stringify({ verificationStatus: newStatus })
+        body: JSON.stringify({ status: newStatus })  // ✅ Fixed: backend expects 'status' not 'verificationStatus'
       })
 
       // Update local state
