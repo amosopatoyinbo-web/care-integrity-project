@@ -111,6 +111,7 @@ export const authApi = {
 /* ── Caregiver endpoints ─────────────────────────────────── */
 
 export const caregiverApi = {
+  register:    (data)       => api.post('/caregivers/register', data),
   list:        (page = 1)   => api.get(`/caregivers?page=${page}`),
   getById:     (id)         => api.get(`/caregivers/${id}`),
   getMe:       ()           => api.get('/caregivers/me'),

@@ -272,24 +272,37 @@ export default function CaregiverOnboarding() {
     setApiError('')
 
     try {
-      // Step 1 — Register account
-      const { user, accessToken, refreshToken } = await authApi.register({
-        email:    s1.email,
-        password: s1.password,
-        role:     'caregiver',
-        phone:    s1.phone,
-      })
-      auth.setTokens(accessToken, refreshToken)
-      auth.setUser(user)
-
-      // Step 2a — Upload photo if provided
+      // Step 1 — Upload photo if provided (before registration)
       let photoUrl = ''
       if (s2.photo) {
         const { url } = await uploadApi.avatar(s2.photo)
         photoUrl = url
       }
 
-      // Step 2b — Upload credential documents
+      // Step 2 — Register account and create profile atomically
+      const { user, accessToken, refreshToken } = await caregiverApi.register({
+        // Auth data
+        email:    s1.email,
+        password: s1.password,
+        phone:    s1.phone,
+        // Profile data
+        fullName:       s2.fullName,
+        role:           s2.role,
+        serviceArea:    s2.serviceArea,
+        yearsExp:       s2.years,
+        bio:            s2.bio,
+        carePhilosophy: s2.philosophy,
+        photoUrl,
+        careTypes:      s3.careTypes,
+        careSettings:   s3.settings,
+        skills:         s3.skills,
+      })
+
+      // Set authentication
+      auth.setTokens(accessToken, refreshToken)
+      auth.setUser(user)
+
+      // Step 3 — Upload credential documents and add credentials
       const credentialsWithUrls = await Promise.all(
         s4.credentials
           .filter(c => c.name && c.org)
@@ -303,26 +316,11 @@ export default function CaregiverOnboarding() {
           })
       )
 
-      // Step 3 — Create caregiver profile
-      const profile = await caregiverApi.create({
-        fullName:       s2.fullName,
-        role:           s2.role,
-        serviceArea:    s2.serviceArea,
-        yearsExp:       s2.years,
-        bio:            s2.bio,
-        carePhilosophy: s2.philosophy,
-        photoUrl,
-        careTypes:    s3.careTypes,
-        careSettings: s3.settings,
-        skills:       s3.skills,
-      })
-
-      // Step 4 — Add credentials
       for (const cred of credentialsWithUrls) {
         await caregiverApi.addCredential(cred)
       }
 
-      // Step 5 — Add employment
+      // Step 4 — Add employment
       for (const emp of s4.employment.filter(e => e.org && e.role && e.start)) {
         await caregiverApi.addEmployment({
           orgName:          emp.org,
