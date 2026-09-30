@@ -301,7 +301,7 @@ export default function AdminDashboard() {
         )}
 
         {/* Verified Agencies */}
-        <section>
+        <section style={{ marginBottom: '48px' }}>
           <h2 style={{ fontSize: '1.3rem', marginBottom: '16px' }}>Verified Agencies ({verifiedAgencies.length})</h2>
           {verifiedAgencies.length > 0 ? (
             <div style={{ display: 'grid', gap: '16px' }}>
@@ -311,6 +311,40 @@ export default function AdminDashboard() {
             </div>
           ) : (
             <p style={{ color: 'var(--charcoal-pale)', fontStyle: 'italic' }}>No verified agencies yet.</p>
+          )}
+        </section>
+
+        {/* Registered Caregivers */}
+        <section>
+          <h1 style={{ marginBottom: '8px' }}>Registered Caregivers</h1>
+          <p style={{ color: 'var(--charcoal-pale)', marginBottom: '24px' }}>
+            View all caregiver registrations on the platform.
+          </p>
+          
+          <h2 style={{ fontSize: '1.3rem', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            All Caregivers
+            {caregivers.length > 0 && (
+              <span style={{ 
+                backgroundColor: '#667eea', 
+                color: '#fff', 
+                padding: '2px 8px', 
+                borderRadius: '12px', 
+                fontSize: '0.85rem', 
+                fontWeight: 600 
+              }}>
+                {caregivers.length}
+              </span>
+            )}
+          </h2>
+
+          {caregivers.length > 0 ? (
+            <div style={{ display: 'grid', gap: '16px' }}>
+              {caregivers.map(caregiver => (
+                <CaregiverCard key={caregiver._id} caregiver={caregiver} />
+              ))}
+            </div>
+          ) : (
+            <p style={{ color: 'var(--charcoal-pale)', fontStyle: 'italic' }}>No caregivers registered yet.</p>
           )}
         </section>
 
@@ -418,6 +452,110 @@ function AgencyCard({ agency, onVerify }) {
           </button>
         )}
       </div>
+    </div>
+  )
+}
+
+function CaregiverCard({ caregiver }) {
+  return (
+    <div style={{ 
+      border: '1px solid #e0e0e0', 
+      borderRadius: '8px', 
+      padding: '20px',
+      backgroundColor: '#fff'
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+            {caregiver.photoUrl && (
+              <img 
+                src={caregiver.photoUrl} 
+                alt={caregiver.fullName} 
+                style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover' }} 
+              />
+            )}
+            <div>
+              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600 }}>{caregiver.fullName}</h3>
+              <p style={{ margin: '4px 0 0', fontSize: '0.9rem', color: 'var(--charcoal-pale)' }}>{caregiver.role}</p>
+            </div>
+          </div>
+          
+          <div style={{ fontSize: '0.9rem', color: 'var(--charcoal-pale)', lineHeight: 1.6 }}>
+            <p style={{ margin: '4px 0' }}>📍 {caregiver.serviceArea}</p>
+            {caregiver.yearsExp && (
+              <p style={{ margin: '4px 0' }}>💼 {caregiver.yearsExp} years experience</p>
+            )}
+            {caregiver.userId?.email && (
+              <p style={{ margin: '4px 0' }}>✉️ {caregiver.userId.email}</p>
+            )}
+            <p style={{ margin: '4px 0' }}>👥 Member since {caregiver.memberSince || 'N/A'}</p>
+          </div>
+        </div>
+
+        <div style={{ 
+          padding: '4px 12px', 
+          borderRadius: '12px', 
+          backgroundColor: '#667eea20',
+          color: '#667eea',
+          fontSize: '0.85rem',
+          fontWeight: 600,
+          whiteSpace: 'nowrap'
+        }}>
+          Caregiver
+        </div>
+      </div>
+
+      {caregiver.bio && (
+        <p style={{ fontSize: '0.9rem', color: 'var(--charcoal)', marginBottom: '12px', marginTop: '12px' }}>
+          {caregiver.bio}
+        </p>
+      )}
+
+      {caregiver.careTypes && caregiver.careTypes.length > 0 && (
+        <div style={{ marginTop: '12px' }}>
+          <p style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px', color: 'var(--charcoal)' }}>Care Types:</p>
+          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+            {caregiver.careTypes.map((type, i) => (
+              <span key={i} style={{
+                padding: '3px 10px',
+                borderRadius: '12px',
+                backgroundColor: '#f0f0f0',
+                fontSize: '0.8rem',
+                color: 'var(--charcoal)'
+              }}>
+                {type}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {caregiver.skills && caregiver.skills.length > 0 && (
+        <div style={{ marginTop: '12px' }}>
+          <p style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px', color: 'var(--charcoal)' }}>Skills:</p>
+          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+            {caregiver.skills.map((skill, i) => (
+              <span key={i} style={{
+                padding: '3px 10px',
+                borderRadius: '12px',
+                backgroundColor: '#e8f4fd',
+                fontSize: '0.8rem',
+                color: '#0066cc'
+              }}>
+                {skill}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {caregiver.certificateCount !== undefined && (
+        <div style={{ marginTop: '12px', padding: '10px', backgroundColor: '#f8f9fa', borderRadius: '6px' }}>
+          <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--charcoal-pale)' }}>
+            🎓 <strong>{caregiver.certificateCount}</strong> training certificate{caregiver.certificateCount !== 1 ? 's' : ''} earned
+          </p>
+        </div>
+      )}
     </div>
   )
 }
