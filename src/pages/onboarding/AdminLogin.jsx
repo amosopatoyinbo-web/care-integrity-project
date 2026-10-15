@@ -51,7 +51,16 @@ export default function AdminLogin() {
     setError('')
 
     try {
-      const { user, accessToken, refreshToken } = await authApi.login(email, password)
+      const response = await authApi.login(email, password)
+      
+      if (!response || !response.user) {
+        console.error('Invalid login response:', response)
+        setError('Invalid response from server. Please try again.')
+        setLoading(false)
+        return
+      }
+
+      const { user, accessToken, refreshToken } = response
 
       // Check if user is actually an admin
       if (user.role !== 'admin') {

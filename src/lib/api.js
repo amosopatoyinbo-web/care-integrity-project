@@ -61,7 +61,7 @@ async function request(path, options = {}, retry = true) {
       } else {
         window.location.href = '/caregiver/login'
       }
-      return
+      throw new Error('Session expired. Please log in again.')
     }
 
     let data
@@ -86,7 +86,7 @@ async function request(path, options = {}, retry = true) {
     }
     
     // Handle network errors
-    if (err.message === 'Failed to fetch' || err.message.includes('network')) {
+    if (err.message === 'Failed to fetch' || err.message?.includes('network')) {
       const networkErr = new Error('Network error. Please check your internet connection.')
       networkErr.status = 0
       throw networkErr
