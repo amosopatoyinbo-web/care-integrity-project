@@ -47,8 +47,11 @@ async function request(path, options = {}, retry = true) {
 
     clearTimeout(timeoutId)
 
-    // Auto-refresh on 401
-    if (res.status === 401 && retry) {
+    let data
+    try { data = await res.json() } catch { data = {} }
+
+    // Auto-refresh on 401 (but only for protected routes, not auth endpoints)
+    if (res.status === 401 && retry && !path.includes('/auth/')) {
       const refreshed = await tryRefresh()
       if (refreshed) return request(path, options, false)
       auth.clearTokens()
@@ -63,9 +66,6 @@ async function request(path, options = {}, retry = true) {
       }
       throw new Error('Session expired. Please log in again.')
     }
-
-    let data
-    try { data = await res.json() } catch { data = {} }
 
     if (!res.ok) {
       const err = new Error(data.error || `Request failed (${res.status})`)
