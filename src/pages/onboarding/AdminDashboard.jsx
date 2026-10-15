@@ -391,7 +391,12 @@ function AgencyCard({ agency, onVerify }) {
           </p>
           {agency.website && (
             <p style={{ margin: '4px 0 0', fontSize: '0.9rem' }}>
-              🌐 <a href={agency.website} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--trust-blue)' }}>
+              🌐 <a 
+                href={agency.website.startsWith('http') ? agency.website : `https://${agency.website}`} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                style={{ color: 'var(--trust-blue)' }}
+              >
                 {agency.website}
               </a>
             </p>

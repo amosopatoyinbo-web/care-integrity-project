@@ -64,11 +64,20 @@ export default function AdminLogin() {
       auth.setUser(user)
       navigate('/admin/dashboard', { replace: true })
     } catch (err) {
-      setError(
-        err.status === 401 ? 'Incorrect email or password. Please try again.' :
-        err.status === 429 ? 'Too many attempts. Please wait a few minutes.' :
-        'Unable to connect. Please check your connection and try again.'
-      )
+      console.error('Admin login error:', err)
+      
+      // Show specific error messages
+      if (err.status === 401) {
+        setError('Incorrect email or password. Please try again.')
+      } else if (err.status === 429) {
+        setError('Too many attempts. Please wait a few minutes.')
+      } else if (err.message?.includes('fetch') || err.message?.includes('network')) {
+        setError('Network error. Please check your internet connection.')
+      } else if (err.message?.includes('timeout')) {
+        setError('Request timed out. Please try again.')
+      } else {
+        setError(err.message || 'Unable to connect. Please try again.')
+      }
       setLoading(false)
     }
   }

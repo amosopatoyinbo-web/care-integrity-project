@@ -397,7 +397,14 @@ export default function AgencyDashboard() {
                   {agency.serviceArea    && <span><strong>Service Area:</strong> {agency.serviceArea}</span>}
                   {agency.yearEstablished && <span><strong>Est.</strong> {agency.yearEstablished}</span>}
                   {agency.size           && <span><strong>Size:</strong> {agency.size}</span>}
-                  {agency.website        && <a href={agency.website} target="_blank" rel="noreferrer" className="adb-org-profile-card__website">{agency.website}</a>}
+                  {agency.website        && <a 
+                    href={agency.website.startsWith('http') ? agency.website : `https://${agency.website}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="adb-org-profile-card__website"
+                  >
+                    {agency.website}
+                  </a>}
                 </div>
                 {agency.focus?.length > 0 && (
                   <div className="adb-org-profile-card__focus">

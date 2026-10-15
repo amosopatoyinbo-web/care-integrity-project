@@ -334,7 +334,24 @@ export default function CaregiverOnboarding() {
 
       navigate('/caregiver/profile?view=caregiver')
     } catch (err) {
-      setApiError(err.message || 'Something went wrong. Please try again.')
+      console.error('Caregiver registration error:', err)
+      
+      // Show specific error messages
+      let errorMessage = 'Something went wrong. Please try again.'
+      
+      if (err.message?.includes('email already exists')) {
+        errorMessage = 'An account with this email already exists. Please log in instead.'
+      } else if (err.message?.includes('Missing required fields')) {
+        errorMessage = 'Please fill in all required fields.'
+      } else if (err.message?.includes('timeout')) {
+        errorMessage = 'Request timed out. Please check your connection and try again.'
+      } else if (err.message?.includes('network') || err.message?.includes('fetch')) {
+        errorMessage = 'Network error. Please check your internet connection.'
+      } else if (err.message) {
+        errorMessage = err.message
+      }
+      
+      setApiError(errorMessage)
       setLoading(false)
     }
   }

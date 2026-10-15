@@ -31,42 +31,69 @@ async function request(path, options = {}, retry = true) {
     ...options.headers,
   }
 
-  const res = await fetch(`${BASE}${path}`, {
-    ...options,
-    headers,
-    body: options.body instanceof FormData
-      ? options.body
-      : options.body ? JSON.stringify(options.body) : undefined,
-  })
+  // Add timeout controller for cold start handling
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
 
-  // Auto-refresh on 401
-  if (res.status === 401 && retry) {
-    const refreshed = await tryRefresh()
-    if (refreshed) return request(path, options, false)
-    auth.clearTokens()
-    // Redirect to the appropriate login page based on stored role
-    const user = auth.getUser()
-    if (user?.role === 'admin') {
-      window.location.href = '/admin/login'
-    } else if (user?.role === 'agency') {
-      window.location.href = '/agency/login'
-    } else {
-      window.location.href = '/caregiver/login'
+  try {
+    const res = await fetch(`${BASE}${path}`, {
+      ...options,
+      headers,
+      signal: controller.signal,
+      body: options.body instanceof FormData
+        ? options.body
+        : options.body ? JSON.stringify(options.body) : undefined,
+    })
+
+    clearTimeout(timeoutId)
+
+    // Auto-refresh on 401
+    if (res.status === 401 && retry) {
+      const refreshed = await tryRefresh()
+      if (refreshed) return request(path, options, false)
+      auth.clearTokens()
+      // Redirect to the appropriate login page based on stored role
+      const user = auth.getUser()
+      if (user?.role === 'admin') {
+        window.location.href = '/admin/login'
+      } else if (user?.role === 'agency') {
+        window.location.href = '/agency/login'
+      } else {
+        window.location.href = '/caregiver/login'
+      }
+      return
     }
-    return
-  }
 
-  let data
-  try { data = await res.json() } catch { data = {} }
+    let data
+    try { data = await res.json() } catch { data = {} }
 
-  if (!res.ok) {
-    const err = new Error(data.error || `Request failed (${res.status})`)
-    err.status = res.status
-    err.errors = data.errors
+    if (!res.ok) {
+      const err = new Error(data.error || `Request failed (${res.status})`)
+      err.status = res.status
+      err.errors = data.errors
+      throw err
+    }
+
+    return data
+  } catch (err) {
+    clearTimeout(timeoutId)
+    
+    // Handle timeout/abort errors
+    if (err.name === 'AbortError') {
+      const timeoutErr = new Error('Request timed out. The server may be waking up. Please try again.')
+      timeoutErr.status = 408
+      throw timeoutErr
+    }
+    
+    // Handle network errors
+    if (err.message === 'Failed to fetch' || err.message.includes('network')) {
+      const networkErr = new Error('Network error. Please check your internet connection.')
+      networkErr.status = 0
+      throw networkErr
+    }
+    
     throw err
   }
-
-  return data
 }
 
 async function tryRefresh() {
