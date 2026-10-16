@@ -56,7 +56,10 @@ function Textarea({ id, placeholder, value, onChange, rows = 4 }) {
 
 /* ── Steps ────────────────────────────────────────────── */
 
-function Step1({ data, set, error }) {
+function Step1({ data, set, error, validationErrors }) {
+  const passwordTooShort = data.password && data.password.length < 8
+  const passwordMismatch = data.password && data.confirm && data.password !== data.confirm
+  
   return (
     <div className="ob-step">
       <div className="ob-step__header">
@@ -68,30 +71,31 @@ function Step1({ data, set, error }) {
         <p>Your phone number and email are <strong>private</strong> and will not appear on your public profile.</p>
       </div>
       {error && <p className="ob-error ob-error--banner" role="alert">{error}</p>}
-      <Field label="Email Address" id="email" required>
+      <Field label="Email Address" id="email" required error={validationErrors.email}>
         <Input id="email" type="email" placeholder="you@example.com" value={data.email} onChange={v => set('email', v)} />
       </Field>
-      <Field label="Password" id="password" required hint="At least 8 characters.">
+      <Field label="Password" id="password" required hint="At least 8 characters." error={validationErrors.password || (passwordTooShort ? 'Password must be at least 8 characters' : '')}>
         <Input id="password" type="password" placeholder="Create a password" value={data.password} onChange={v => set('password', v)} />
       </Field>
-      <Field label="Confirm Password" id="confirm" required>
+      <Field label="Confirm Password" id="confirm" required error={validationErrors.confirm || (passwordMismatch ? 'Passwords do not match' : '')}>
         <Input id="confirm" type="password" placeholder="Repeat your password" value={data.confirm} onChange={v => set('confirm', v)} />
       </Field>
-      <Field label="Phone Number" id="phone" required>
+      <Field label="Phone Number" id="phone" required error={validationErrors.phone}>
         <Input id="phone" type="tel" placeholder="+1 (555) 000-0000" value={data.phone} onChange={v => set('phone', v)} />
       </Field>
-      <Field label="Country / Region" id="country" required>
+      <Field label="Country / Region" id="country" required error={validationErrors.country}>
         <Select id="country" options={['United States', 'Canada', 'United Kingdom', 'Australia', 'Other']} value={data.country} onChange={v => set('country', v)} />
       </Field>
       <label className="ob-checkbox">
         <input type="checkbox" checked={data.terms} onChange={e => set('terms', e.target.checked)} />
         <span>I agree to the <Link to="/privacy" className="ob-link">Privacy Policy</Link> and <Link to="/terms" className="ob-link">Terms of Use</Link>.</span>
       </label>
+      {validationErrors.terms && <p className="ob-error" role="alert">{validationErrors.terms}</p>}
     </div>
   )
 }
 
-function Step2({ data, set }) {
+function Step2({ data, set, validationErrors }) {
   const photoRef = useRef()
   return (
     <div className="ob-step">
@@ -110,16 +114,16 @@ function Step2({ data, set }) {
             onChange={e => { const f = e.target.files[0]; if (f) { set('photo', f); set('photoPreview', URL.createObjectURL(f)) } }} />
         </div>
       </div>
-      <Field label="Full Name" id="fullName" required>
+      <Field label="Full Name" id="fullName" required error={validationErrors.fullName}>
         <Input id="fullName" placeholder="Your full name" value={data.fullName} onChange={v => set('fullName', v)} />
       </Field>
-      <Field label="Professional Role" id="role" required>
+      <Field label="Professional Role" id="role" required error={validationErrors.role}>
         <Select id="role" options={['Home Health Aide', 'Certified Nursing Assistant (CNA)', 'Personal Care Aide', 'Companion Caregiver', 'Live-In Caregiver', 'Memory Care Specialist', 'Other']} value={data.role} onChange={v => set('role', v)} />
       </Field>
-      <Field label="Years of Experience" id="years" required>
+      <Field label="Years of Experience" id="years" required error={validationErrors.years}>
         <Select id="years" options={['Less than 1 year', '1–2 years', '3–5 years', '6–10 years', '10+ years']} value={data.years} onChange={v => set('years', v)} />
       </Field>
-      <Field label="Primary Service Area" id="serviceArea" required hint="City, region, or zip code.">
+      <Field label="Primary Service Area" id="serviceArea" required hint="City, region, or zip code." error={validationErrors.serviceArea}>
         <Input id="serviceArea" placeholder="e.g. Seattle, WA" value={data.serviceArea} onChange={v => set('serviceArea', v)} />
       </Field>
       <Field label="Professional Bio" id="bio" hint="Appears on your public profile.">
@@ -247,6 +251,7 @@ export default function CaregiverOnboarding() {
   const [step, setStep]       = useState(1)
   const [loading, setLoading] = useState(false)
   const [apiError, setApiError] = useState('')
+  const [validationErrors, setValidationErrors] = useState({})
 
   const [s1, setS1] = useState({ email: '', password: '', confirm: '', phone: '', country: '', terms: false })
   const [s2, setS2] = useState({ photo: null, photoPreview: '', fullName: '', role: '', years: '', serviceArea: '', bio: '', philosophy: '' })
@@ -260,16 +265,113 @@ export default function CaregiverOnboarding() {
     return (key, val) => setState(prev => ({ ...prev, [key]: val }))
   }
 
+  // Comprehensive validation for each step
+  const validateStep = (stepNum) => {
+    const errors = {}
+
+    if (stepNum === 1) {
+      if (!s1.email) {
+        errors.email = 'Email is required'
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s1.email)) {
+        errors.email = 'Please enter a valid email address'
+      }
+
+      if (!s1.password) {
+        errors.password = 'Password is required'
+      } else if (s1.password.length < 8) {
+        errors.password = 'Password must be at least 8 characters'
+      }
+
+      if (!s1.confirm) {
+        errors.confirm = 'Please confirm your password'
+      } else if (s1.password !== s1.confirm) {
+        errors.confirm = 'Passwords do not match'
+      }
+
+      if (!s1.phone) {
+        errors.phone = 'Phone number is required'
+      }
+
+      if (!s1.country) {
+        errors.country = 'Please select a country/region'
+      }
+
+      if (!s1.terms) {
+        errors.terms = 'You must agree to the Privacy Policy and Terms of Use'
+      }
+    }
+
+    if (stepNum === 2) {
+      if (!s2.fullName || s2.fullName.trim().length < 2) {
+        errors.fullName = 'Please enter your full name (at least 2 characters)'
+      }
+
+      if (!s2.role) {
+        errors.role = 'Please select a professional role'
+      }
+
+      if (!s2.years) {
+        errors.years = 'Please select your years of experience'
+      }
+
+      if (!s2.serviceArea || s2.serviceArea.trim().length === 0) {
+        errors.serviceArea = 'Please enter your primary service area'
+      }
+    }
+
+    if (stepNum === 5) {
+      if (!s5.committed) {
+        errors.committed = 'You must commit to the Care Integrity Standards'
+      }
+    }
+
+    return errors
+  }
+
   const canAdvance = () => {
-    if (step === 1) return s1.email && s1.password && s1.confirm && s1.phone && s1.country && s1.terms
+    if (step === 1) {
+      return s1.email && s1.password && s1.confirm && s1.phone && s1.country && s1.terms 
+        && s1.password.length >= 8 && s1.password === s1.confirm
+    }
+    if (step === 2) {
+      return s2.fullName && s2.role && s2.years && s2.serviceArea
+    }
     if (step === 5) return s5.committed
     return true
   }
 
+  const handleNextStep = () => {
+    const errors = validateStep(step)
+    
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors)
+      return
+    }
+    
+    setValidationErrors({})
+    setApiError('')
+    setStep(s => s + 1)
+  }
+
   async function handleSubmit(e) {
     e.preventDefault()
+    
+    // Final validation of all required fields
+    const allErrors = {
+      ...validateStep(1),
+      ...validateStep(2),
+      ...validateStep(5),
+    }
+
+    if (Object.keys(allErrors).length > 0) {
+      setValidationErrors(allErrors)
+      setApiError('Please fix all validation errors before submitting')
+      return
+    }
+
     setLoading(true)
     setApiError('')
+    setValidationErrors({})
 
     try {
       // Step 1 — Upload photo if provided (before registration)
@@ -375,8 +477,8 @@ export default function CaregiverOnboarding() {
 
       <form className="ob-form" onSubmit={handleSubmit} noValidate>
         <div className="ob-form__body">
-          {step === 1 && <Step1 data={s1} set={setter(setS1)} error={apiError} />}
-          {step === 2 && <Step2 data={s2} set={setter(setS2)} />}
+          {step === 1 && <Step1 data={s1} set={setter(setS1)} error={apiError} validationErrors={validationErrors} />}
+          {step === 2 && <Step2 data={s2} set={setter(setS2)} validationErrors={validationErrors} />}
           {step === 3 && <Step3 data={s3} set={setter(setS3)} />}
           {step === 4 && <Step4 data={s4} set={setter(setS4)} />}
           {step === 5 && <Step5 data={s5} set={setter(setS5)} />}
@@ -388,12 +490,12 @@ export default function CaregiverOnboarding() {
 
         <div className="ob-form__actions">
           {step > 1 && (
-            <button type="button" className="btn btn-blue-outline" onClick={() => { setApiError(''); setStep(s => s - 1) }}>
+            <button type="button" className="btn btn-blue-outline" onClick={() => { setValidationErrors({}); setApiError(''); setStep(s => s - 1) }}>
               ← Back
             </button>
           )}
           {step < 5 ? (
-            <button type="button" className="btn btn-blue" disabled={!canAdvance()} onClick={() => { setApiError(''); setStep(s => s + 1) }}>
+            <button type="button" className="btn btn-blue" disabled={!canAdvance()} onClick={handleNextStep}>
               Save & Continue
             </button>
           ) : (

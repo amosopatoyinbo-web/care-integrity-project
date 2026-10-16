@@ -40,7 +40,9 @@ function Textarea({ id, placeholder, value, onChange, rows = 4 }) {
 
 /* ── Steps ────────────────────────────────────────────── */
 
-function Step1({ data, set, error }) {
+function Step1({ data, set, error, validationErrors }) {
+  const passwordTooShort = data.password && data.password.length < 8
+  
   return (
     <div className="ob-step">
       <div className="ob-step__header">
@@ -48,20 +50,21 @@ function Step1({ data, set, error }) {
         <p className="ob-step__sub">Set up your organization's account on the Care Integrity Project.</p>
       </div>
       {error && <p className="ob-error ob-error--banner" role="alert">{error}</p>}
-      <Field label="Work Email" id="email" required><Input id="email" type="email" placeholder="admin@yourorganization.com" value={data.email} onChange={v => set('email', v)} /></Field>
-      <Field label="Password" id="password" required hint="At least 8 characters."><Input id="password" type="password" placeholder="Create a password" value={data.password} onChange={v => set('password', v)} /></Field>
-      <Field label="Contact Person" id="contact" required hint="Primary point of contact."><Input id="contact" placeholder="Full name" value={data.contact} onChange={v => set('contact', v)} /></Field>
-      <Field label="Your Role / Title" id="title" required><Input id="title" placeholder="e.g. Director of Operations" value={data.title} onChange={v => set('title', v)} /></Field>
-      <Field label="Phone Number" id="phone" required><Input id="phone" type="tel" placeholder="+1 (555) 000-0000" value={data.phone} onChange={v => set('phone', v)} /></Field>
+      <Field label="Work Email" id="email" required error={validationErrors.email}><Input id="email" type="email" placeholder="admin@yourorganization.com" value={data.email} onChange={v => set('email', v)} /></Field>
+      <Field label="Password" id="password" required hint="At least 8 characters." error={validationErrors.password || (passwordTooShort ? 'Password must be at least 8 characters' : '')}><Input id="password" type="password" placeholder="Create a password" value={data.password} onChange={v => set('password', v)} /></Field>
+      <Field label="Contact Person" id="contact" required hint="Primary point of contact." error={validationErrors.contact}><Input id="contact" placeholder="Full name" value={data.contact} onChange={v => set('contact', v)} /></Field>
+      <Field label="Your Role / Title" id="title" required error={validationErrors.title}><Input id="title" placeholder="e.g. Director of Operations" value={data.title} onChange={v => set('title', v)} /></Field>
+      <Field label="Phone Number" id="phone" required error={validationErrors.phone}><Input id="phone" type="tel" placeholder="+1 (555) 000-0000" value={data.phone} onChange={v => set('phone', v)} /></Field>
       <label className="ob-checkbox">
         <input type="checkbox" checked={data.terms} onChange={e => set('terms', e.target.checked)} />
         <span>I agree to the <Link to="/privacy" className="ob-link">Privacy Policy</Link> and <Link to="/terms" className="ob-link">Terms of Use</Link>.</span>
       </label>
+      {validationErrors.terms && <p className="ob-error" role="alert">{validationErrors.terms}</p>}
     </div>
   )
 }
 
-function Step2({ data, set }) {
+function Step2({ data, set, validationErrors }) {
   const logoRef = useRef()
   return (
     <div className="ob-step">
@@ -80,9 +83,9 @@ function Step2({ data, set }) {
             onChange={e => { const f = e.target.files[0]; if (f) { set('logo', f); set('logoPreview', URL.createObjectURL(f)) } }} />
         </div>
       </div>
-      <Field label="Organization Name" id="orgName" required><Input id="orgName" placeholder="Full organization name" value={data.orgName} onChange={v => set('orgName', v)} /></Field>
-      <Field label="Organization Type" id="orgType" required><Select id="orgType" options={ORG_TYPES} value={data.orgType} onChange={v => set('orgType', v)} /></Field>
-      <Field label="Primary Location" id="location" required><Input id="location" placeholder="City, State" value={data.location} onChange={v => set('location', v)} /></Field>
+      <Field label="Organization Name" id="orgName" required error={validationErrors.orgName}><Input id="orgName" placeholder="Full organization name" value={data.orgName} onChange={v => set('orgName', v)} /></Field>
+      <Field label="Organization Type" id="orgType" required error={validationErrors.orgType}><Select id="orgType" options={ORG_TYPES} value={data.orgType} onChange={v => set('orgType', v)} /></Field>
+      <Field label="Primary Location" id="location" required error={validationErrors.location}><Input id="location" placeholder="City, State" value={data.location} onChange={v => set('location', v)} /></Field>
       <Field label="Service Area" id="serviceArea" hint="Geographic area where you operate."><Input id="serviceArea" placeholder="e.g. Greater Seattle area" value={data.serviceArea} onChange={v => set('serviceArea', v)} /></Field>
       <Field label="Website" id="website"><Input id="website" type="url" placeholder="https://yourorganization.com" value={data.website} onChange={v => set('website', v)} /></Field>
       <div className="ob-row-2">
@@ -156,6 +159,7 @@ export default function AgencyOnboarding() {
   const [step, setStep]         = useState(1)
   const [loading, setLoading]   = useState(false)
   const [apiError, setApiError] = useState('')
+  const [validationErrors, setValidationErrors] = useState({})
 
   const [s1, setS1] = useState({ email: '', password: '', contact: '', title: '', phone: '', terms: false })
   const [s2, setS2] = useState({ logo: null, logoPreview: '', orgName: '', orgType: '', location: '', serviceArea: '', website: '', year: '', size: '', desc: '' })
@@ -166,16 +170,123 @@ export default function AgencyOnboarding() {
 
   function setter(setState) { return (key, val) => setState(prev => ({ ...prev, [key]: val })) }
 
+  // Comprehensive validation for each step
+  const validateStep = (stepNum) => {
+    const errors = {}
+
+    if (stepNum === 1) {
+      if (!s1.email) {
+        errors.email = 'Email is required'
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s1.email)) {
+        errors.email = 'Please enter a valid email address'
+      }
+
+      if (!s1.password) {
+        errors.password = 'Password is required'
+      } else if (s1.password.length < 8) {
+        errors.password = 'Password must be at least 8 characters'
+      }
+
+      if (!s1.contact || s1.contact.trim().length === 0) {
+        errors.contact = 'Contact person name is required'
+      }
+
+      if (!s1.title || s1.title.trim().length === 0) {
+        errors.title = 'Your role/title is required'
+      }
+
+      if (!s1.phone) {
+        errors.phone = 'Phone number is required'
+      }
+
+      if (!s1.terms) {
+        errors.terms = 'You must agree to the Privacy Policy and Terms of Use'
+      }
+    }
+
+    if (stepNum === 2) {
+      if (!s2.orgName || s2.orgName.trim().length === 0) {
+        errors.orgName = 'Organization name is required'
+      }
+
+      if (!s2.orgType) {
+        errors.orgType = 'Please select an organization type'
+      }
+
+      if (!s2.location || s2.location.trim().length === 0) {
+        errors.location = 'Primary location is required'
+      }
+    }
+
+    if (stepNum === 4) {
+      if (!s4.legalName || s4.legalName.trim().length === 0) {
+        errors.legalName = 'Legal organization name is required'
+      }
+
+      if (!s4.address || s4.address.trim().length === 0) {
+        errors.address = 'Business address is required'
+      }
+
+      if (!s4.rep || s4.rep.trim().length === 0) {
+        errors.rep = 'Authorized representative name is required'
+      }
+
+      if (!s4.bizEmail) {
+        errors.bizEmail = 'Business email is required'
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s4.bizEmail)) {
+        errors.bizEmail = 'Please enter a valid business email'
+      }
+    }
+
+    return errors
+  }
+
   const canAdvance = () => {
-    if (step === 1) return s1.email && s1.password && s1.contact && s1.title && s1.phone && s1.terms
-    if (step === 4) return s4.legalName && s4.address && s4.rep && s4.bizEmail
+    if (step === 1) {
+      return s1.email && s1.password && s1.contact && s1.title && s1.phone && s1.terms 
+        && s1.password.length >= 8
+    }
+    if (step === 2) {
+      return s2.orgName && s2.orgType && s2.location
+    }
+    if (step === 4) {
+      return s4.legalName && s4.address && s4.rep && s4.bizEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s4.bizEmail)
+    }
     return true
+  }
+
+  const handleNextStep = () => {
+    const errors = validateStep(step)
+    
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors)
+      return
+    }
+    
+    setValidationErrors({})
+    setApiError('')
+    setStep(s => s + 1)
   }
 
   async function handleSubmit(e) {
     e.preventDefault()
+    
+    // Final validation of all required fields
+    const allErrors = {
+      ...validateStep(1),
+      ...validateStep(2),
+      ...validateStep(4),
+    }
+
+    if (Object.keys(allErrors).length > 0) {
+      setValidationErrors(allErrors)
+      setApiError('Please fix all validation errors before submitting')
+      return
+    }
+
     setLoading(true)
     setApiError('')
+    setValidationErrors({})
 
     try {
       // Upload logo if provided
@@ -265,8 +376,8 @@ export default function AgencyOnboarding() {
 
       <form className="ob-form" onSubmit={handleSubmit} noValidate>
         <div className="ob-form__body">
-          {step === 1 && <Step1 data={s1} set={setter(setS1)} error={apiError} />}
-          {step === 2 && <Step2 data={s2} set={setter(setS2)} />}
+          {step === 1 && <Step1 data={s1} set={setter(setS1)} error={apiError} validationErrors={validationErrors} />}
+          {step === 2 && <Step2 data={s2} set={setter(setS2)} validationErrors={validationErrors} />}
           {step === 3 && <Step3 data={s3} set={setter(setS3)} />}
           {step === 4 && <Step4 data={s4} set={setter(setS4)} />}
         </div>
@@ -274,9 +385,9 @@ export default function AgencyOnboarding() {
           <p className="ob-error ob-error--banner" role="alert" style={{ padding: '0 0 12px' }}>{apiError}</p>
         )}
         <div className="ob-form__actions">
-          {step > 1 && <button type="button" className="btn btn-blue-outline" onClick={() => { setApiError(''); setStep(s => s - 1) }}>← Back</button>}
+          {step > 1 && <button type="button" className="btn btn-blue-outline" onClick={() => { setValidationErrors({}); setApiError(''); setStep(s => s - 1) }}>← Back</button>}
           {step < 4
-            ? <button type="button" className="btn btn-blue" disabled={!canAdvance()} onClick={() => { setApiError(''); setStep(s => s + 1) }}>Save & Continue</button>
+            ? <button type="button" className="btn btn-blue" disabled={!canAdvance()} onClick={handleNextStep}>Save & Continue</button>
             : <button type="submit" className="btn btn-green" disabled={!canAdvance() || loading}>
                 {loading ? 'Creating Profile…' : 'Create Organization Profile'}
               </button>
