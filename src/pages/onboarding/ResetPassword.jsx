@@ -58,7 +58,12 @@ export default function ResetPassword() {
             </p>
             <button
               className="btn btn-green login-submit"
-              onClick={() => navigate('/caregiver/login', { replace: true })}
+              onClick={() => {
+                // Determine which login page to show based on stored user role or default to caregiver
+                const user = JSON.parse(localStorage.getItem('cip_user') || '{}')
+                const loginPage = user?.role === 'agency' ? '/agency/login' : '/caregiver/login'
+                navigate(loginPage, { replace: true })
+              }}
             >
               Sign In Now
             </button>
@@ -75,77 +80,6 @@ export default function ResetPassword() {
             <Link to="/forgot-password" className="btn btn-blue login-submit">
               Request New Reset Link
             </Link>
-            <Link to="/caregiver/login" className="login-back">← Back to Sign In</Link>
-          </>
-        )}
-
-        {/* ── Form ── */}
-        {!done && !invalidLink && (
-          <>
-            <h1 className="login-heading">Set New Password</h1>
-            <p className="login-sub">
-              Create a new password for <strong>{email}</strong>.
-            </p>
-
-            {error && <div className="login-error" role="alert">{error}</div>}
-
-            <form className="login-form" onSubmit={handleSubmit} noValidate>
-              <div className="login-field">
-                <label className="login-label" htmlFor="rp-password">New Password</label>
-                <input
-                  id="rp-password"
-                  type="password"
-                  className="login-input"
-                  placeholder="At least 8 characters"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  autoComplete="new-password"
-                  autoFocus
-                  required
-                />
-                {password.length > 0 && (
-                  <p style={{
-                    fontSize: '0.75rem',
-                    marginTop: 4,
-                    color: password.length >= 8 ? 'var(--integrity-green)' : '#c0392b',
-                  }}>
-                    {password.length >= 8 ? '✓ Good length' : `${8 - password.length} more character${8 - password.length !== 1 ? 's' : ''} needed`}
-                  </p>
-                )}
-              </div>
-
-              <div className="login-field">
-                <label className="login-label" htmlFor="rp-confirm">Confirm New Password</label>
-                <input
-                  id="rp-confirm"
-                  type="password"
-                  className="login-input"
-                  placeholder="Repeat your new password"
-                  value={confirm}
-                  onChange={e => setConfirm(e.target.value)}
-                  autoComplete="new-password"
-                  required
-                />
-                {confirm.length > 0 && password.length > 0 && (
-                  <p style={{
-                    fontSize: '0.75rem',
-                    marginTop: 4,
-                    color: confirm === password ? 'var(--integrity-green)' : '#c0392b',
-                  }}>
-                    {confirm === password ? '✓ Passwords match' : '✗ Passwords do not match'}
-                  </p>
-                )}
-              </div>
-
-              <button
-                type="submit"
-                className="btn btn-green login-submit"
-                disabled={loading || !password || !confirm}
-              >
-                {loading ? 'Saving…' : 'Set New Password'}
-              </button>
-            </form>
-
             <Link to="/caregiver/login" className="login-back">← Back to Sign In</Link>
           </>
         )}
