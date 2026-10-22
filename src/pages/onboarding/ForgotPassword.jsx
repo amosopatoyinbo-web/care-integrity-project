@@ -43,9 +43,11 @@ export default function ForgotPassword() {
             </div>
             <h1 className="login-heading" style={{ textAlign: 'center' }}>Check Your Email</h1>
             <p className="login-sub">
-              If an account exists for <strong>{email}</strong>, a reset link has been sent.
-              The link expires in <strong>1 hour</strong>.
+              If an account exists for <strong>{email}</strong>, a password reset link has been sent.
             </p>
+            <div style={{ background: '#f0f9f7', border: '1px solid #2EAF8F', borderRadius: '8px', padding: '16px', margin: '20px 0', fontSize: '0.9rem', color: '#1a5f4a' }}>
+              <strong>⏰ Important:</strong> The reset link expires in <strong>5 minutes</strong>. Check your email right away!
+            </div>
             <p style={{ fontSize: '0.78rem', color: 'var(--charcoal-pale)', textAlign: 'center', marginBottom: 20 }}>
               Didn't receive it? Check your spam folder or try again.
             </p>
