@@ -132,7 +132,8 @@ export const authApi = {
   me:             ()                 => api.get('/auth/me'),
   changePassword: (cur, next)        => api.post('/auth/change-password', { currentPassword: cur, newPassword: next }),
   forgotPassword: (email)            => api.post('/auth/forgot-password', { email }),
-  resetPassword:  (token, email, newPassword) => api.post('/auth/reset-password', { token, email, newPassword }),
+  verifyOTP:      (email, otp)       => api.post('/auth/verify-otp', { email, otp }),
+  resetPassword:  (email, verificationToken, newPassword) => api.post('/auth/reset-password', { email, verificationToken, newPassword }),
 }
 
 /* ── Caregiver endpoints ─────────────────────────────────── */
