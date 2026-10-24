@@ -78,6 +78,13 @@
   font-family: var(--font-heading); font-size: 1.6rem; font-weight: 700;
   display: flex; align-items: center; justify-content: center;
 }
+
+.cp-avatar--photo {
+  object-fit: cover;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+}
 .cp-verified-ring {
   position: absolute; inset: -3px; border-radius: 50%;
   border: 2.5px solid var(--integrity-green); pointer-events: none;
@@ -282,4 +289,359 @@
   border: 1px solid rgba(255,255,255,0.3);
   color: white;
   font-weight: 600;
+}
+
+/* ============================================
+   PROFILE EDIT FORM
+   ============================================ */
+
+/* Page container for edit */
+.cp-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 20px;
+}
+
+/* Header */
+.cp-header {
+  margin-bottom: 32px;
+}
+
+.cp-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  color: var(--trust-blue);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 0;
+  margin-bottom: 16px;
+  font-family: var(--font-body);
+  transition: color 0.2s;
+}
+
+.cp-back:hover {
+  color: var(--integrity-green);
+}
+
+.cp-heading {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  color: var(--trust-blue);
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.cp-sub {
+  font-size: 1rem;
+  color: var(--charcoal-light);
+  line-height: 1.6;
+}
+
+/* Alerts */
+.cp-error {
+  background: rgba(192, 57, 43, 0.1);
+  border: 1px solid rgba(192, 57, 43, 0.3);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  color: #c0392b;
+  font-size: 0.9rem;
+  margin-bottom: 24px;
+  font-weight: 500;
+}
+
+.cp-success {
+  background: rgba(46, 175, 143, 0.1);
+  border: 1px solid rgba(46, 175, 143, 0.3);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  color: var(--integrity-green-dark);
+  font-size: 0.9rem;
+  margin-bottom: 24px;
+  font-weight: 600;
+}
+
+/* Form */
+.cp-form {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 36px;
+}
+
+@media (max-width: 600px) {
+  .cp-form {
+    padding: 24px 20px;
+  }
+}
+
+/* Form field */
+.cp-field {
+  margin-bottom: 28px;
+}
+
+.cp-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--charcoal);
+  margin-bottom: 8px;
+  font-family: var(--font-body);
+}
+
+.cp-label::after {
+  content: ' *';
+  color: #c0392b;
+  font-weight: 400;
+}
+
+.cp-label:not([required])::after {
+  content: '';
+}
+
+/* Input */
+.cp-input {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 0.95rem;
+  border: 2px solid rgba(0, 0, 0, 0.12);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  color: var(--charcoal);
+  background: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.cp-input:hover {
+  border-color: rgba(15, 76, 129, 0.3);
+}
+
+.cp-input:focus {
+  outline: none;
+  border-color: var(--trust-blue);
+  box-shadow: 0 0 0 3px rgba(15, 76, 129, 0.1);
+}
+
+.cp-input::placeholder {
+  color: var(--charcoal-pale);
+}
+
+/* Textarea */
+.cp-textarea {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 0.95rem;
+  border: 2px solid rgba(0, 0, 0, 0.12);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  color: var(--charcoal);
+  background: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  resize: vertical;
+  min-height: 100px;
+  line-height: 1.6;
+}
+
+.cp-textarea:hover {
+  border-color: rgba(15, 76, 129, 0.3);
+}
+
+.cp-textarea:focus {
+  outline: none;
+  border-color: var(--trust-blue);
+  box-shadow: 0 0 0 3px rgba(15, 76, 129, 0.1);
+}
+
+.cp-textarea::placeholder {
+  color: var(--charcoal-pale);
+}
+
+/* Photo upload */
+.cp-photo-upload {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  background: var(--soft-cream);
+  border: 2px dashed rgba(0, 0, 0, 0.15);
+  border-radius: var(--radius-md);
+}
+
+.cp-photo-preview {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--integrity-green);
+  box-shadow: var(--shadow-sm);
+}
+
+.cp-photo-placeholder {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 10px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+}
+
+.cp-photo-input {
+  flex: 1;
+  padding: 10px;
+  font-size: 0.9rem;
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+
+.cp-photo-input::file-selector-button {
+  background: var(--trust-blue);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 10px 20px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-right: 12px;
+}
+
+.cp-photo-input::file-selector-button:hover {
+  background: var(--integrity-green);
+}
+
+/* Chips for edit form (checkboxes) */
+.cp-chips label.cp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #fff;
+  border: 2px solid rgba(0, 0, 0, 0.12);
+  border-radius: var(--radius-pill);
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--charcoal);
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.cp-chips label.cp-chip:hover {
+  border-color: var(--trust-blue);
+  background: rgba(15, 76, 129, 0.04);
+}
+
+.cp-chips label.cp-chip input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--integrity-green);
+}
+
+.cp-chips label.cp-chip:has(input:checked) {
+  background: rgba(46, 175, 143, 0.12);
+  border-color: var(--integrity-green);
+  color: var(--integrity-green-dark);
+  font-weight: 600;
+}
+
+/* Form actions */
+.cp-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 2px solid rgba(0, 0, 0, 0.06);
+}
+
+@media (max-width: 500px) {
+  .cp-actions {
+    flex-direction: column-reverse;
+  }
+  
+  .cp-actions button {
+    width: 100%;
+  }
+}
+
+/* Button overrides for form */
+.cp-form .btn {
+  padding: 12px 32px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  min-width: 140px;
+}
+
+.cp-form .btn-outline {
+  background: transparent;
+  border: 2px solid rgba(0, 0, 0, 0.15);
+  color: var(--charcoal);
+}
+
+.cp-form .btn-outline:hover {
+  border-color: var(--trust-blue);
+  background: rgba(15, 76, 129, 0.05);
+  color: var(--trust-blue);
+}
+
+.cp-form .btn-green {
+  background: var(--integrity-green);
+  color: #fff;
+  border: none;
+}
+
+.cp-form .btn-green:hover {
+  background: var(--integrity-green-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.cp-form .btn-green:disabled {
+  background: var(--charcoal-pale);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Loading state */
+.cp-form .btn-green:disabled::after {
+  content: '...';
+  animation: loading-dots 1.5s infinite;
+}
+
+@keyframes loading-dots {
+  0%, 20% { content: '.'; }
+  40% { content: '..'; }
+  60%, 100% { content: '...'; }
+}
+
+/* Responsive improvements */
+@media (max-width: 600px) {
+  .cp-heading {
+    font-size: 1.6rem;
+  }
+  
+  .cp-photo-upload {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .cp-chips {
+    justify-content: center;
+  }
 }

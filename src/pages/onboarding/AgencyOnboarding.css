@@ -58,3 +58,264 @@
   transition: color 0.15s;
 }
 .ob-page__signin-link:hover { color: var(--integrity-green); }
+
+/* ============================================
+   AGENCY PROFILE EDIT FORM
+   ============================================ */
+
+/* Form field */
+.ob-field {
+  margin-bottom: 28px;
+}
+
+.ob-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--charcoal);
+  margin-bottom: 8px;
+  font-family: var(--font-body);
+}
+
+/* Input & Select */
+.ob-input,
+.ob-textarea {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 0.95rem;
+  border: 2px solid rgba(0, 0, 0, 0.12);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  color: var(--charcoal);
+  background: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.ob-input:hover,
+.ob-textarea:hover {
+  border-color: rgba(15, 76, 129, 0.3);
+}
+
+.ob-input:focus,
+.ob-textarea:focus {
+  outline: none;
+  border-color: var(--trust-blue);
+  box-shadow: 0 0 0 3px rgba(15, 76, 129, 0.1);
+}
+
+.ob-input::placeholder,
+.ob-textarea::placeholder {
+  color: var(--charcoal-pale);
+}
+
+/* Textarea specific */
+.ob-textarea {
+  resize: vertical;
+  min-height: 100px;
+  line-height: 1.6;
+}
+
+/* Logo upload */
+.ob-logo-upload {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  background: var(--soft-cream);
+  border: 2px dashed rgba(0, 0, 0, 0.15);
+  border-radius: var(--radius-md);
+}
+
+.ob-logo-preview {
+  width: 100px;
+  height: 100px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 3px solid var(--integrity-green);
+  box-shadow: var(--shadow-sm);
+}
+
+.ob-logo-placeholder {
+  width: 100px;
+  height: 100px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 10px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+}
+
+.ob-logo-input {
+  flex: 1;
+  padding: 10px;
+  font-size: 0.9rem;
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+
+.ob-logo-input::file-selector-button {
+  background: var(--trust-blue);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 10px 20px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-right: 12px;
+}
+
+.ob-logo-input::file-selector-button:hover {
+  background: var(--integrity-green);
+}
+
+/* Chips for checkboxes */
+.ob-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.ob-chips label.ob-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #fff;
+  border: 2px solid rgba(0, 0, 0, 0.12);
+  border-radius: var(--radius-pill);
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--charcoal);
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.ob-chips label.ob-chip:hover {
+  border-color: var(--trust-blue);
+  background: rgba(15, 76, 129, 0.04);
+}
+
+.ob-chips label.ob-chip input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--integrity-green);
+}
+
+.ob-chips label.ob-chip:has(input:checked) {
+  background: rgba(46, 175, 143, 0.12);
+  border-color: var(--integrity-green);
+  color: var(--integrity-green-dark);
+  font-weight: 600;
+}
+
+/* Form actions */
+.ob-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 2px solid rgba(0, 0, 0, 0.06);
+}
+
+@media (max-width: 500px) {
+  .ob-actions {
+    flex-direction: column-reverse;
+  }
+  
+  .ob-actions button {
+    width: 100%;
+  }
+}
+
+/* Page content styling for edit mode */
+.ob-page__content {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 20px;
+}
+
+.ob-page__header {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.ob-page__logo {
+  height: 48px;
+  margin: 0 auto 16px;
+  display: block;
+}
+
+.ob-page__heading {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  color: var(--trust-blue);
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.ob-page__sub {
+  font-size: 1rem;
+  color: var(--charcoal-light);
+  line-height: 1.6;
+}
+
+/* Alerts */
+.ob-page__error {
+  background: rgba(192, 57, 43, 0.1);
+  border: 1px solid rgba(192, 57, 43, 0.3);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  color: #c0392b;
+  font-size: 0.9rem;
+  margin-bottom: 24px;
+  font-weight: 500;
+}
+
+.ob-page__success {
+  background: rgba(46, 175, 143, 0.1);
+  border: 1px solid rgba(46, 175, 143, 0.3);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  color: var(--integrity-green-dark);
+  font-size: 0.9rem;
+  margin-bottom: 24px;
+  font-weight: 600;
+}
+
+/* Form container */
+.ob-page__form {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 36px;
+}
+
+@media (max-width: 600px) {
+  .ob-page__form {
+    padding: 24px 20px;
+  }
+  
+  .ob-page__heading {
+    font-size: 1.6rem;
+  }
+  
+  .ob-logo-upload {
+    flex-direction: column;
+    text-align: center;
+  }
+}
