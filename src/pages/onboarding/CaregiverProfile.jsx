@@ -55,11 +55,17 @@ export default function CaregiverProfile() {
       try {
         let data
         if (isCaregiver) {
+          // Caregiver viewing their own profile
           data = await caregiverApi.getMe()
         } else {
-          // For public/agency views try to get from URL param or fall back to /me
+          // Agency or public viewing - MUST have ID parameter
           const id = params.get('id')
-          data = id ? await caregiverApi.getById(id) : await caregiverApi.getMe()
+          if (!id) {
+            setError('No caregiver selected. Please browse caregivers to view a profile.')
+            setLoading(false)
+            return
+          }
+          data = await caregiverApi.getById(id)
         }
         setProfile(data)
 
@@ -85,7 +91,7 @@ export default function CaregiverProfile() {
       }
     }
     load()
-  }, [viewMode])
+  }, [viewMode, params])
 
   if (loading) return (
     <div className="cp-page">
@@ -101,12 +107,24 @@ export default function CaregiverProfile() {
       <div className="cp-topbar">
         <Link to="/" className="cp-topbar__logo"><img src="/Main Logo.png" alt="The Care Integrity Project" /></Link>
       </div>
-      <div style={{ textAlign: 'center', padding: '80px 24px', color: '#c0392b' }}>
-        {error || 'Profile not found.'}
+      <div style={{ textAlign: 'center', padding: '80px 24px', maxWidth: '500px', margin: '0 auto' }}>
+        <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🔍</div>
+        <h2 style={{ color: 'var(--charcoal)', marginBottom: '12px', fontSize: '1.5rem' }}>
+          {error?.includes('No caregiver selected') ? 'No Caregiver Selected' : 'Profile Not Found'}
+        </h2>
+        <p style={{ color: 'var(--charcoal-light)', marginBottom: '24px' }}>
+          {error || 'The profile you\'re looking for doesn\'t exist or has been removed.'}
+        </p>
+        {isAgency && error?.includes('No caregiver selected') && (
+          <Link to="/caregivers/browse" className="btn btn-blue">
+            Browse Caregivers
+          </Link>
+        )}
         {isCaregiver && !profile && (
-          <div style={{ marginTop: 16 }}>
-            <Link to="/caregiver/register" className="btn btn-blue">Create Your Profile</Link>
-          </div>
+          <Link to="/caregiver/register" className="btn btn-blue">Create Your Profile</Link>
+        )}
+        {!isCaregiver && !isAgency && (
+          <Link to="/" className="btn btn-blue">Go Home</Link>
         )}
       </div>
     </div>

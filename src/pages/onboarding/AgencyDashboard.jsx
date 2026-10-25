@@ -214,7 +214,7 @@ export default function AgencyDashboard() {
               <div className="adb-actions-section">
                 <div className="adb-section-title">Primary Actions</div>
                 <div className="adb-actions-grid">
-                  <Link to="/caregiver/profile?view=agency" className="btn btn-blue">View Caregivers</Link>
+                  <Link to="/caregivers/browse" className="btn btn-blue">Browse Caregivers</Link>
                   <button className="btn btn-blue-outline" onClick={() => setTab('verifications')}>Verify Employment</button>
                   <button className="btn btn-blue-outline" onClick={() => setTab('recognition')}>Recognize a Caregiver</button>
                   <button className="btn btn-blue-outline" onClick={() => setTab('requests')}>View Interview Requests</button>
@@ -269,7 +269,7 @@ export default function AgencyDashboard() {
               ))}
               {requests.length === 0 && <div className="adb-empty">No interview requests sent yet.</div>}
               <div style={{ marginTop: 20 }}>
-                <Link to="/caregiver/profile?view=agency" className="btn btn-blue">Browse Caregiver Profiles</Link>
+                <Link to="/caregivers/browse" className="btn btn-blue">Browse Caregiver Profiles</Link>
               </div>
             </div>
           )}
@@ -367,7 +367,6 @@ export default function AgencyDashboard() {
               <p className="adb-panel__note">Browse caregiver profiles. Contact caregivers through the Request an Interview system. Personal contact information is never exposed during browsing.</p>
               <div style={{ display: 'flex', gap: 12, marginTop: 16, flexWrap: 'wrap' }}>
                 <Link to="/caregivers/browse" className="btn btn-blue">Browse All Caregivers</Link>
-                <Link to="/caregiver/profile?view=agency" className="btn btn-blue-outline">View Single Profile</Link>
               </div>
             </div>
           )}
