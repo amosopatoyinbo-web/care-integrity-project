@@ -273,7 +273,7 @@ export default function Home() {
               <div className="h-how__journey-step" role="listitem">
                 <div className="h-how__card">
                   <div className="h-how__card-img-wrap">
-                    <img src="/image 15.jpg" alt="A caregiver in blue scrubs guiding an older adult with a walker in a warm home environment" className="h-how__card-img" loading="lazy" />
+                    <img src="/image 15.png" alt="A caregiver in blue scrubs guiding an older adult with a walker in a warm home environment" className="h-how__card-img" loading="lazy" />
                     <div className="h-how__card-num-badge" style={{ background: '#0F4C81' }}>01</div>
                   </div>
                   <div className="h-how__card-body">
@@ -295,7 +295,7 @@ export default function Home() {
               <div className="h-how__journey-step" role="listitem">
                 <div className="h-how__card">
                   <div className="h-how__card-img-wrap">
-                    <img src="/image 16.jpg" alt="A caregiver with a warm smile attentively engaged with an older adult in a home-care setting" className="h-how__card-img" loading="lazy" />
+                    <img src="/image 16.png" alt="A caregiver with a warm smile attentively engaged with an older adult in a home-care setting" className="h-how__card-img" loading="lazy" />
                     <div className="h-how__card-num-badge" style={{ background: '#2EAF8F' }}>02</div>
                   </div>
                   <div className="h-how__card-body">
@@ -317,7 +317,7 @@ export default function Home() {
               <div className="h-how__journey-step" role="listitem">
                 <div className="h-how__card">
                   <div className="h-how__card-img-wrap">
-                    <img src="/image 17.jpg" alt="A caregiver warmly supporting an older adult walking with a mobility aid, both smiling" className="h-how__card-img" loading="lazy" />
+                    <img src="/image 17.png" alt="A caregiver warmly supporting an older adult walking with a mobility aid, both smiling" className="h-how__card-img" loading="lazy" />
                     <div className="h-how__card-num-badge" style={{ background: '#D4AF37' }}>03</div>
                   </div>
                   <div className="h-how__card-body">
@@ -341,7 +341,7 @@ export default function Home() {
               <div className="h-how__journey-step" role="listitem">
                 <div className="h-how__card">
                   <div className="h-how__card-img-wrap">
-                    <img src="/image 18.jpg" alt="A caregiver attentively supporting a person in a wheelchair, showing respect and dignity" className="h-how__card-img" loading="lazy" />
+                    <img src="/image 18.png" alt="A caregiver attentively supporting a person in a wheelchair, showing respect and dignity" className="h-how__card-img" loading="lazy" />
                     <div className="h-how__card-num-badge" style={{ background: '#7ED0C9' }}>04</div>
                   </div>
                   <div className="h-how__card-body">
@@ -364,7 +364,7 @@ export default function Home() {
               <div className="h-how__journey-step h-how__journey-step--last" role="listitem">
                 <div className="h-how__card">
                   <div className="h-how__card-img-wrap">
-                    <img src="/image 19.jpg" alt="A caregiver demonstrating professional growth and development in a caregiving setting" className="h-how__card-img" loading="lazy" />
+                    <img src="/image 19.png" alt="A caregiver demonstrating professional growth and development in a caregiving setting" className="h-how__card-img" loading="lazy" />
                     <div className="h-how__card-num-badge" style={{ background: '#2EAF8F' }}>05</div>
                   </div>
                   <div className="h-how__card-body">
