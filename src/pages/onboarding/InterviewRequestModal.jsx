@@ -31,7 +31,7 @@ export default function InterviewRequestModal({ caregiverName, caregiverId, onCl
 
   function set(k, v) { setForm(p => ({ ...p, [k]: v })) }
 
-  const canSend = form.org && form.contact && form.reason && form.message
+  const canSend = form.org && form.contact && form.reason && form.message.length >= 10
 
   async function handleSend(e) {
     e.preventDefault()
@@ -47,7 +47,13 @@ export default function InterviewRequestModal({ caregiverName, caregiverId, onCl
       })
       setSent(true)
     } catch (err) {
-      setError(err.message || 'Could not send request. Please try again.')
+      // Display detailed validation errors if available
+      if (err.errors && Array.isArray(err.errors)) {
+        const errorMessages = err.errors.map(e => `${e.field}: ${e.message}`).join(', ')
+        setError(errorMessages)
+      } else {
+        setError(err.message || 'Could not send request. Please try again.')
+      }
     } finally {
       setLoad(false)
     }
@@ -96,8 +102,28 @@ export default function InterviewRequestModal({ caregiverName, caregiverId, onCl
                 </select>
               </div>
               <div className="irm-field">
-                <label className="irm-label" htmlFor="irm-message">Message <span aria-hidden="true">*</span></label>
-                <textarea id="irm-message" className="irm-textarea" rows={4} placeholder="Introduce yourself and describe the opportunity…" value={form.message} onChange={e => set('message', e.target.value)} required />
+                <label className="irm-label" htmlFor="irm-message">
+                  Message <span aria-hidden="true">*</span>
+                  <span className="irm-char-count" aria-live="polite">
+                    {form.message.length}/10 characters minimum
+                  </span>
+                </label>
+                <textarea 
+                  id="irm-message" 
+                  className="irm-textarea" 
+                  rows={4} 
+                  placeholder="Introduce yourself and describe the opportunity… (minimum 10 characters)" 
+                  value={form.message} 
+                  onChange={e => set('message', e.target.value)} 
+                  required 
+                  minLength={10}
+                  aria-describedby="irm-message-hint"
+                />
+                {form.message.length > 0 && form.message.length < 10 && (
+                  <p id="irm-message-hint" className="irm-field-hint">
+                    Message must be at least 10 characters long
+                  </p>
+                )}
               </div>
 
               {error && <p className="irm-error" role="alert">{error}</p>}

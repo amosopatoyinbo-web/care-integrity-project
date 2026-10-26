@@ -62,8 +62,23 @@
   font-size: 0.84rem;
   font-weight: 600;
   color: var(--charcoal);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 .irm-label span { color: #c0392b; }
+
+.irm-char-count {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--charcoal-light);
+}
+
+.irm-field-hint {
+  font-size: 0.75rem;
+  color: #c0392b;
+  margin: -2px 0 0 0;
+}
 
 .irm-input,
 .irm-select,

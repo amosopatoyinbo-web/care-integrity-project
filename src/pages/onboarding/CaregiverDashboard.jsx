@@ -53,6 +53,10 @@ function RespondPanel({ req, onDone, onRefresh }) {
   const [error, setError]     = useState('')
 
   async function handleSend() {
+    if (message.trim().length < 10) {
+      setError('Response message must be at least 10 characters long.')
+      return
+    }
     setLoading(true)
     setError('')
     try {
@@ -60,7 +64,13 @@ function RespondPanel({ req, onDone, onRefresh }) {
       setSent(true)
       onRefresh()
     } catch (err) {
-      setError(err.message || 'Could not send response.')
+      // Display detailed validation errors if available
+      if (err.errors && Array.isArray(err.errors)) {
+        const errorMessages = err.errors.map(e => `${e.field}: ${e.message}`).join(', ')
+        setError(errorMessages)
+      } else {
+        setError(err.message || 'Could not send response.')
+      }
     } finally {
       setLoading(false)
     }
@@ -83,12 +93,26 @@ function RespondPanel({ req, onDone, onRefresh }) {
           <div className="cgd-respond-panel__reason">{req.reason}</div>
         </div>
       </div>
-      <p className="cgd-respond-panel__msg-label">Your response:</p>
-      <textarea className="cgd-respond-textarea" rows={4} value={message} onChange={e => setMessage(e.target.value)} />
+      <p className="cgd-respond-panel__msg-label">
+        Your response: 
+        <span style={{ fontSize: '0.75rem', fontWeight: 400, color: 'var(--charcoal-light)', marginLeft: 8 }}>
+          {message.length}/10 characters minimum
+        </span>
+      </p>
+      <textarea 
+        className="cgd-respond-textarea" 
+        rows={4} 
+        value={message} 
+        onChange={e => setMessage(e.target.value)}
+        minLength={10}
+      />
+      {message.length > 0 && message.length < 10 && (
+        <p style={{ color: '#c0392b', fontSize: '0.75rem', marginTop: 4 }}>Response must be at least 10 characters long</p>
+      )}
       {error && <p style={{ color: '#c0392b', fontSize: '0.82rem', marginTop: 6 }}>{error}</p>}
       <div className="cgd-respond-panel__actions">
         <button className="btn btn-blue-outline btn-sm" onClick={onDone}>Cancel</button>
-        <button className="btn btn-green btn-sm" disabled={!message.trim() || loading} onClick={handleSend}>
+        <button className="btn btn-green btn-sm" disabled={message.trim().length < 10 || loading} onClick={handleSend}>
           {loading ? 'Sending…' : 'Accept & Send Response'}
         </button>
       </div>
@@ -112,7 +136,13 @@ function RequestCard({ req, onRefresh }) {
       setDecline(false)
       onRefresh()
     } catch (err) {
-      setError(err.message || 'Could not decline request.')
+      // Display detailed validation errors if available
+      if (err.errors && Array.isArray(err.errors)) {
+        const errorMessages = err.errors.map(e => `${e.field}: ${e.message}`).join(', ')
+        setError(errorMessages)
+      } else {
+        setError(err.message || 'Could not decline request.')
+      }
       setLoading(false)
     }
   }
