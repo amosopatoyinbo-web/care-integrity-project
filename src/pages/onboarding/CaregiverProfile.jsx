@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import InterviewRequestModal from './InterviewRequestModal'
 import { caregiverApi, recognitionApi, auth } from '../../lib/api'
 import trainingApi from '../../lib/trainingApi'
+import { formatTravelDistance, formatWorkAreas } from '../../constants/locations'
 import './CaregiverProfile.css'
 
 /* ── Status badge map ─────────────────────────────────── */
@@ -280,6 +281,27 @@ export default function CaregiverProfile() {
                   <div className="cp-chips">{profile.skills.map(s => <span key={s} className="cp-chip cp-chip--green">{s}</span>)}</div>
                 </div>
               )}
+            </section>
+          )}
+
+          {/* Travel Preferences */}
+          {(profile.travelDistance || profile.workAreas?.length > 0) && (
+            <section className="cp-section">
+              <h2 className="cp-section-title">Service Area & Travel</h2>
+              <div className="cp-travel-preferences">
+                {profile.travelDistance && (
+                  <div className="cp-travel-row">
+                    <span className="cp-travel-label">Willing to Travel</span>
+                    <span className="cp-travel-value">{formatTravelDistance(profile.travelDistance)}</span>
+                  </div>
+                )}
+                {profile.workAreas?.length > 0 && (
+                  <div className="cp-travel-row">
+                    <span className="cp-travel-label">Work Areas</span>
+                    <span className="cp-travel-value">{formatWorkAreas(profile.workAreas)}</span>
+                  </div>
+                )}
+              </div>
             </section>
           )}
 

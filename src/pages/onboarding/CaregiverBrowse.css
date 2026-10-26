@@ -227,3 +227,52 @@
 .cbr-card__certificates svg {
   flex-shrink: 0;
 }
+
+/* ── Travel Preferences in Cards (Phase 2) ── */
+.cbr-card__travel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  background: rgba(126,208,201,0.06);
+  border: 1.5px solid rgba(126,208,201,0.2);
+  border-radius: var(--radius-md);
+  margin-top: 8px;
+}
+
+.cbr-card__travel-item {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 0.78rem;
+}
+
+.cbr-card__travel-label {
+  font-weight: 700;
+  color: var(--charcoal-pale);
+  flex-shrink: 0;
+}
+
+.cbr-card__travel-value {
+  font-weight: 500;
+  color: var(--charcoal);
+  line-height: 1.4;
+}
+
+/* Mobile breakpoints (320px - 414px) */
+@media (max-width: 414px) {
+  .cbr-card__travel {
+    padding: 8px 10px;
+  }
+  
+  .cbr-card__travel-item {
+    font-size: 0.75rem;
+  }
+}
+
+/* Tablet and desktop (768px+) */
+@media (min-width: 768px) {
+  .cbr-card__travel-item {
+    font-size: 0.8rem;
+  }
+}

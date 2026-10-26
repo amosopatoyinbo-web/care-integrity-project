@@ -142,33 +142,29 @@ export const KENTUCKY_COUNTIES = [
  * @returns {string} - Formatted display string
  */
 export function formatTravelDistance(value) {
+  if (!value || value === null || value === undefined) return 'Not specified'
   const option = TRAVEL_DISTANCES.find(d => d.value === value)
-  return option ? option.label : value
+  return option ? option.label : 'Not specified'
 }
 
 /**
  * Get short form of county name (without "County" suffix)
+ * Used for compact displays like browse cards
  * @param {string} county - Full county name (e.g., "Scott County")
  * @returns {string} - Short form (e.g., "Scott")
  */
 export function getCountyShortName(county) {
+  if (!county) return ''
   return county.replace(' County', '')
 }
 
 /**
- * Format array of counties for display
+ * Format array of counties for display (full profile view)
+ * Returns full county names, comma-separated
  * @param {string[]} counties - Array of county names
- * @param {number} maxDisplay - Maximum number to display before truncating
- * @returns {string} - Formatted string (e.g., "Scott, Fayette, and 3 more")
+ * @returns {string} - Formatted string (e.g., "Scott County, Fayette County, Boone County")
  */
-export function formatWorkAreas(counties, maxDisplay = 3) {
+export function formatWorkAreas(counties) {
   if (!counties || counties.length === 0) return 'Not specified'
-  
-  if (counties.length <= maxDisplay) {
-    return counties.map(getCountyShortName).join(', ')
-  }
-  
-  const displayed = counties.slice(0, maxDisplay).map(getCountyShortName)
-  const remaining = counties.length - maxDisplay
-  return `${displayed.join(', ')}, and ${remaining} more`
+  return counties.join(', ')
 }
