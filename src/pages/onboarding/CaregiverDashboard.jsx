@@ -264,7 +264,7 @@ export default function CaregiverDashboard() {
         <div className="cgd-topbar__right">
           <Link to="/caregiver/profile/edit" className="btn btn-green-outline btn-sm">Edit Profile</Link>
           <Link to="/caregiver/profile?view=caregiver" className="btn btn-blue-outline btn-sm">My Profile</Link>
-          <Link to="/caregiver/profile?view=public" className="btn btn-blue btn-sm">Public Preview</Link>
+          <Link to={`/caregiver/profile?view=agency&id=${profile?._id}`} className="btn btn-blue btn-sm">Public Preview</Link>
           <button className="btn btn-sm cgd-logout-btn" onClick={async () => {
             await authApi.logout().catch(() => {})
             auth.clearTokens()
@@ -357,7 +357,7 @@ export default function CaregiverDashboard() {
               )}
               <div className="cgd-panel__actions">
                 <Link to="/caregiver/profile?view=caregiver" className="btn btn-blue-outline btn-sm">View Full Profile</Link>
-                <Link to="/caregiver/profile?view=public" className="btn btn-blue btn-sm">Preview Public Profile</Link>
+                <Link to={`/caregiver/profile?view=agency&id=${profile?._id}`} className="btn btn-blue btn-sm">Preview Public Profile</Link>
               </div>
             </div>
           )}
