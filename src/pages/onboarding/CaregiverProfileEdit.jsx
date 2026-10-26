@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { caregiverApi, uploadApi, auth } from '../../lib/api'
+import { TRAVEL_DISTANCES, KENTUCKY_COUNTIES } from '../../constants/locations'
 import './CaregiverProfile.css'
 
 export default function CaregiverProfileEdit() {
@@ -22,6 +23,8 @@ export default function CaregiverProfileEdit() {
     careSettings: [],
     skills: [],
     standards: [],
+    travelDistance: 'up-to-20',
+    workAreas: [],
   })
 
   const [photoFile, setPhotoFile] = useState(null)
@@ -85,6 +88,8 @@ export default function CaregiverProfileEdit() {
         careSettings: profile.careSettings,
         skills: profile.skills,
         standards: profile.standards,
+        travelDistance: profile.travelDistance,
+        workAreas: profile.workAreas,
       })
 
       setSuccess(true)
@@ -302,6 +307,66 @@ export default function CaregiverProfileEdit() {
                   {standard}
                 </label>
               ))}
+            </div>
+          </div>
+
+          {/* Travel Distance */}
+          <div className="cp-field">
+            <label className="cp-label">Travel Distance</label>
+            <p className="cp-field-hint">How far are you willing to travel for work?</p>
+            <select
+              className="cp-input"
+              value={profile.travelDistance || 'up-to-20'}
+              onChange={e => setProfile({ ...profile, travelDistance: e.target.value })}
+            >
+              {TRAVEL_DISTANCES.map(({ value, label }) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Work Areas */}
+          <div className="cp-field">
+            <label className="cp-label">Work Areas</label>
+            <p className="cp-field-hint">
+              Select the counties where you're willing to work (maximum 25)
+            </p>
+            {profile.workAreas && profile.workAreas.length >= 25 && (
+              <div className="cp-field-warning">
+                ⚠ Maximum of 25 counties reached. Unselect some to add others.
+              </div>
+            )}
+            <div className="cp-work-areas-grid">
+              {KENTUCKY_COUNTIES.map(county => {
+                const isChecked = profile.workAreas && profile.workAreas.includes(county)
+                const isDisabled = !isChecked && profile.workAreas && profile.workAreas.length >= 25
+                return (
+                  <label key={county} className="cp-chip">
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={e => {
+                        if (e.target.checked) {
+                          if (profile.workAreas && profile.workAreas.length >= 25) {
+                            return
+                          }
+                          setProfile({ 
+                            ...profile, 
+                            workAreas: [...(profile.workAreas || []), county] 
+                          })
+                        } else {
+                          setProfile({
+                            ...profile,
+                            workAreas: (profile.workAreas || []).filter(c => c !== county)
+                          })
+                        }
+                      }}
+                      disabled={isDisabled}
+                    />
+                    {county}
+                  </label>
+                )
+              })}
             </div>
           </div>
 
