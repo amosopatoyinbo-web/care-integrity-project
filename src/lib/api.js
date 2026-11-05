@@ -136,6 +136,14 @@ export const authApi = {
     const recaptchaToken = await executeRecaptcha('login')
     return api.post('/auth/login', { email, password, recaptchaToken })
   },
+  // OTP-based login (2-step process)
+  initiateLogin: async (email, password) => {
+    const recaptchaToken = await executeRecaptcha('login')
+    return api.post('/auth-otp/initiate-login', { email, password, recaptchaToken })
+  },
+  verifyLoginOTP: async (email, otp, sessionToken) => {
+    return api.post('/auth-otp/verify-login', { email, otp, sessionToken })
+  },
   logout:         ()                 => api.post('/auth/logout', { refreshToken: auth.getRefresh() }),
   me:             ()                 => api.get('/auth/me'),
   changePassword: (cur, next)        => api.post('/auth/change-password', { currentPassword: cur, newPassword: next }),
