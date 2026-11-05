@@ -4,6 +4,8 @@
    Handles token storage, refresh, and error normalisation.
    ============================================================ */
 
+import { executeRecaptcha } from './recaptcha.js'
+
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
 
 /* ── Token helpers ───────────────────────────────────────── */
@@ -126,8 +128,14 @@ const api = {
 /* ── Auth endpoints ──────────────────────────────────────── */
 
 export const authApi = {
-  register:       (data)             => api.post('/auth/register', data),
-  login:          (email, password)  => api.post('/auth/login', { email, password }),
+  register: async (data) => {
+    const recaptchaToken = await executeRecaptcha('signup')
+    return api.post('/auth/register', { ...data, recaptchaToken })
+  },
+  login: async (email, password) => {
+    const recaptchaToken = await executeRecaptcha('login')
+    return api.post('/auth/login', { email, password, recaptchaToken })
+  },
   logout:         ()                 => api.post('/auth/logout', { refreshToken: auth.getRefresh() }),
   me:             ()                 => api.get('/auth/me'),
   changePassword: (cur, next)        => api.post('/auth/change-password', { currentPassword: cur, newPassword: next }),
@@ -139,7 +147,10 @@ export const authApi = {
 /* ── Caregiver endpoints ─────────────────────────────────── */
 
 export const caregiverApi = {
-  register:    (data)       => api.post('/caregivers/register', data),
+  register: async (data) => {
+    const recaptchaToken = await executeRecaptcha('caregiver_signup')
+    return api.post('/caregivers/register', { ...data, recaptchaToken })
+  },
   list:        (page = 1)   => api.get(`/caregivers?page=${page}`),
   getById:     (id)         => api.get(`/caregivers/${id}`),
   getMe:       ()           => api.get('/caregivers/me'),
@@ -163,7 +174,10 @@ export const caregiverApi = {
 /* ── Agency endpoints ────────────────────────────────────── */
 
 export const agencyApi = {
-  register: (data)      => api.post('/agencies/register', data),
+  register: async (data) => {
+    const recaptchaToken = await executeRecaptcha('agency_signup')
+    return api.post('/agencies/register', { ...data, recaptchaToken })
+  },
   list:     (page = 1)  => api.get(`/agencies?page=${page}`),
   getById:  (id)        => api.get(`/agencies/${id}`),
   getMe:    ()          => api.get('/agencies/me'),
