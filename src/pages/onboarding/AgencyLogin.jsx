@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { authApi, auth } from '../../lib/api'
+import OTPVerification from '../../components/OTPVerification'
 import './Login.css'
 
 export default function AgencyLogin() {
@@ -10,6 +11,11 @@ export default function AgencyLogin() {
   const [password, setPassword] = useState('')
   const [error,    setError]    = useState('')
   const [loading,  setLoading]  = useState(false)
+  
+  // OTP flow state
+  const [showOTP, setShowOTP] = useState(false)
+  const [sessionToken, setSessionToken] = useState('')
+  const [otpExpirySeconds, setOtpExpirySeconds] = useState(600)
 
   // If already logged in as agency, go to dashboard
   useEffect(() => {
@@ -48,39 +54,29 @@ export default function AgencyLogin() {
     setError('')
 
     try {
-      const response = await authApi.login(email, password)
+      // Step 1: Initiate login with OTP
+      const response = await authApi.initiateLogin(email, password)
       
-      if (!response || !response.user) {
-        console.error('Invalid login response:', response)
-        setError('Invalid response from server. Please try again.')
-        setLoading(false)
-        return
+      if (!response || !response.sessionToken) {
+        throw new Error('Invalid response from server.')
       }
 
-      const { user, accessToken, refreshToken } = response
-
-      // Check if user is actually an agency
-      if (user.role !== 'agency') {
-        setError('This account is registered as a caregiver. Please use the Caregiver Login page.')
-        setLoading(false)
-        return
-      }
-
-      auth.setTokens(accessToken, refreshToken)
-      auth.setUser(user)
-      navigate('/agency/dashboard', { replace: true })
+      // OTP sent successfully - show OTP screen
+      setSessionToken(response.sessionToken)
+      setOtpExpirySeconds(response.expiresIn || 600)
+      setShowOTP(true)
+      
     } catch (err) {
-      console.error('Agency login error:', err)
+      console.error('Agency login initiation error:', err)
       
-      // Show specific error messages
       if (err.status === 401) {
         setError('Incorrect email or password. Please try again.')
+      } else if (err.status === 423) {
+        setError(err.message || 'Account temporarily locked.')
       } else if (err.status === 429) {
         setError('Too many attempts. Please wait a few minutes.')
       } else if (err.message?.includes('fetch') || err.message?.includes('network')) {
         setError('Network error. Please check your internet connection.')
-      } else if (err.message?.includes('timeout')) {
-        setError('Request timed out. Please try again.')
       } else {
         setError(err.message || 'Unable to connect. Please try again.')
       }
@@ -88,6 +84,61 @@ export default function AgencyLogin() {
     }
   }
 
+  async function handleVerifyOTP(otp) {
+    try {
+      const response = await authApi.verifyLoginOTP(email, otp, sessionToken)
+      
+      if (!response || !response.user) {
+        throw new Error('Invalid response from server.')
+      }
+
+      const { user, accessToken, refreshToken } = response
+
+      // Check if user is actually an agency
+      if (user.role !== 'agency') {
+        throw new Error('This account is registered as a caregiver. Please use the Caregiver Login page.')
+      }
+
+      auth.setTokens(accessToken, refreshToken)
+      auth.setUser(user)
+      navigate('/agency/dashboard', { replace: true })
+      
+    } catch (err) {
+      console.error('OTP verification error:', err)
+      throw err // Re-throw to let OTPVerification component handle the error display
+    }
+  }
+
+  async function handleResendOTP() {
+    // Re-initiate login to get new OTP
+    const response = await authApi.initiateLogin(email, password)
+    setSessionToken(response.sessionToken)
+    setOtpExpirySeconds(response.expiresIn || 600)
+  }
+
+  function handleCancelOTP() {
+    setShowOTP(false)
+    setSessionToken('')
+    setPassword('')
+    setLoading(false)
+  }
+
+  // Show OTP verification screen
+  if (showOTP) {
+    return (
+      <OTPVerification
+        email={email}
+        onVerify={handleVerifyOTP}
+        onResend={handleResendOTP}
+        onCancel={handleCancelOTP}
+        title="Verify Your Login"
+        subtitle="Enter the 6-digit code we sent to"
+        expirySeconds={otpExpirySeconds}
+      />
+    )
+  }
+
+  // Show login form
   return (
     <div className="login-page">
       <div className="login-card">
@@ -144,7 +195,7 @@ export default function AgencyLogin() {
             className="btn login-submit btn-blue"
             disabled={loading || !email || !password}
           >
-            {loading ? 'Signing in…' : 'Sign In'}
+            {loading ? 'Sending Code…' : 'Continue with Email Verification'}
           </button>
 
         </form>

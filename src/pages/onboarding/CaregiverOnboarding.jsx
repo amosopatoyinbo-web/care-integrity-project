@@ -500,7 +500,7 @@ export default function CaregiverOnboarding() {
             </button>
           ) : (
             <button type="submit" className="btn btn-green" disabled={!canAdvance() || loading}>
-              {loading ? 'Creating Profile…' : 'Create My Professional Profile'}
+              {loading ? 'Creating Profile…' : 'Create Profile'}
             </button>
           )}
         </div>

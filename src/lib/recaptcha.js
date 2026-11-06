@@ -32,17 +32,9 @@ export async function executeRecaptcha(action) {
 
     function executeToken() {
       window.grecaptcha.ready(() => {
-        // Render invisible reCAPTCHA badge
-        if (!window.recaptchaWidgetId) {
-          window.recaptchaWidgetId = window.grecaptcha.render('recaptcha-container', {
-            sitekey: RECAPTCHA_SITE_KEY,
-            size: 'invisible',
-          })
-        }
-
-        // Execute reCAPTCHA
+        // For v3, we don't need to render - just execute directly
         window.grecaptcha
-          .execute(window.recaptchaWidgetId, { action })
+          .execute(RECAPTCHA_SITE_KEY, { action })
           .then((token) => {
             resolve(token)
           })
@@ -56,14 +48,10 @@ export async function executeRecaptcha(action) {
 }
 
 /**
- * Reset reCAPTCHA widget (useful after failed attempts)
+ * Reset reCAPTCHA (for v3, this is mostly a no-op, but kept for compatibility)
  */
 export function resetRecaptcha() {
-  if (window.grecaptcha && window.recaptchaWidgetId !== undefined) {
-    try {
-      window.grecaptcha.reset(window.recaptchaWidgetId)
-    } catch (err) {
-      console.warn('[reCAPTCHA] Reset failed:', err)
-    }
-  }
+  // reCAPTCHA v3 doesn't need manual reset
+  // Tokens are generated fresh on each execute() call
+  console.log('[reCAPTCHA] Reset called (no-op for v3)')
 }
