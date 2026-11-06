@@ -407,21 +407,29 @@ export default function CaregiverOnboarding() {
   }
 
   async function handleVerifyOTP(otp) {
+    console.log('[CaregiverOnboarding] Starting OTP verification and registration')
     try {
+      // Step 1: Verify OTP and get verified token
+      console.log('[CaregiverOnboarding] Verifying OTP...')
       const otpResponse = await authApi.verifySignupOTP(s1.email, otp, sessionToken)
+      console.log('[CaregiverOnboarding] OTP verification response:', otpResponse)
 
       if (!otpResponse || !otpResponse.verifiedToken) {
-        throw new Error('Invalid response from server.')
+        throw new Error('Invalid response from server - no verified token received.')
       }
 
-      // Upload profile assets only after the email has been verified.
+      // Step 2: Upload profile photo if provided
       let photoUrl = ''
       if (s2.photo) {
+        console.log('[CaregiverOnboarding] Uploading profile photo...')
         const { url } = await uploadApi.avatar(s2.photo)
         photoUrl = url
+        console.log('[CaregiverOnboarding] Photo uploaded:', photoUrl)
       }
 
-      const { user, accessToken, refreshToken } = await caregiverApi.register({
+      // Step 3: Register caregiver account
+      console.log('[CaregiverOnboarding] Registering caregiver account...')
+      const registrationResponse = await caregiverApi.register({
         // Auth data
         email:    s1.email,
         password: s1.password,
@@ -439,18 +447,31 @@ export default function CaregiverOnboarding() {
         careSettings:   s3.settings,
         skills:         s3.skills,
       })
+      console.log('[CaregiverOnboarding] Registration response:', registrationResponse)
 
-      // Set authentication
+      const { user, accessToken, refreshToken } = registrationResponse
+
+      if (!accessToken || !refreshToken || !user) {
+        throw new Error('Registration succeeded but tokens were not returned. Please contact support.')
+      }
+
+      // Step 4: Set authentication tokens and user data
+      console.log('[CaregiverOnboarding] Setting auth tokens and user data...')
       auth.setTokens(accessToken, refreshToken)
       auth.setUser(user)
+      console.log('[CaregiverOnboarding] Auth tokens set successfully')
+      console.log('[CaregiverOnboarding] Stored access token:', localStorage.getItem('cip_access')?.substring(0, 20) + '...')
+      console.log('[CaregiverOnboarding] Stored user:', JSON.parse(localStorage.getItem('cip_user')))
 
-      // Step 3 — Upload credential documents and add credentials
+      // Step 5: Upload credential documents and add credentials
+      console.log('[CaregiverOnboarding] Processing credentials...')
       const credentialsWithUrls = await Promise.all(
         s4.credentials
           .filter(c => c.name && c.org)
           .map(async c => {
             let documentUrl = ''
             if (c.doc) {
+              console.log('[CaregiverOnboarding] Uploading credential document:', c.name)
               const { path } = await uploadApi.document(c.doc)
               documentUrl = path
             }
@@ -459,11 +480,15 @@ export default function CaregiverOnboarding() {
       )
 
       for (const cred of credentialsWithUrls) {
+        console.log('[CaregiverOnboarding] Adding credential:', cred.name)
         await caregiverApi.addCredential(cred)
       }
+      console.log('[CaregiverOnboarding] All credentials added')
 
-      // Step 4 — Add employment
+      // Step 6: Add employment history
+      console.log('[CaregiverOnboarding] Processing employment history...')
       for (const emp of s4.employment.filter(e => e.org && e.role && e.start)) {
+        console.log('[CaregiverOnboarding] Adding employment:', emp.org, emp.role)
         await caregiverApi.addEmployment({
           orgName:          emp.org,
           role:             emp.role,
@@ -473,10 +498,18 @@ export default function CaregiverOnboarding() {
           responsibilities: emp.responsibilities,
         })
       }
+      console.log('[CaregiverOnboarding] All employment records added')
 
+      // Step 7: Navigate to dashboard
+      console.log('[CaregiverOnboarding] Registration complete! Navigating to dashboard...')
       navigate('/caregiver/profile?view=caregiver')
     } catch (err) {
-      console.error('Caregiver registration error:', err)
+      console.error('[CaregiverOnboarding] Registration error:', err)
+      console.error('[CaregiverOnboarding] Error details:', {
+        message: err.message,
+        status: err.status,
+        stack: err.stack
+      })
       throw err
     }
   }

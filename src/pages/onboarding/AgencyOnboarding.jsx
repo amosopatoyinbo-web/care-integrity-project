@@ -329,38 +329,42 @@ export default function AgencyOnboarding() {
   }
   
   async function handleVerifyOTP(otp) {
-    console.log('[AgencyOnboarding] handleVerifyOTP called')
+    console.log('[AgencyOnboarding] Starting OTP verification and registration')
     
     try {
       // Step 1: Verify OTP
-      console.log('[AgencyOnboarding] Calling authApi.verifySignupOTP...')
+      console.log('[AgencyOnboarding] Verifying OTP...')
       const otpResponse = await authApi.verifySignupOTP(s1.email, otp, sessionToken)
-      console.log('[AgencyOnboarding] verifySignupOTP response:', otpResponse)
+      console.log('[AgencyOnboarding] OTP verification response:', otpResponse)
       
       if (!otpResponse || !otpResponse.verifiedToken) {
-        throw new Error('Invalid response from server.')
+        throw new Error('Invalid response from server - no verified token received.')
       }
       
-      console.log('[AgencyOnboarding] Email verified, now creating account...')
+      console.log('[AgencyOnboarding] Email verified successfully')
       const token = otpResponse.verifiedToken
       
       // Step 2: Upload logo if provided
       let logoUrl = ''
       if (s2.logo) {
+        console.log('[AgencyOnboarding] Uploading logo...')
         const { url } = await uploadApi.logo(s2.logo)
         logoUrl = url
+        console.log('[AgencyOnboarding] Logo uploaded:', logoUrl)
       }
 
       // Step 3: Upload verification document if provided
       let verificationDocUrl = ''
       if (s4.doc) {
+        console.log('[AgencyOnboarding] Uploading verification document...')
         const { path } = await uploadApi.document(s4.doc)
         verificationDocUrl = path
+        console.log('[AgencyOnboarding] Verification document uploaded:', verificationDocUrl)
       }
 
       // Step 4: Create agency account
-      console.log('[AgencyOnboarding] Calling agencyApi.register...')
-      const { user, accessToken, refreshToken } = await agencyApi.register({
+      console.log('[AgencyOnboarding] Registering agency account...')
+      const registrationResponse = await agencyApi.register({
         email:    s1.email,
         password: s1.password,
         phone:    s1.phone,
@@ -385,14 +389,33 @@ export default function AgencyOnboarding() {
         businessEmail:    s4.bizEmail,
         verificationDocUrl,
       })
+      console.log('[AgencyOnboarding] Registration response:', registrationResponse)
 
-      console.log('[AgencyOnboarding] Registration successful')
+      const { user, accessToken, refreshToken } = registrationResponse
+
+      if (!accessToken || !refreshToken || !user) {
+        throw new Error('Registration succeeded but tokens were not returned. Please contact support.')
+      }
+
+      // Step 5: Set authentication tokens and user data
+      console.log('[AgencyOnboarding] Setting auth tokens and user data...')
       auth.setTokens(accessToken, refreshToken)
       auth.setUser(user)
+      console.log('[AgencyOnboarding] Auth tokens set successfully')
+      console.log('[AgencyOnboarding] Stored access token:', localStorage.getItem('cip_access')?.substring(0, 20) + '...')
+      console.log('[AgencyOnboarding] Stored user:', JSON.parse(localStorage.getItem('cip_user')))
+
+      // Step 6: Navigate to dashboard
+      console.log('[AgencyOnboarding] Registration complete! Navigating to dashboard...')
       navigate('/agency/dashboard')
       
     } catch (err) {
-      console.error('[AgencyOnboarding] Error:', err)
+      console.error('[AgencyOnboarding] Registration error:', err)
+      console.error('[AgencyOnboarding] Error details:', {
+        message: err.message,
+        status: err.status,
+        stack: err.stack
+      })
       throw err
     }
   }
