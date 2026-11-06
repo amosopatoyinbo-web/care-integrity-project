@@ -380,19 +380,52 @@ export default function CaregiverOnboarding() {
     setValidationErrors({})
 
     try {
-      // Step 1 — Upload photo if provided (before registration)
+      const response = await authApi.initiateSignup(s1.email, 'caregiver')
+
+      if (!response || !response.sessionToken) {
+        throw new Error('Invalid response from server.')
+      }
+
+      setOtpEmail(s1.email)
+      setSessionToken(response.sessionToken)
+      setOtpExpirySeconds(response.expiresIn || 600)
+      setShowOTP(true)
+      setLoading(false)
+    } catch (err) {
+      console.error('Caregiver signup OTP error:', err)
+
+      if (err.status === 409) {
+        setApiError('An account with this email already exists. Please log in instead.')
+      } else if (err.message?.includes('network') || err.message?.includes('fetch')) {
+        setApiError('Network error. Please check your internet connection.')
+      } else {
+        setApiError(err.message || 'Unable to send verification code. Please try again.')
+      }
+      setLoading(false)
+    }
+  }
+
+  async function handleVerifyOTP(otp) {
+    try {
+      const otpResponse = await authApi.verifySignupOTP(s1.email, otp, sessionToken)
+
+      if (!otpResponse || !otpResponse.verifiedToken) {
+        throw new Error('Invalid response from server.')
+      }
+
+      // Upload profile assets only after the email has been verified.
       let photoUrl = ''
       if (s2.photo) {
         const { url } = await uploadApi.avatar(s2.photo)
         photoUrl = url
       }
 
-      // Step 2 — Register account and create profile atomically
       const { user, accessToken, refreshToken } = await caregiverApi.register({
         // Auth data
         email:    s1.email,
         password: s1.password,
         phone:    s1.phone,
+        verifiedToken: otpResponse.verifiedToken,
         // Profile data
         fullName:       s2.fullName,
         role:           s2.role,
@@ -443,25 +476,35 @@ export default function CaregiverOnboarding() {
       navigate('/caregiver/profile?view=caregiver')
     } catch (err) {
       console.error('Caregiver registration error:', err)
-      
-      // Show specific error messages
-      let errorMessage = 'Something went wrong. Please try again.'
-      
-      if (err.message?.includes('email already exists')) {
-        errorMessage = 'An account with this email already exists. Please log in instead.'
-      } else if (err.message?.includes('Missing required fields')) {
-        errorMessage = 'Please fill in all required fields.'
-      } else if (err.message?.includes('timeout')) {
-        errorMessage = 'Request timed out. Please check your connection and try again.'
-      } else if (err.message?.includes('network') || err.message?.includes('fetch')) {
-        errorMessage = 'Network error. Please check your internet connection.'
-      } else if (err.message) {
-        errorMessage = err.message
-      }
-      
-      setApiError(errorMessage)
-      setLoading(false)
+      throw err
     }
+  }
+
+  async function handleResendOTP() {
+    const response = await authApi.initiateSignup(s1.email, 'caregiver')
+    setSessionToken(response.sessionToken)
+    setOtpExpirySeconds(response.expiresIn || 600)
+  }
+
+  function handleCancelOTP() {
+    setShowOTP(false)
+    setSessionToken('')
+    setOtpEmail('')
+    setLoading(false)
+  }
+
+  if (showOTP) {
+    return (
+      <OTPVerification
+        email={otpEmail}
+        onVerify={handleVerifyOTP}
+        onResend={handleResendOTP}
+        onCancel={handleCancelOTP}
+        title="Verify Your Email"
+        subtitle="Enter the 6-digit code we sent to"
+        expirySeconds={otpExpirySeconds}
+      />
+    )
   }
 
   return (
