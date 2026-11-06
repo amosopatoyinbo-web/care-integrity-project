@@ -278,6 +278,7 @@ export default function AgencyOnboarding() {
 
   async function handleSubmit(e) {
     e.preventDefault()
+    console.log('[AgencyOnboarding] handleSubmit called')
     
     // Final validation of all required fields
     const allErrors = {
@@ -292,33 +293,78 @@ export default function AgencyOnboarding() {
       return
     }
 
+    // First, send OTP for email verification
+    console.log('[AgencyOnboarding] All steps validated, initiating OTP')
     setLoading(true)
     setApiError('')
     setValidationErrors({})
 
     try {
-      // Upload logo if provided
+      console.log('[AgencyOnboarding] Calling authApi.initiateSignup...')
+      const response = await authApi.initiateSignup(s1.email, 'agency')
+      console.log('[AgencyOnboarding] initiateSignup response:', response)
+      
+      if (!response || !response.sessionToken) {
+        throw new Error('Invalid response from server.')
+      }
+      
+      console.log('[AgencyOnboarding] OTP sent, showing verification screen')
+      setSessionToken(response.sessionToken)
+      setOtpExpirySeconds(response.expiresIn || 600)
+      setShowOTP(true)
+      setLoading(false)
+      
+    } catch (err) {
+      console.error('[AgencyOnboarding] initiateSignup error:', err)
+      
+      if (err.status === 409) {
+        setApiError('An account with this email already exists. Please log in instead.')
+      } else if (err.message?.includes('network') || err.message?.includes('fetch')) {
+        setApiError('Network error. Please check your internet connection.')
+      } else {
+        setApiError(err.message || 'Unable to send verification code. Please try again.')
+      }
+      setLoading(false)
+    }
+  }
+  
+  async function handleVerifyOTP(otp) {
+    console.log('[AgencyOnboarding] handleVerifyOTP called')
+    
+    try {
+      // Step 1: Verify OTP
+      console.log('[AgencyOnboarding] Calling authApi.verifySignupOTP...')
+      const otpResponse = await authApi.verifySignupOTP(s1.email, otp, sessionToken)
+      console.log('[AgencyOnboarding] verifySignupOTP response:', otpResponse)
+      
+      if (!otpResponse || !otpResponse.verifiedToken) {
+        throw new Error('Invalid response from server.')
+      }
+      
+      console.log('[AgencyOnboarding] Email verified, now creating account...')
+      const token = otpResponse.verifiedToken
+      
+      // Step 2: Upload logo if provided
       let logoUrl = ''
       if (s2.logo) {
         const { url } = await uploadApi.logo(s2.logo)
         logoUrl = url
       }
 
-      // Upload verification document if provided
+      // Step 3: Upload verification document if provided
       let verificationDocUrl = ''
       if (s4.doc) {
         const { path } = await uploadApi.document(s4.doc)
         verificationDocUrl = path
       }
 
-      // Create agency account and profile atomically
+      // Step 4: Create agency account
+      console.log('[AgencyOnboarding] Calling agencyApi.register...')
       const { user, accessToken, refreshToken } = await agencyApi.register({
-        // Auth data
         email:    s1.email,
         password: s1.password,
         phone:    s1.phone,
-        verifiedToken, // Add the verified token from OTP
-        // Agency profile data
+        verifiedToken: token,
         name:             s2.orgName,
         orgType:          s2.orgType,
         location:         s2.location,
@@ -340,32 +386,29 @@ export default function AgencyOnboarding() {
         verificationDocUrl,
       })
 
-      // Set auth tokens and user
+      console.log('[AgencyOnboarding] Registration successful')
       auth.setTokens(accessToken, refreshToken)
       auth.setUser(user)
-
       navigate('/agency/dashboard')
+      
     } catch (err) {
-      console.error('Agency registration error:', err)
-      
-      // Show specific error messages
-      let errorMessage = 'Something went wrong. Please try again.'
-      
-      if (err.message?.includes('email already exists')) {
-        errorMessage = 'An account with this email already exists. Please log in instead.'
-      } else if (err.message?.includes('Missing required fields')) {
-        errorMessage = 'Please fill in all required fields.'
-      } else if (err.message?.includes('timeout')) {
-        errorMessage = 'Request timed out. Please check your connection and try again.'
-      } else if (err.message?.includes('network') || err.message?.includes('fetch')) {
-        errorMessage = 'Network error. Please check your internet connection.'
-      } else if (err.message) {
-        errorMessage = err.message
-      }
-      
-      setApiError(errorMessage)
-      setLoading(false)
+      console.error('[AgencyOnboarding] Error:', err)
+      throw err
     }
+  }
+  
+  async function handleResendOTP() {
+    console.log('[AgencyOnboarding] handleResendOTP called')
+    const response = await authApi.initiateSignup(s1.email, 'agency')
+    setSessionToken(response.sessionToken)
+    setOtpExpirySeconds(response.expiresIn || 600)
+  }
+  
+  function handleCancelOTP() {
+    console.log('[AgencyOnboarding] handleCancelOTP called')
+    setShowOTP(false)
+    setSessionToken('')
+    setLoading(false)
   }
 
   // Show OTP verification screen
