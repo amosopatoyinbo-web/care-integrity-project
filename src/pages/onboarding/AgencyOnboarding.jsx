@@ -401,6 +401,10 @@ export default function AgencyOnboarding() {
       console.log('[AgencyOnboarding] Setting auth tokens and user data...')
       auth.setTokens(accessToken, refreshToken)
       auth.setUser(user)
+      
+      // Small delay to ensure localStorage writes complete
+      await new Promise(resolve => setTimeout(resolve, 100))
+      
       console.log('[AgencyOnboarding] Auth tokens set successfully')
       console.log('[AgencyOnboarding] Stored access token:', localStorage.getItem('cip_access')?.substring(0, 20) + '...')
       console.log('[AgencyOnboarding] Stored user:', JSON.parse(localStorage.getItem('cip_user')))

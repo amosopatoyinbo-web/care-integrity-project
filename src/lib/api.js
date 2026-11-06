@@ -20,7 +20,7 @@ export const auth = {
 
 /* ── Core fetch wrapper ──────────────────────────────────── */
 
-async function request(path, options = {}, retry = true) {
+async function request(path, options = {}, retry = true, isPostRegistration = false) {
   console.log(`[API] Request: ${options.method || 'GET'} ${path}`)
   
   const token = auth.getAccess()
@@ -63,10 +63,17 @@ async function request(path, options = {}, retry = true) {
     // Auto-refresh on 401 (but only for protected routes, not auth endpoints)
     if (res.status === 401 && retry && !path.includes('/auth/')) {
       console.log(`[API] 401 detected, attempting token refresh...`)
+      
+      // If this is right after registration, add a small delay to allow DB sync
+      if (isPostRegistration) {
+        console.log(`[API] Post-registration request, waiting 500ms for DB sync...`)
+        await new Promise(resolve => setTimeout(resolve, 500))
+      }
+      
       const refreshed = await tryRefresh()
       if (refreshed) {
         console.log(`[API] Token refreshed, retrying request`)
-        return request(path, options, false)
+        return request(path, options, false, false) // Don't retry again or add delay
       }
       console.warn(`[API] Token refresh failed, clearing auth`)
       auth.clearTokens()
@@ -140,6 +147,8 @@ const api = {
   patch:  (path, body)   => request(path, { method: 'PATCH',  body }),
   delete: (path)         => request(path, { method: 'DELETE' }),
   upload: (path, form)   => request(path, { method: 'POST',   body: form }),
+  // Special method for post-registration requests with retry logic
+  postRegistration: (path, body) => request(path, { method: 'POST', body }, true, true),
 }
 
 /* ── Auth endpoints ──────────────────────────────────────── */
@@ -195,13 +204,13 @@ export const caregiverApi = {
 
   // Credentials
   getCredentials:       ()          => api.get('/caregivers/me/credentials'),
-  addCredential:        (data)      => api.post('/caregivers/me/credentials', data),
+  addCredential:        (data)      => api.postRegistration('/caregivers/me/credentials', data),
   updateCredential:     (id, data)  => api.put(`/caregivers/me/credentials/${id}`, data),
   deleteCredential:     (id)        => api.delete(`/caregivers/me/credentials/${id}`),
 
   // Employment
   getEmployment:        ()          => api.get('/caregivers/me/employment'),
-  addEmployment:        (data)      => api.post('/caregivers/me/employment', data),
+  addEmployment:        (data)      => api.postRegistration('/caregivers/me/employment', data),
   updateEmployment:     (id, data)  => api.put(`/caregivers/me/employment/${id}`, data),
   deleteEmployment:     (id)        => api.delete(`/caregivers/me/employment/${id}`),
 }

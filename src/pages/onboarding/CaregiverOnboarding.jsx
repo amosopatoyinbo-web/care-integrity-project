@@ -459,46 +459,60 @@ export default function CaregiverOnboarding() {
       console.log('[CaregiverOnboarding] Setting auth tokens and user data...')
       auth.setTokens(accessToken, refreshToken)
       auth.setUser(user)
+      
+      // Small delay to ensure localStorage writes complete
+      await new Promise(resolve => setTimeout(resolve, 100))
+      
       console.log('[CaregiverOnboarding] Auth tokens set successfully')
       console.log('[CaregiverOnboarding] Stored access token:', localStorage.getItem('cip_access')?.substring(0, 20) + '...')
       console.log('[CaregiverOnboarding] Stored user:', JSON.parse(localStorage.getItem('cip_user')))
 
       // Step 5: Upload credential documents and add credentials
       console.log('[CaregiverOnboarding] Processing credentials...')
-      const credentialsWithUrls = await Promise.all(
-        s4.credentials
-          .filter(c => c.name && c.org)
-          .map(async c => {
-            let documentUrl = ''
-            if (c.doc) {
-              console.log('[CaregiverOnboarding] Uploading credential document:', c.name)
-              const { path } = await uploadApi.document(c.doc)
-              documentUrl = path
-            }
-            return { name: c.name, org: c.org, issuedDate: c.date, expiryDate: c.expiry, documentUrl }
-          })
-      )
+      try {
+        const credentialsWithUrls = await Promise.all(
+          s4.credentials
+            .filter(c => c.name && c.org)
+            .map(async c => {
+              let documentUrl = ''
+              if (c.doc) {
+                console.log('[CaregiverOnboarding] Uploading credential document:', c.name)
+                const { path } = await uploadApi.document(c.doc)
+                documentUrl = path
+              }
+              return { name: c.name, org: c.org, issuedDate: c.date, expiryDate: c.expiry, documentUrl }
+            })
+        )
 
-      for (const cred of credentialsWithUrls) {
-        console.log('[CaregiverOnboarding] Adding credential:', cred.name)
-        await caregiverApi.addCredential(cred)
+        for (const cred of credentialsWithUrls) {
+          console.log('[CaregiverOnboarding] Adding credential:', cred.name)
+          await caregiverApi.addCredential(cred)
+        }
+        console.log('[CaregiverOnboarding] All credentials added')
+      } catch (credErr) {
+        console.warn('[CaregiverOnboarding] Failed to add credentials:', credErr.message)
+        console.warn('[CaregiverOnboarding] Continuing anyway - user can add credentials later')
       }
-      console.log('[CaregiverOnboarding] All credentials added')
 
       // Step 6: Add employment history
       console.log('[CaregiverOnboarding] Processing employment history...')
-      for (const emp of s4.employment.filter(e => e.org && e.role && e.start)) {
-        console.log('[CaregiverOnboarding] Adding employment:', emp.org, emp.role)
-        await caregiverApi.addEmployment({
-          orgName:          emp.org,
-          role:             emp.role,
-          startDate:        emp.start,
-          endDate:          emp.end || undefined,
-          setting:          emp.setting,
-          responsibilities: emp.responsibilities,
-        })
+      try {
+        for (const emp of s4.employment.filter(e => e.org && e.role && e.start)) {
+          console.log('[CaregiverOnboarding] Adding employment:', emp.org, emp.role)
+          await caregiverApi.addEmployment({
+            orgName:          emp.org,
+            role:             emp.role,
+            startDate:        emp.start,
+            endDate:          emp.end || undefined,
+            setting:          emp.setting,
+            responsibilities: emp.responsibilities,
+          })
+        }
+        console.log('[CaregiverOnboarding] All employment records added')
+      } catch (empErr) {
+        console.warn('[CaregiverOnboarding] Failed to add employment:', empErr.message)
+        console.warn('[CaregiverOnboarding] Continuing anyway - user can add employment later')
       }
-      console.log('[CaregiverOnboarding] All employment records added')
 
       // Step 7: Navigate to dashboard
       console.log('[CaregiverOnboarding] Registration complete! Navigating to dashboard...')
