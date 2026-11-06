@@ -2,6 +2,7 @@ import { useState, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import ProgressBar from '../../components/onboarding/ProgressBar'
 import ChipSelect from '../../components/onboarding/ChipSelect'
+import OTPVerification from '../../components/OTPVerification'
 import { authApi, caregiverApi, uploadApi, auth } from '../../lib/api'
 import './CaregiverOnboarding.css'
 
