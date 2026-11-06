@@ -4,8 +4,6 @@
    Handles token storage, refresh, and error normalisation.
    ============================================================ */
 
-import { executeRecaptcha } from './recaptcha.js'
-
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
 
 /* ── Token helpers ───────────────────────────────────────── */
@@ -149,22 +147,16 @@ const api = {
 export const authApi = {
   register: async (data) => {
     console.log('[authApi] register called')
-    const recaptchaToken = await executeRecaptcha('signup')
-    console.log('[authApi] reCAPTCHA token obtained for register')
-    return api.post('/auth/register', { ...data, recaptchaToken })
+    return api.post('/auth/register', data)
   },
   login: async (email, password) => {
     console.log('[authApi] login called for:', email)
-    const recaptchaToken = await executeRecaptcha('login')
-    console.log('[authApi] reCAPTCHA token obtained for login')
-    return api.post('/auth/login', { email, password, recaptchaToken })
+    return api.post('/auth/login', { email, password })
   },
   // OTP-based login (2-step process)
   initiateLogin: async (email, password) => {
     console.log('[authApi] initiateLogin called for:', email)
-    const recaptchaToken = await executeRecaptcha('login')
-    console.log('[authApi] reCAPTCHA token obtained for initiateLogin')
-    return api.post('/auth-otp/initiate-login', { email, password, recaptchaToken })
+    return api.post('/auth-otp/initiate-login', { email, password })
   },
   verifyLoginOTP: async (email, otp, sessionToken) => {
     console.log('[authApi] verifyLoginOTP called for:', email)
@@ -173,9 +165,7 @@ export const authApi = {
   // OTP-based signup (2-step process)
   initiateSignup: async (email, role) => {
     console.log('[authApi] initiateSignup called for:', email, role)
-    const recaptchaToken = await executeRecaptcha('signup')
-    console.log('[authApi] reCAPTCHA token obtained for initiateSignup')
-    return api.post('/auth-otp/initiate-signup', { email, role, recaptchaToken })
+    return api.post('/auth-otp/initiate-signup', { email, role })
   },
   verifySignupOTP: async (email, otp, sessionToken) => {
     console.log('[authApi] verifySignupOTP called for:', email)
@@ -194,9 +184,7 @@ export const authApi = {
 export const caregiverApi = {
   register: async (data) => {
     console.log('[caregiverApi] register called')
-    const recaptchaToken = await executeRecaptcha('caregiver_signup')
-    console.log('[caregiverApi] reCAPTCHA token obtained')
-    return api.post('/caregivers/register', { ...data, recaptchaToken })
+    return api.post('/caregivers/register', data)
   },
   list:        (page = 1)   => api.get(`/caregivers?page=${page}`),
   getById:     (id)         => api.get(`/caregivers/${id}`),
@@ -223,9 +211,7 @@ export const caregiverApi = {
 export const agencyApi = {
   register: async (data) => {
     console.log('[agencyApi] register called')
-    const recaptchaToken = await executeRecaptcha('agency_signup')
-    console.log('[agencyApi] reCAPTCHA token obtained')
-    return api.post('/agencies/register', { ...data, recaptchaToken })
+    return api.post('/agencies/register', data)
   },
   list:     (page = 1)  => api.get(`/agencies?page=${page}`),
   getById:  (id)        => api.get(`/agencies/${id}`),
