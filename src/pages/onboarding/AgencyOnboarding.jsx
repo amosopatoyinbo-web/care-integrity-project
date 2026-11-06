@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import ProgressBar from '../../components/onboarding/ProgressBar'
 import ChipSelect from '../../components/onboarding/ChipSelect'
 import { authApi, agencyApi, uploadApi, auth } from '../../lib/api'
+import OTPVerification from '../../components/OTPVerification'
 import './AgencyOnboarding.css'
 
 const STEPS = ['Account', 'Organization', 'Services', 'Verification']
@@ -160,6 +161,12 @@ export default function AgencyOnboarding() {
   const [loading, setLoading]   = useState(false)
   const [apiError, setApiError] = useState('')
   const [validationErrors, setValidationErrors] = useState({})
+  
+  // OTP verification state
+  const [showOTP, setShowOTP] = useState(false)
+  const [sessionToken, setSessionToken] = useState('')
+  const [verifiedToken, setVerifiedToken] = useState('')
+  const [otpExpirySeconds, setOtpExpirySeconds] = useState(600)
 
   const [s1, setS1] = useState({ email: '', password: '', contact: '', title: '', phone: '', terms: false })
   const [s2, setS2] = useState({ logo: null, logoPreview: '', orgName: '', orgType: '', location: '', serviceArea: '', website: '', year: '', size: '', desc: '' })
@@ -263,6 +270,7 @@ export default function AgencyOnboarding() {
       return
     }
     
+    // For all steps, just advance
     setValidationErrors({})
     setApiError('')
     setStep(s => s + 1)
@@ -309,6 +317,7 @@ export default function AgencyOnboarding() {
         email:    s1.email,
         password: s1.password,
         phone:    s1.phone,
+        verifiedToken, // Add the verified token from OTP
         // Agency profile data
         name:             s2.orgName,
         orgType:          s2.orgType,
@@ -357,6 +366,21 @@ export default function AgencyOnboarding() {
       setApiError(errorMessage)
       setLoading(false)
     }
+  }
+
+  // Show OTP verification screen
+  if (showOTP) {
+    return (
+      <OTPVerification
+        email={s1.email}
+        onVerify={handleVerifyOTP}
+        onResend={handleResendOTP}
+        onCancel={handleCancelOTP}
+        title="Verify Your Email"
+        subtitle="Enter the 6-digit code we sent to"
+        expirySeconds={otpExpirySeconds}
+      />
+    )
   }
 
   return (
