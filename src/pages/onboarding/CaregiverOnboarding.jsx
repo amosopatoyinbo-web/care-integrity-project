@@ -252,6 +252,12 @@ export default function CaregiverOnboarding() {
   const [loading, setLoading] = useState(false)
   const [apiError, setApiError] = useState('')
   const [validationErrors, setValidationErrors] = useState({})
+  
+  // OTP verification state
+  const [showOTP, setShowOTP] = useState(false)
+  const [otpEmail, setOtpEmail] = useState('')
+  const [sessionToken, setSessionToken] = useState('')
+  const [otpExpirySeconds, setOtpExpirySeconds] = useState(600)
 
   const [s1, setS1] = useState({ email: '', password: '', confirm: '', phone: '', country: '', terms: false })
   const [s2, setS2] = useState({ photo: null, photoPreview: '', fullName: '', role: '', years: '', serviceArea: '', bio: '', philosophy: '' })

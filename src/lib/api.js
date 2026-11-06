@@ -23,6 +23,8 @@ export const auth = {
 /* ── Core fetch wrapper ──────────────────────────────────── */
 
 async function request(path, options = {}, retry = true) {
+  console.log(`[API] Request: ${options.method || 'GET'} ${path}`)
+  
   const token = auth.getAccess()
 
   const headers = {
@@ -38,6 +40,7 @@ async function request(path, options = {}, retry = true) {
   const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
 
   try {
+    console.log(`[API] Fetching: ${BASE}${path}`)
     const res = await fetch(`${BASE}${path}`, {
       ...options,
       headers,
@@ -48,14 +51,26 @@ async function request(path, options = {}, retry = true) {
     })
 
     clearTimeout(timeoutId)
+    console.log(`[API] Response status: ${res.status}`)
 
     let data
-    try { data = await res.json() } catch { data = {} }
+    try { 
+      data = await res.json()
+      console.log(`[API] Response data:`, data)
+    } catch { 
+      data = {}
+      console.warn(`[API] No JSON data in response`)
+    }
 
     // Auto-refresh on 401 (but only for protected routes, not auth endpoints)
     if (res.status === 401 && retry && !path.includes('/auth/')) {
+      console.log(`[API] 401 detected, attempting token refresh...`)
       const refreshed = await tryRefresh()
-      if (refreshed) return request(path, options, false)
+      if (refreshed) {
+        console.log(`[API] Token refreshed, retrying request`)
+        return request(path, options, false)
+      }
+      console.warn(`[API] Token refresh failed, clearing auth`)
       auth.clearTokens()
       // Redirect to the appropriate login page based on stored role
       const user = auth.getUser()
@@ -73,6 +88,7 @@ async function request(path, options = {}, retry = true) {
       const err = new Error(data.error || `Request failed (${res.status})`)
       err.status = res.status
       err.errors = data.errors
+      console.error(`[API] Request failed:`, err)
       throw err
     }
 
@@ -82,6 +98,7 @@ async function request(path, options = {}, retry = true) {
     
     // Handle timeout/abort errors
     if (err.name === 'AbortError') {
+      console.error(`[API] Request timeout`)
       const timeoutErr = new Error('Request timed out. The server may be waking up. Please try again.')
       timeoutErr.status = 408
       throw timeoutErr
@@ -89,11 +106,13 @@ async function request(path, options = {}, retry = true) {
     
     // Handle network errors
     if (err.message === 'Failed to fetch' || err.message?.includes('network')) {
+      console.error(`[API] Network error`)
       const networkErr = new Error('Network error. Please check your internet connection.')
       networkErr.status = 0
       throw networkErr
     }
     
+    console.error(`[API] Request error:`, err)
     throw err
   }
 }
@@ -129,20 +148,38 @@ const api = {
 
 export const authApi = {
   register: async (data) => {
+    console.log('[authApi] register called')
     const recaptchaToken = await executeRecaptcha('signup')
+    console.log('[authApi] reCAPTCHA token obtained for register')
     return api.post('/auth/register', { ...data, recaptchaToken })
   },
   login: async (email, password) => {
+    console.log('[authApi] login called for:', email)
     const recaptchaToken = await executeRecaptcha('login')
+    console.log('[authApi] reCAPTCHA token obtained for login')
     return api.post('/auth/login', { email, password, recaptchaToken })
   },
   // OTP-based login (2-step process)
   initiateLogin: async (email, password) => {
+    console.log('[authApi] initiateLogin called for:', email)
     const recaptchaToken = await executeRecaptcha('login')
+    console.log('[authApi] reCAPTCHA token obtained for initiateLogin')
     return api.post('/auth-otp/initiate-login', { email, password, recaptchaToken })
   },
   verifyLoginOTP: async (email, otp, sessionToken) => {
+    console.log('[authApi] verifyLoginOTP called for:', email)
     return api.post('/auth-otp/verify-login', { email, otp, sessionToken })
+  },
+  // OTP-based signup (2-step process)
+  initiateSignup: async (email, role) => {
+    console.log('[authApi] initiateSignup called for:', email, role)
+    const recaptchaToken = await executeRecaptcha('signup')
+    console.log('[authApi] reCAPTCHA token obtained for initiateSignup')
+    return api.post('/auth-otp/initiate-signup', { email, role, recaptchaToken })
+  },
+  verifySignupOTP: async (email, otp, sessionToken) => {
+    console.log('[authApi] verifySignupOTP called for:', email)
+    return api.post('/auth-otp/verify-signup', { email, otp, sessionToken })
   },
   logout:         ()                 => api.post('/auth/logout', { refreshToken: auth.getRefresh() }),
   me:             ()                 => api.get('/auth/me'),
@@ -156,7 +193,9 @@ export const authApi = {
 
 export const caregiverApi = {
   register: async (data) => {
+    console.log('[caregiverApi] register called')
     const recaptchaToken = await executeRecaptcha('caregiver_signup')
+    console.log('[caregiverApi] reCAPTCHA token obtained')
     return api.post('/caregivers/register', { ...data, recaptchaToken })
   },
   list:        (page = 1)   => api.get(`/caregivers?page=${page}`),
@@ -183,7 +222,9 @@ export const caregiverApi = {
 
 export const agencyApi = {
   register: async (data) => {
+    console.log('[agencyApi] register called')
     const recaptchaToken = await executeRecaptcha('agency_signup')
+    console.log('[agencyApi] reCAPTCHA token obtained')
     return api.post('/agencies/register', { ...data, recaptchaToken })
   },
   list:     (page = 1)  => api.get(`/agencies?page=${page}`),

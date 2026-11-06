@@ -46,28 +46,38 @@ export default function AgencyLogin() {
 
   async function handleSubmit(e) {
     e.preventDefault()
+    console.log('[AgencyLogin] handleSubmit called')
+    
     if (!email || !password) {
+      console.warn('[AgencyLogin] Missing email or password')
       setError('Please enter your email and password.')
       return
     }
+    
     setLoading(true)
     setError('')
+    console.log('[AgencyLogin] Starting login initiation for:', email)
 
     try {
+      console.log('[AgencyLogin] Calling authApi.initiateLogin...')
       // Step 1: Initiate login with OTP
       const response = await authApi.initiateLogin(email, password)
+      console.log('[AgencyLogin] initiateLogin response:', response)
       
       if (!response || !response.sessionToken) {
+        console.error('[AgencyLogin] Invalid response - missing sessionToken:', response)
         throw new Error('Invalid response from server.')
       }
 
       // OTP sent successfully - show OTP screen
+      console.log('[AgencyLogin] OTP sent successfully, showing OTP screen')
       setSessionToken(response.sessionToken)
       setOtpExpirySeconds(response.expiresIn || 600)
       setShowOTP(true)
       
     } catch (err) {
-      console.error('Agency login initiation error:', err)
+      console.error('[AgencyLogin] Login initiation error:', err)
+      console.error('[AgencyLogin] Error stack:', err.stack)
       
       if (err.status === 401) {
         setError('Incorrect email or password. Please try again.')
@@ -85,10 +95,15 @@ export default function AgencyLogin() {
   }
 
   async function handleVerifyOTP(otp) {
+    console.log('[AgencyLogin] handleVerifyOTP called with OTP:', otp.substring(0, 2) + '****')
+    
     try {
+      console.log('[AgencyLogin] Calling authApi.verifyLoginOTP...')
       const response = await authApi.verifyLoginOTP(email, otp, sessionToken)
+      console.log('[AgencyLogin] verifyLoginOTP response:', response)
       
       if (!response || !response.user) {
+        console.error('[AgencyLogin] Invalid response - missing user:', response)
         throw new Error('Invalid response from server.')
       }
 
@@ -96,27 +111,40 @@ export default function AgencyLogin() {
 
       // Check if user is actually an agency
       if (user.role !== 'agency') {
+        console.error('[AgencyLogin] Wrong role - expected agency, got:', user.role)
         throw new Error('This account is registered as a caregiver. Please use the Caregiver Login page.')
       }
 
+      console.log('[AgencyLogin] Login successful, setting tokens and redirecting')
       auth.setTokens(accessToken, refreshToken)
       auth.setUser(user)
       navigate('/agency/dashboard', { replace: true })
       
     } catch (err) {
-      console.error('OTP verification error:', err)
+      console.error('[AgencyLogin] OTP verification error:', err)
+      console.error('[AgencyLogin] Error stack:', err.stack)
       throw err // Re-throw to let OTPVerification component handle the error display
     }
   }
 
   async function handleResendOTP() {
-    // Re-initiate login to get new OTP
-    const response = await authApi.initiateLogin(email, password)
-    setSessionToken(response.sessionToken)
-    setOtpExpirySeconds(response.expiresIn || 600)
+    console.log('[AgencyLogin] handleResendOTP called')
+    
+    try {
+      // Re-initiate login to get new OTP
+      console.log('[AgencyLogin] Re-initiating login for new OTP')
+      const response = await authApi.initiateLogin(email, password)
+      console.log('[AgencyLogin] New OTP sent')
+      setSessionToken(response.sessionToken)
+      setOtpExpirySeconds(response.expiresIn || 600)
+    } catch (err) {
+      console.error('[AgencyLogin] Resend OTP error:', err)
+      throw err
+    }
   }
 
   function handleCancelOTP() {
+    console.log('[AgencyLogin] handleCancelOTP called')
     setShowOTP(false)
     setSessionToken('')
     setPassword('')

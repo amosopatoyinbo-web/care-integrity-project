@@ -14,9 +14,12 @@ export async function executeRecaptcha(action) {
   return new Promise((resolve, reject) => {
     // Wait for grecaptcha to be ready
     if (!window.grecaptcha) {
+      console.log('[reCAPTCHA] Waiting for script to load...')
+      
       const checkInterval = setInterval(() => {
         if (window.grecaptcha && window.grecaptcha.ready) {
           clearInterval(checkInterval)
+          console.log('[reCAPTCHA] Script loaded successfully')
           executeToken()
         }
       }, 100)
@@ -24,6 +27,7 @@ export async function executeRecaptcha(action) {
       // Timeout after 10 seconds
       setTimeout(() => {
         clearInterval(checkInterval)
+        console.error('[reCAPTCHA] Failed to load after 10 seconds')
         reject(new Error('reCAPTCHA failed to load. Please refresh the page.'))
       }, 10000)
     } else {
@@ -31,18 +35,26 @@ export async function executeRecaptcha(action) {
     }
 
     function executeToken() {
-      window.grecaptcha.ready(() => {
-        // For v3, we don't need to render - just execute directly
-        window.grecaptcha
-          .execute(RECAPTCHA_SITE_KEY, { action })
-          .then((token) => {
-            resolve(token)
-          })
-          .catch((err) => {
-            console.error('[reCAPTCHA] Execution failed:', err)
-            reject(new Error('reCAPTCHA verification failed. Please try again.'))
-          })
-      })
+      try {
+        window.grecaptcha.ready(() => {
+          console.log(`[reCAPTCHA] Executing action: ${action}`)
+          
+          // For v3, execute directly with site key (no rendering needed)
+          window.grecaptcha
+            .execute(RECAPTCHA_SITE_KEY, { action })
+            .then((token) => {
+              console.log('[reCAPTCHA] Token generated successfully')
+              resolve(token)
+            })
+            .catch((err) => {
+              console.error('[reCAPTCHA] Execution failed:', err)
+              reject(new Error('reCAPTCHA verification failed. Please try again.'))
+            })
+        })
+      } catch (err) {
+        console.error('[reCAPTCHA] Unexpected error:', err)
+        reject(new Error('reCAPTCHA error. Please refresh the page.'))
+      }
     }
   })
 }

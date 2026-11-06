@@ -43,28 +43,38 @@ export default function CaregiverLogin() {
 
   async function handleSubmit(e) {
     e.preventDefault()
+    console.log('[CaregiverLogin] handleSubmit called')
+    
     if (!email || !password) {
+      console.warn('[CaregiverLogin] Missing email or password')
       setError('Please enter your email and password.')
       return
     }
+    
     setLoading(true)
     setError('')
+    console.log('[CaregiverLogin] Starting login initiation for:', email)
 
     try {
+      console.log('[CaregiverLogin] Calling authApi.initiateLogin...')
       // Step 1: Initiate login with OTP
       const response = await authApi.initiateLogin(email, password)
+      console.log('[CaregiverLogin] initiateLogin response:', response)
       
       if (!response || !response.sessionToken) {
+        console.error('[CaregiverLogin] Invalid response - missing sessionToken:', response)
         throw new Error('Invalid response from server.')
       }
 
       // OTP sent successfully - show OTP screen
+      console.log('[CaregiverLogin] OTP sent successfully, showing OTP screen')
       setSessionToken(response.sessionToken)
       setOtpExpirySeconds(response.expiresIn || 600)
       setShowOTP(true)
       
     } catch (err) {
-      console.error('Login initiation error:', err)
+      console.error('[CaregiverLogin] Login initiation error:', err)
+      console.error('[CaregiverLogin] Error stack:', err.stack)
       
       if (err.status === 401) {
         setError('Incorrect email or password. Please try again.')
@@ -82,10 +92,15 @@ export default function CaregiverLogin() {
   }
 
   async function handleVerifyOTP(otp) {
+    console.log('[CaregiverLogin] handleVerifyOTP called with OTP:', otp.substring(0, 2) + '****')
+    
     try {
+      console.log('[CaregiverLogin] Calling authApi.verifyLoginOTP...')
       const response = await authApi.verifyLoginOTP(email, otp, sessionToken)
+      console.log('[CaregiverLogin] verifyLoginOTP response:', response)
       
       if (!response || !response.user) {
+        console.error('[CaregiverLogin] Invalid response - missing user:', response)
         throw new Error('Invalid response from server.')
       }
 
@@ -93,27 +108,40 @@ export default function CaregiverLogin() {
 
       // Check if user is actually a caregiver
       if (user.role !== 'caregiver') {
+        console.error('[CaregiverLogin] Wrong role - expected caregiver, got:', user.role)
         throw new Error('This account is registered as an agency. Please use the Agency Login page.')
       }
 
+      console.log('[CaregiverLogin] Login successful, setting tokens and redirecting')
       auth.setTokens(accessToken, refreshToken)
       auth.setUser(user)
       navigate('/caregiver/dashboard', { replace: true })
       
     } catch (err) {
-      console.error('OTP verification error:', err)
+      console.error('[CaregiverLogin] OTP verification error:', err)
+      console.error('[CaregiverLogin] Error stack:', err.stack)
       throw err // Re-throw to let OTPVerification component handle the error display
     }
   }
 
   async function handleResendOTP() {
-    // Re-initiate login to get new OTP
-    const response = await authApi.initiateLogin(email, password)
-    setSessionToken(response.sessionToken)
-    setOtpExpirySeconds(response.expiresIn || 600)
+    console.log('[CaregiverLogin] handleResendOTP called')
+    
+    try {
+      // Re-initiate login to get new OTP
+      console.log('[CaregiverLogin] Re-initiating login for new OTP')
+      const response = await authApi.initiateLogin(email, password)
+      console.log('[CaregiverLogin] New OTP sent')
+      setSessionToken(response.sessionToken)
+      setOtpExpirySeconds(response.expiresIn || 600)
+    } catch (err) {
+      console.error('[CaregiverLogin] Resend OTP error:', err)
+      throw err
+    }
   }
 
   function handleCancelOTP() {
+    console.log('[CaregiverLogin] handleCancelOTP called')
     setShowOTP(false)
     setSessionToken('')
     setPassword('')
