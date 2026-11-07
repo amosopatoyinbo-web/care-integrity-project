@@ -105,7 +105,7 @@ export default function CaregiverBrowse() {
               <div key={cg._id} className="cbr-card">
                 <div className="cbr-card__avatar">
                   {cg.photoUrl
-                    ? <img src={cg.photoUrl} alt={cg.fullName} className="cbr-card__photo" />
+                    ? <img src={cg.photoUrl} alt={cg.fullName} className="cbr-card__photo" onError={(e) => e.target.style.display='none'} />
                     : <span className="cbr-card__initials">
                         {cg.fullName?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                       </span>

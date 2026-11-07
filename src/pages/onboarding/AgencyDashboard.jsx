@@ -378,7 +378,7 @@ export default function AgencyDashboard() {
               <div className="adb-org-profile-card">
                 <div className="adb-org-profile-card__top">
                   <div className="adb-org-card__logo">
-                    {agency.logoUrl ? <img src={agency.logoUrl} alt={agency.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }} /> : agency.name?.slice(0, 2).toUpperCase()}
+                    {agency.logoUrl ? <img src={agency.logoUrl} alt={agency.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }} onError={(e) => { e.target.style.display='none'; e.target.parentElement.textContent = agency.name?.slice(0, 2).toUpperCase() }} /> : agency.name?.slice(0, 2).toUpperCase()}
                   </div>
                   <div className="adb-org-profile-card__info">
                     <div className="adb-org-card__name">{agency.name}</div>

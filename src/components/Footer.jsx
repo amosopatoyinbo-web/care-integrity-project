@@ -19,7 +19,7 @@ export default function Footer() {
           {/* Column 1: About */}
           <div className="footer__col">
             <div className="footer__logo">
-              <img src="/Main Logo.png" alt="The Care Integrity Project" className="footer__logo-img" />
+              <img src="/Main Logo.png" alt="The Care Integrity Project" className="footer__logo-img" onError={(e) => e.target.src='/image 5.png'} />
             </div>
             <p className="footer__blurb">
               We believe caregivers should be equipped before they are expected to perform-

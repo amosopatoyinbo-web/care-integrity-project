@@ -379,7 +379,7 @@ function AgencyCard({ agency, onVerify }) {
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
             {agency.logoUrl && (
-              <img src={agency.logoUrl} alt={agency.name} style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
+              <img src={agency.logoUrl} alt={agency.name} style={{ width: '40px', height: '40px', objectFit: 'contain' }} onError={(e) => e.target.style.display='none'} />
             )}
             <div>
               <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600 }}>{agency.name}</h3>

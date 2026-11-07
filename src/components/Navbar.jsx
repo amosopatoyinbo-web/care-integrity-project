@@ -109,7 +109,7 @@ export default function Navbar() {
 
         {/* Logo */}
         <Link to="/" className="navbar__logo" onClick={close} aria-label="The Care Integrity Project — Home">
-          <img src="/Main Logo.png" alt="The Care Integrity Project" className="navbar__logo-img" />
+          <img src="/Main Logo.png" alt="The Care Integrity Project" className="navbar__logo-img" onError={(e) => e.target.src='/image 5.png'} />
         </Link>
 
         {/* Desktop Nav */}

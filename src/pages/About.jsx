@@ -70,13 +70,13 @@ export default function About() {
           {/* Image cards */}
           <div className="about__philosophy-cards">
             <div className="about__philosophy-card">
-              <img src="/image 6.jpg" alt="Professional caregiver supporting a client with warmth and dignity" loading="lazy" />
+              <img src="/image 6.jpg" alt="Professional caregiver supporting a client with warmth and dignity" loading="lazy" onError={(e) => e.target.style.display='none'} />
             </div>
             <div className="about__philosophy-card">
-              <img src="/image 7.jpg" alt="Caregiver and client sharing a moment of trust and connection" loading="lazy" />
+              <img src="/image 7.jpg" alt="Caregiver and client sharing a moment of trust and connection" loading="lazy" onError={(e) => e.target.style.display='none'} />
             </div>
             <div className="about__philosophy-card">
-              <img src="/image 8.jpg" alt="Caregiver demonstrating professional care in a home setting" loading="lazy" />
+              <img src="/image 8.jpg" alt="Caregiver demonstrating professional care in a home setting" loading="lazy" onError={(e) => e.target.style.display='none'} />
             </div>
           </div>
 
