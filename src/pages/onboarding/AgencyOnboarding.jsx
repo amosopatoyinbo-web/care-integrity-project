@@ -343,26 +343,8 @@ export default function AgencyOnboarding() {
       
       console.log('[AgencyOnboarding] Email verified successfully')
       const token = otpResponse.verifiedToken
-      
-      // Step 2: Upload logo if provided
-      let logoUrl = ''
-      if (s2.logo) {
-        console.log('[AgencyOnboarding] Uploading logo...')
-        const { url } = await uploadApi.logo(s2.logo)
-        logoUrl = url
-        console.log('[AgencyOnboarding] Logo uploaded:', logoUrl)
-      }
 
-      // Step 3: Upload verification document if provided
-      let verificationDocUrl = ''
-      if (s4.doc) {
-        console.log('[AgencyOnboarding] Uploading verification document...')
-        const { path } = await uploadApi.document(s4.doc)
-        verificationDocUrl = path
-        console.log('[AgencyOnboarding] Verification document uploaded:', verificationDocUrl)
-      }
-
-      // Step 4: Create agency account
+      // Step 2: Create agency account FIRST (without uploads)
       console.log('[AgencyOnboarding] Registering agency account...')
       const registrationResponse = await agencyApi.register({
         email:    s1.email,
@@ -377,7 +359,7 @@ export default function AgencyOnboarding() {
         yearEstablished:  s2.year,
         size:             s2.size,
         description:      s2.desc,
-        logoUrl,
+        logoUrl:          '',  // Empty for now
         careTypes:        s3.careTypes,
         serviceAreas:     s3.areas,
         settings:         s3.settings,
@@ -387,7 +369,7 @@ export default function AgencyOnboarding() {
         businessAddress:  s4.address,
         authorizedRep:    s4.rep,
         businessEmail:    s4.bizEmail,
-        verificationDocUrl,
+        verificationDocUrl: '',  // Empty for now
       })
       console.log('[AgencyOnboarding] Registration response:', registrationResponse)
 
@@ -397,7 +379,7 @@ export default function AgencyOnboarding() {
         throw new Error('Registration succeeded but tokens were not returned. Please contact support.')
       }
 
-      // Step 5: Set authentication tokens and user data
+      // Step 3: Set authentication tokens IMMEDIATELY
       console.log('[AgencyOnboarding] Setting auth tokens and user data...')
       auth.setTokens(accessToken, refreshToken)
       auth.setUser(user)
@@ -409,7 +391,43 @@ export default function AgencyOnboarding() {
       console.log('[AgencyOnboarding] Stored access token:', localStorage.getItem('cip_access')?.substring(0, 20) + '...')
       console.log('[AgencyOnboarding] Stored user:', JSON.parse(localStorage.getItem('cip_user')))
 
-      // Step 6: Navigate to dashboard
+      // Step 4: NOW upload files with authentication (optional, non-blocking)
+      let logoUrl = ''
+      let verificationDocUrl = ''
+      
+      if (s2.logo) {
+        try {
+          console.log('[AgencyOnboarding] Uploading logo with authentication...')
+          const logoUploadResponse = await uploadApi.logo(s2.logo)
+          logoUrl = logoUploadResponse.url
+          console.log('[AgencyOnboarding] Logo uploaded:', logoUrl)
+          
+          // Update profile with logo URL
+          await agencyApi.updateMe({ logoUrl })
+          console.log('[AgencyOnboarding] Profile updated with logo')
+        } catch (logoErr) {
+          console.warn('[AgencyOnboarding] Logo upload failed:', logoErr.message)
+          console.warn('[AgencyOnboarding] Continuing anyway - user can upload logo later')
+        }
+      }
+      
+      if (s4.doc) {
+        try {
+          console.log('[AgencyOnboarding] Uploading verification document with authentication...')
+          const docUploadResponse = await uploadApi.document(s4.doc)
+          verificationDocUrl = docUploadResponse.path
+          console.log('[AgencyOnboarding] Document uploaded:', verificationDocUrl)
+          
+          // Update profile with document URL
+          await agencyApi.updateMe({ verificationDocUrl })
+          console.log('[AgencyOnboarding] Profile updated with verification document')
+        } catch (docErr) {
+          console.warn('[AgencyOnboarding] Document upload failed:', docErr.message)
+          console.warn('[AgencyOnboarding] Continuing anyway - user can upload document later')
+        }
+      }
+
+      // Step 5: Navigate to dashboard
       console.log('[AgencyOnboarding] Registration complete! Navigating to dashboard...')
       navigate('/agency/dashboard')
       
