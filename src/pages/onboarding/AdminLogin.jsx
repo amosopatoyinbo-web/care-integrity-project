@@ -10,6 +10,7 @@ export default function AdminLogin() {
   const [password, setPassword] = useState('')
   const [error,    setError]    = useState('')
   const [loading,  setLoading]  = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   // If already logged in as admin, go to dashboard
   useEffect(() => {
@@ -129,16 +130,41 @@ export default function AdminLogin() {
             <div className="login-label-row">
               <label className="login-label" htmlFor="login-password">Password</label>
             </div>
-            <input
-              id="login-password"
-              type="password"
-              className="login-input"
-              placeholder="Your password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              autoComplete="current-password"
-              required
-            />
+            <div style={{ position: 'relative' }}>
+              <input
+                id="login-password"
+                type={showPassword ? "text" : "password"}
+                className="login-input"
+                style={{ paddingRight: '45px' }}
+                placeholder="Your password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                autoComplete="current-password"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#666',
+                  fontSize: '18px'
+                }}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? '👁️' : '👁️‍🗨️'}
+              </button>
+            </div>
           </div>
 
           <button

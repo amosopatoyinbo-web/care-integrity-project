@@ -42,6 +42,7 @@ function Textarea({ id, placeholder, value, onChange, rows = 4 }) {
 /* ── Steps ────────────────────────────────────────────── */
 
 function Step1({ data, set, error, validationErrors }) {
+  const [showPassword, setShowPassword] = useState(false)
   const passwordTooShort = data.password && data.password.length < 8
   
   return (
@@ -52,7 +53,14 @@ function Step1({ data, set, error, validationErrors }) {
       </div>
       {error && <p className="ob-error ob-error--banner" role="alert">{error}</p>}
       <Field label="Work Email" id="email" required error={validationErrors.email}><Input id="email" type="email" placeholder="admin@yourorganization.com" value={data.email} onChange={v => set('email', v)} /></Field>
-      <Field label="Password" id="password" required hint="At least 8 characters." error={validationErrors.password || (passwordTooShort ? 'Password must be at least 8 characters' : '')}><Input id="password" type="password" placeholder="Create a password" value={data.password} onChange={v => set('password', v)} /></Field>
+      <Field label="Password" id="password" required hint="At least 8 characters." error={validationErrors.password || (passwordTooShort ? 'Password must be at least 8 characters' : '')}>
+        <div style={{ position: 'relative' }}>
+          <Input id="password" type={showPassword ? "text" : "password"} placeholder="Create a password" value={data.password} onChange={v => set('password', v)} style={{ paddingRight: '45px' }} />
+          <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#666', fontSize: '18px' }} aria-label={showPassword ? "Hide password" : "Show password"}>
+            {showPassword ? '👁️' : '👁️‍🗨️'}
+          </button>
+        </div>
+      </Field>
       <Field label="Contact Person" id="contact" required hint="Primary point of contact." error={validationErrors.contact}><Input id="contact" placeholder="Full name" value={data.contact} onChange={v => set('contact', v)} /></Field>
       <Field label="Your Role / Title" id="title" required error={validationErrors.title}><Input id="title" placeholder="e.g. Director of Operations" value={data.title} onChange={v => set('title', v)} /></Field>
       <Field label="Phone Number" id="phone" required error={validationErrors.phone}><Input id="phone" type="tel" placeholder="+1 (555) 000-0000" value={data.phone} onChange={v => set('phone', v)} /></Field>

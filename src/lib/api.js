@@ -213,6 +213,7 @@ export const caregiverApi = {
   addEmployment:        (data)      => api.postRegistration('/caregivers/me/employment', data),
   updateEmployment:     (id, data)  => api.put(`/caregivers/me/employment/${id}`, data),
   deleteEmployment:     (id)        => api.delete(`/caregivers/me/employment/${id}`),
+  deleteById:           (id)        => api.delete(`/caregivers/${id}`),  // Admin only
 }
 
 /* ── Agency endpoints ────────────────────────────────────── */
@@ -228,6 +229,7 @@ export const agencyApi = {
   create:   (data)      => api.post('/agencies', data),
   updateMe: (data)      => api.put('/agencies/me', data),
   deleteMe: ()          => api.delete('/agencies/me'),
+  deleteById: (id)      => api.delete(`/agencies/${id}`),  // Admin only
 }
 
 /* ── Interview request endpoints ─────────────────────────── */

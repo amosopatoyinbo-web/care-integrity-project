@@ -9,6 +9,9 @@ export default function ForgotPassword() {
   const role = searchParams.get('role') // 'caregiver' or 'agency'
   const loginPath = role === 'agency' ? '/agency/login' : '/caregiver/login'
 
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+
   // Step 1: Enter email
   const [email, setEmail] = useState('')
   const [emailSent, setEmailSent] = useState(false)
@@ -272,31 +275,53 @@ export default function ForgotPassword() {
             <form className="login-form" onSubmit={handleResetPassword} noValidate>
               <div className="login-field">
                 <label className="login-label" htmlFor="new-password">New Password</label>
-                <input
-                  id="new-password"
-                  type="password"
-                  className="login-input"
-                  placeholder="At least 8 characters"
-                  value={newPassword}
-                  onChange={e => setNewPassword(e.target.value)}
-                  autoComplete="new-password"
-                  autoFocus
-                  required
-                />
+                <div style={{ position: 'relative' }}>
+                  <input
+                    id="new-password"
+                    type={showNewPassword ? "text" : "password"}
+                    className="login-input"
+                    style={{ paddingRight: '45px' }}
+                    placeholder="At least 8 characters"
+                    value={newPassword}
+                    onChange={e => setNewPassword(e.target.value)}
+                    autoComplete="new-password"
+                    autoFocus
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#666', fontSize: '18px' }}
+                    aria-label={showNewPassword ? "Hide password" : "Show password"}
+                  >
+                    {showNewPassword ? '👁️' : '👁️‍🗨️'}
+                  </button>
+                </div>
               </div>
 
               <div className="login-field">
                 <label className="login-label" htmlFor="confirm-password">Confirm Password</label>
-                <input
-                  id="confirm-password"
-                  type="password"
-                  className="login-input"
-                  placeholder="Re-enter your password"
-                  value={confirmPassword}
-                  onChange={e => setConfirmPassword(e.target.value)}
-                  autoComplete="new-password"
-                  required
-                />
+                <div style={{ position: 'relative' }}>
+                  <input
+                    id="confirm-password"
+                    type={showConfirmPassword ? "text" : "password"}
+                    className="login-input"
+                    style={{ paddingRight: '45px' }}
+                    placeholder="Re-enter your password"
+                    value={confirmPassword}
+                    onChange={e => setConfirmPassword(e.target.value)}
+                    autoComplete="new-password"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#666', fontSize: '18px' }}
+                    aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                  >
+                    {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
+                  </button>
+                </div>
               </div>
 
               <button
