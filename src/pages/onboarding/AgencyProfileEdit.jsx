@@ -67,33 +67,80 @@ export default function AgencyProfileEdit() {
     setSuccess(false)
 
     try {
-      // Upload new logo if provided
+      // Upload new logo if provided (with retry logic)
       let logoUrl = profile.logoUrl
       if (logoFile) {
-        const { url } = await uploadApi.logo(logoFile)
-        logoUrl = url
+        console.log('[AgencyProfileEdit] Uploading new logo...')
+        let uploadSuccess = false
+        let retries = 3
+        let uploadError = null
+
+        while (retries > 0 && !uploadSuccess) {
+          try {
+            console.log(`[AgencyProfileEdit] Logo upload attempt ${4 - retries}/3...`)
+            const response = await uploadApi.logo(logoFile)
+            logoUrl = response.url
+            console.log('[AgencyProfileEdit] Logo uploaded successfully:', logoUrl)
+            uploadSuccess = true
+          } catch (uploadErr) {
+            retries--
+            uploadError = uploadErr
+            console.warn(`[AgencyProfileEdit] Logo upload failed (${retries} retries left):`, uploadErr.message)
+            if (retries > 0) {
+              await new Promise(resolve => setTimeout(resolve, 1000))
+            }
+          }
+        }
+
+        if (!uploadSuccess) {
+          throw new Error(`Failed to upload logo: ${uploadError?.message || 'Unknown error'}`)
+        }
       }
 
-      // Update profile
-      await agencyApi.updateMe({
-        name: profile.name,
-        orgType: profile.orgType,
-        location: profile.location,
-        serviceArea: profile.serviceArea,
-        website: profile.website,
-        yearEstablished: profile.yearEstablished,
-        size: profile.size,
-        description: profile.description,
-        logoUrl,
-        careTypes: profile.careTypes,
-        serviceAreas: profile.serviceAreas,
-        settings: profile.settings,
-        focus: profile.focus,
-      })
+      // Update profile (with retry logic)
+      console.log('[AgencyProfileEdit] Updating profile...')
+      let updateSuccess = false
+      let retries = 3
+      let updateError = null
+
+      while (retries > 0 && !updateSuccess) {
+        try {
+          console.log(`[AgencyProfileEdit] Profile update attempt ${4 - retries}/3...`)
+          await agencyApi.updateMe({
+            name: profile.name,
+            orgType: profile.orgType,
+            location: profile.location,
+            serviceArea: profile.serviceArea,
+            website: profile.website,
+            yearEstablished: profile.yearEstablished,
+            size: profile.size,
+            description: profile.description,
+            logoUrl,
+            careTypes: profile.careTypes,
+            serviceAreas: profile.serviceAreas,
+            settings: profile.settings,
+            focus: profile.focus,
+          })
+          console.log('[AgencyProfileEdit] Profile updated successfully')
+          updateSuccess = true
+        } catch (updateErr) {
+          retries--
+          updateError = updateErr
+          console.warn(`[AgencyProfileEdit] Profile update failed (${retries} retries left):`, updateErr.message)
+          if (retries > 0) {
+            await new Promise(resolve => setTimeout(resolve, 1000))
+          }
+        }
+      }
+
+      if (!updateSuccess) {
+        throw new Error(`Failed to update profile: ${updateError?.message || 'Unknown error'}`)
+      }
 
       setSuccess(true)
       setTimeout(() => navigate('/agency/dashboard'), 1500)
     } catch (err) {
+      console.error('[AgencyProfileEdit] Save failed:', err)
       setError(err.message || 'Failed to update profile. Please try again.')
       setSaving(false)
     }
