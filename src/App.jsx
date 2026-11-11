@@ -8,6 +8,8 @@ import ForAgencies from './pages/ForAgencies'
 import Standards from './pages/Standards'
 import HowItWorks from './pages/HowItWorks'
 import FoundingAgency from './pages/FoundingAgency'
+import Privacy from './pages/Privacy'
+import Terms from './pages/Terms'
 import CaregiverOnboarding from './pages/onboarding/CaregiverOnboarding'
 import CaregiverProfile    from './pages/onboarding/CaregiverProfile'
 import CaregiverProfileEdit from './pages/onboarding/CaregiverProfileEdit'
@@ -71,6 +73,8 @@ export default function App() {
           <Route path="/standards"       element={<Standards />} />
           <Route path="/how-it-works"    element={<HowItWorks />} />
           <Route path="/founding-agency" element={<FoundingAgency />} />
+          <Route path="/privacy"         element={<Privacy />} />
+          <Route path="/terms"           element={<Terms />} />
 
           {/* ── Phase 1 — Caregiver ── */}
           <Route path="/caregiver/register"  element={<CaregiverOnboarding />} />

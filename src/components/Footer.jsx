@@ -74,6 +74,11 @@ export default function Footer() {
           <p className="footer__mission">
             Trusted Care · Stronger Communities · A Brighter Future
           </p>
+          <div className="footer__legal-links">
+            <Link to="/privacy" className="footer__legal-link">Privacy Policy</Link>
+            <span className="footer__legal-separator">•</span>
+            <Link to="/terms" className="footer__legal-link">Terms & Conditions</Link>
+          </div>
           <p className="footer__copyright">
             © 2026 The Care Integrity Project. All rights reserved.
           </p>

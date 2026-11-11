@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { caregiverApi, uploadApi, auth } from '../../lib/api'
 import { TRAVEL_DISTANCES, KENTUCKY_COUNTIES } from '../../constants/locations'
+import { PROFESSIONAL_ROLES, EMPLOYMENT_STATUS_OPTIONS, US_STATES, requiresLicense } from '../../constants/professionalCategories'
 import './CaregiverProfile.css'
 
 export default function CaregiverProfileEdit() {
@@ -14,6 +15,10 @@ export default function CaregiverProfileEdit() {
   const [profile, setProfile] = useState({
     fullName: '',
     role: '',
+    employmentStatus: 'open_to_opportunities',
+    licenseNumber: '',
+    licensingState: '',
+    licenseExpiry: '',
     serviceArea: '',
     yearsExp: '',
     bio: '',
@@ -79,6 +84,10 @@ export default function CaregiverProfileEdit() {
       await caregiverApi.updateMe({
         fullName: profile.fullName,
         role: profile.role,
+        employmentStatus: profile.employmentStatus,
+        licenseNumber: profile.licenseNumber || undefined,
+        licensingState: profile.licensingState || undefined,
+        licenseExpiry: profile.licenseExpiry || undefined,
         serviceArea: profile.serviceArea,
         yearsExp: profile.yearsExp,
         bio: profile.bio,
@@ -181,16 +190,77 @@ export default function CaregiverProfileEdit() {
 
           {/* Role */}
           <div className="cp-field">
-            <label className="cp-label">Professional Role *</label>
-            <input
-              type="text"
+            <label className="cp-label">Professional Category *</label>
+            <select
               className="cp-input"
               value={profile.role}
               onChange={e => setProfile({ ...profile, role: e.target.value })}
-              placeholder="e.g., Certified Home Health Aide"
               required
-            />
+            >
+              <option value="">Select...</option>
+              {PROFESSIONAL_ROLES.map(role => (
+                <option key={role} value={role}>{role}</option>
+              ))}
+            </select>
           </div>
+
+          {/* Employment Status */}
+          <div className="cp-field">
+            <label className="cp-label">Employment Status *</label>
+            <select
+              className="cp-input"
+              value={profile.employmentStatus}
+              onChange={e => setProfile({ ...profile, employmentStatus: e.target.value })}
+              required
+            >
+              {EMPLOYMENT_STATUS_OPTIONS.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Conditional License Fields - Show only for licensed professionals */}
+          {requiresLicense(profile.role) && (
+            <>
+              <div className="cp-field">
+                <label className="cp-label">License/Certification Number</label>
+                <input
+                  type="text"
+                  className="cp-input"
+                  value={profile.licenseNumber}
+                  onChange={e => setProfile({ ...profile, licenseNumber: e.target.value })}
+                  placeholder="Enter license number"
+                />
+                <p className="cp-hint">Optional. Self-reported until verified.</p>
+              </div>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div className="cp-field">
+                  <label className="cp-label">Licensing State</label>
+                  <select
+                    className="cp-input"
+                    value={profile.licensingState}
+                    onChange={e => setProfile({ ...profile, licensingState: e.target.value })}
+                  >
+                    <option value="">Select...</option>
+                    {US_STATES.map(state => (
+                      <option key={state} value={state}>{state}</option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div className="cp-field">
+                  <label className="cp-label">License Expiry Date</label>
+                  <input
+                    type="date"
+                    className="cp-input"
+                    value={profile.licenseExpiry}
+                    onChange={e => setProfile({ ...profile, licenseExpiry: e.target.value })}
+                  />
+                </div>
+              </div>
+            </>
+          )}
 
           {/* Service Area */}
           <div className="cp-field">

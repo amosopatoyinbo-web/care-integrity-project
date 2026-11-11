@@ -8,7 +8,7 @@ import './AgencyOnboarding.css'
 
 const STEPS = ['Account', 'Organization', 'Services', 'Verification']
 
-const ORG_TYPES     = ['Home Care Agency', 'Assisted Living Facility', 'Memory Care Facility', 'Adult Day Program', 'Skilled Nursing Facility', 'Staffing Agency', 'Nonprofit Organization', 'Other']
+const ORG_TYPES     = ['Home Care Agency', 'Assisted Living Facility', 'Memory Care Facility', 'Adult Day Program', 'Skilled Nursing Facility', 'Nursing Home / Long-Term Care Facility', 'Staffing Agency', 'Nonprofit Organization', 'Other']
 const CARE_TYPES    = ['Personal Care', 'Companion Care', 'Home Health', 'Dementia / Memory Care', 'Hospice / Palliative', 'Post-Surgery Recovery', 'Pediatric Care', 'Disability Support']
 const SERVICE_AREAS = ['Seattle Metro', 'Portland Metro', 'Los Angeles', 'San Francisco Bay Area', 'New York Metro', 'Chicago Metro', 'Houston Metro', 'Phoenix Metro', 'Other / Nationwide']
 const SETTINGS      = ['Private Home', 'Assisted Living', 'Memory Care Facility', 'Adult Day Program', 'Skilled Nursing', 'Community-Based', 'Group Home']
@@ -64,11 +64,20 @@ function Step1({ data, set, error, validationErrors }) {
       <Field label="Contact Person" id="contact" required hint="Primary point of contact." error={validationErrors.contact}><Input id="contact" placeholder="Full name" value={data.contact} onChange={v => set('contact', v)} /></Field>
       <Field label="Your Role / Title" id="title" required error={validationErrors.title}><Input id="title" placeholder="e.g. Director of Operations" value={data.title} onChange={v => set('title', v)} /></Field>
       <Field label="Phone Number" id="phone" required error={validationErrors.phone}><Input id="phone" type="tel" placeholder="+1 (555) 000-0000" value={data.phone} onChange={v => set('phone', v)} /></Field>
-      <label className="ob-checkbox">
-        <input type="checkbox" checked={data.terms} onChange={e => set('terms', e.target.checked)} />
-        <span>I agree to the <Link to="/privacy" className="ob-link">Privacy Policy</Link> and <Link to="/terms" className="ob-link">Terms of Use</Link>.</span>
-      </label>
-      {validationErrors.terms && <p className="ob-error" role="alert">{validationErrors.terms}</p>}
+      
+      <div className="ob-legal-checkboxes">
+        <label className="ob-checkbox">
+          <input type="checkbox" checked={data.terms} onChange={e => set('terms', e.target.checked)} />
+          <span>I confirm that I am at least 18 years old, agree to The Care Integrity Project's <Link to="/terms" className="ob-link">Terms & Conditions</Link>, and acknowledge that I have read its <Link to="/privacy" className="ob-link">Privacy Policy</Link>.</span>
+        </label>
+        {validationErrors.terms && <p className="ob-error" role="alert">{validationErrors.terms}</p>}
+        
+        <label className="ob-checkbox">
+          <input type="checkbox" checked={data.employerConsent} onChange={e => set('employerConsent', e.target.checked)} />
+          <span>I understand and agree that as an employer, I will use professional information obtained through this platform only for legitimate recruitment purposes and in compliance with applicable employment and privacy laws.</span>
+        </label>
+        {validationErrors.employerConsent && <p className="ob-error" role="alert">{validationErrors.employerConsent}</p>}
+      </div>
     </div>
   )
 }
@@ -176,7 +185,7 @@ export default function AgencyOnboarding() {
   const [verifiedToken, setVerifiedToken] = useState('')
   const [otpExpirySeconds, setOtpExpirySeconds] = useState(600)
 
-  const [s1, setS1] = useState({ email: '', password: '', contact: '', title: '', phone: '', terms: false })
+  const [s1, setS1] = useState({ email: '', password: '', contact: '', title: '', phone: '', terms: false, employerConsent: false })
   const [s2, setS2] = useState({ logo: null, logoPreview: '', orgName: '', orgType: '', location: '', serviceArea: '', website: '', year: '', size: '', desc: '' })
   const [s3, setS3] = useState({ careTypes: [], areas: [], settings: [], focus: [] })
   const [s4, setS4] = useState({ legalName: '', orgId: '', address: '', rep: '', bizEmail: '', doc: null })
@@ -216,6 +225,10 @@ export default function AgencyOnboarding() {
 
       if (!s1.terms) {
         errors.terms = 'You must agree to the Privacy Policy and Terms of Use'
+      }
+
+      if (!s1.employerConsent) {
+        errors.employerConsent = 'You must acknowledge the employer responsibilities'
       }
     }
 
@@ -258,7 +271,7 @@ export default function AgencyOnboarding() {
 
   const canAdvance = () => {
     if (step === 1) {
-      return s1.email && s1.password && s1.contact && s1.title && s1.phone && s1.terms 
+      return s1.email && s1.password && s1.contact && s1.title && s1.phone && s1.terms && s1.employerConsent
         && s1.password.length >= 8
     }
     if (step === 2) {

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { caregiverApi, auth, authApi } from '../../lib/api'
 import RecognitionModal from './RecognitionModal'
 import { formatTravelDistance, getCountyShortName } from '../../constants/locations'
+import { PROFESSIONAL_ROLES, EMPLOYMENT_STATUS_OPTIONS } from '../../constants/professionalCategories'
 import './CaregiverBrowse.css'
 
 function Badge({ status }) {
@@ -22,6 +23,9 @@ export default function CaregiverBrowse() {
   const [loading,    setLoading]    = useState(true)
   const [error,      setError]      = useState('')
   const [search,     setSearch]     = useState('')
+  const [roleFilter, setRoleFilter] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
+  const [areaFilter, setAreaFilter] = useState('')
   const [recognitionCaregiver, setRecognitionCaregiver] = useState(null)
   const navigate = useNavigate()
   const limit = 12
@@ -31,7 +35,13 @@ export default function CaregiverBrowse() {
       setLoading(true)
       setError('')
       try {
-        const res = await caregiverApi.list(page)
+        // Build query params
+        const params = { page }
+        if (roleFilter) params.role = roleFilter
+        if (statusFilter) params.employmentStatus = statusFilter
+        if (areaFilter) params.serviceArea = areaFilter
+        
+        const res = await caregiverApi.list(params)
         setCaregivers(res.data || [])
         setTotal(res.pagination?.total || 0)
       } catch (err) {
@@ -41,7 +51,12 @@ export default function CaregiverBrowse() {
       }
     }
     load()
-  }, [page])
+  }, [page, roleFilter, statusFilter, areaFilter])
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setPage(1)
+  }, [roleFilter, statusFilter, areaFilter])
 
   const filtered = search.trim()
     ? caregivers.filter(c =>
@@ -92,6 +107,76 @@ export default function CaregiverBrowse() {
           />
         </div>
 
+        {/* Filters */}
+        <div className="cbr-filters" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px', color: 'var(--charcoal)' }}>
+              Professional Category
+            </label>
+            <select
+              className="cbr-filter-select"
+              style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--soft-cream)', background: 'white', fontSize: '0.9rem' }}
+              value={roleFilter}
+              onChange={e => setRoleFilter(e.target.value)}
+              aria-label="Filter by professional category"
+            >
+              <option value="">All Categories</option>
+              {PROFESSIONAL_ROLES.map(role => (
+                <option key={role} value={role}>{role}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px', color: 'var(--charcoal)' }}>
+              Employment Status
+            </label>
+            <select
+              className="cbr-filter-select"
+              style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--soft-cream)', background: 'white', fontSize: '0.9rem' }}
+              value={statusFilter}
+              onChange={e => setStatusFilter(e.target.value)}
+              aria-label="Filter by employment status"
+            >
+              <option value="">All Statuses</option>
+              {EMPLOYMENT_STATUS_OPTIONS.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px', color: 'var(--charcoal)' }}>
+              Service Area
+            </label>
+            <input
+              type="text"
+              className="cbr-filter-input"
+              style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--soft-cream)', background: 'white', fontSize: '0.9rem' }}
+              placeholder="e.g., Seattle, WA"
+              value={areaFilter}
+              onChange={e => setAreaFilter(e.target.value)}
+              aria-label="Filter by service area"
+            />
+          </div>
+
+          {(roleFilter || statusFilter || areaFilter) && (
+            <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+              <button
+                className="btn btn-blue-outline btn-sm"
+                style={{ width: '100%' }}
+                onClick={() => {
+                  setRoleFilter('')
+                  setStatusFilter('')
+                  setAreaFilter('')
+                }}
+              >
+                Clear Filters
+              </button>
+            </div>
+          )}
+        </div>
+
         {loading && <div className="cbr-state">Loading caregivers…</div>}
         {error   && <div className="cbr-state cbr-state--error">{error}</div>}
 
@@ -113,7 +198,12 @@ export default function CaregiverBrowse() {
                 </div>
                 <div className="cbr-card__body">
                   <h3 className="cbr-card__name">{cg.fullName}</h3>
-                  <p className="cbr-card__role">{cg.role}</p>
+                  <p className="cbr-card__role">{cg.role || 'Caregiver'}</p>
+                  {cg.employmentStatus && (
+                    <p className="cbr-card__status" style={{ fontSize: '0.8rem', color: 'var(--calm-aqua)', marginTop: '4px', fontWeight: 500 }}>
+                      {EMPLOYMENT_STATUS_OPTIONS.find(opt => opt.value === cg.employmentStatus)?.label || cg.employmentStatus}
+                    </p>
+                  )}
                   <p className="cbr-card__area">{cg.serviceArea}</p>
                   {cg.yearsExp && <p className="cbr-card__years">{cg.yearsExp} experience</p>}
 

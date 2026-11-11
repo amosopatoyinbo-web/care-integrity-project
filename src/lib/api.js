@@ -195,7 +195,14 @@ export const caregiverApi = {
     console.log('[caregiverApi] register called')
     return api.post('/caregivers/register', data)
   },
-  list:        (page = 1)   => api.get(`/caregivers?page=${page}`),
+  list: (params = {}) => {
+    const { page = 1, role, employmentStatus, serviceArea } = params
+    const query = new URLSearchParams({ page })
+    if (role) query.append('role', role)
+    if (employmentStatus) query.append('employmentStatus', employmentStatus)
+    if (serviceArea) query.append('serviceArea', serviceArea)
+    return api.get(`/caregivers?${query.toString()}`)
+  },
   getById:     (id)         => api.get(`/caregivers/${id}`),
   getMe:       ()           => api.get('/caregivers/me'),
   create:      (data)       => api.post('/caregivers', data),

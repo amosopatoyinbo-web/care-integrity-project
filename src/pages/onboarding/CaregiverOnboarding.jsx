@@ -4,6 +4,7 @@ import ProgressBar from '../../components/onboarding/ProgressBar'
 import ChipSelect from '../../components/onboarding/ChipSelect'
 import OTPVerification from '../../components/OTPVerification'
 import { authApi, caregiverApi, uploadApi, auth } from '../../lib/api'
+import { PROFESSIONAL_ROLES, EMPLOYMENT_STATUS_OPTIONS, US_STATES, requiresLicense } from '../../constants/professionalCategories'
 import './CaregiverOnboarding.css'
 
 const STEPS = ['Account', 'About You', 'Experience', 'Training', 'Commitment']
@@ -99,11 +100,20 @@ function Step1({ data, set, error, validationErrors }) {
       <Field label="Country / Region" id="country" required error={validationErrors.country}>
         <Select id="country" options={['United States', 'Canada', 'United Kingdom', 'Australia', 'Other']} value={data.country} onChange={v => set('country', v)} />
       </Field>
-      <label className="ob-checkbox">
-        <input type="checkbox" checked={data.terms} onChange={e => set('terms', e.target.checked)} />
-        <span>I agree to the <Link to="/privacy" className="ob-link">Privacy Policy</Link> and <Link to="/terms" className="ob-link">Terms of Use</Link>.</span>
-      </label>
-      {validationErrors.terms && <p className="ob-error" role="alert">{validationErrors.terms}</p>}
+      
+      <div className="ob-legal-checkboxes">
+        <label className="ob-checkbox">
+          <input type="checkbox" checked={data.terms} onChange={e => set('terms', e.target.checked)} />
+          <span>I confirm that I am at least 18 years old, agree to The Care Integrity Project's <Link to="/terms" className="ob-link">Terms & Conditions</Link>, and acknowledge that I have read its <Link to="/privacy" className="ob-link">Privacy Policy</Link>.</span>
+        </label>
+        {validationErrors.terms && <p className="ob-error" role="alert">{validationErrors.terms}</p>}
+        
+        <label className="ob-checkbox">
+          <input type="checkbox" checked={data.profileConsent} onChange={e => set('profileConsent', e.target.checked)} />
+          <span>I understand and agree that information in my professional profile designated for employer viewing may be accessed by approved healthcare employers for recruiting purposes. I understand that creating a profile does not guarantee employment or an interview.</span>
+        </label>
+        {validationErrors.profileConsent && <p className="ob-error" role="alert">{validationErrors.profileConsent}</p>}
+      </div>
     </div>
   )
 }
@@ -130,9 +140,39 @@ function Step2({ data, set, validationErrors }) {
       <Field label="Full Name" id="fullName" required error={validationErrors.fullName}>
         <Input id="fullName" placeholder="Your full name" value={data.fullName} onChange={v => set('fullName', v)} />
       </Field>
-      <Field label="Professional Role" id="role" required error={validationErrors.role}>
-        <Select id="role" options={['Home Health Aide', 'Certified Nursing Assistant (CNA)', 'Personal Care Aide', 'Companion Caregiver', 'Live-In Caregiver', 'Memory Care Specialist', 'Other']} value={data.role} onChange={v => set('role', v)} />
+      <Field label="Professional Category" id="role" required error={validationErrors.role}>
+        <Select id="role" options={PROFESSIONAL_ROLES} value={data.role} onChange={v => set('role', v)} />
       </Field>
+      <Field label="Employment Status" id="employmentStatus" required error={validationErrors.employmentStatus}>
+        <select
+          id="employmentStatus"
+          className="ob-select"
+          value={data.employmentStatus}
+          onChange={e => set('employmentStatus', e.target.value)}
+        >
+          {EMPLOYMENT_STATUS_OPTIONS.map(opt => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
+      </Field>
+      
+      {/* Conditional License Fields - Show only for licensed professionals */}
+      {requiresLicense(data.role) && (
+        <>
+          <Field label="License/Certification Number" id="licenseNumber" hint="Optional. Self-reported until verified." error={validationErrors.licenseNumber}>
+            <Input id="licenseNumber" placeholder="Enter license number" value={data.licenseNumber} onChange={v => set('licenseNumber', v)} />
+          </Field>
+          <div className="ob-row-2">
+            <Field label="Licensing State" id="licensingState">
+              <Select id="licensingState" options={['', ...US_STATES]} value={data.licensingState} onChange={v => set('licensingState', v)} />
+            </Field>
+            <Field label="License Expiry Date" id="licenseExpiry" hint="Optional">
+              <Input id="licenseExpiry" type="date" value={data.licenseExpiry} onChange={v => set('licenseExpiry', v)} />
+            </Field>
+          </div>
+        </>
+      )}
+      
       <Field label="Years of Experience" id="years" required error={validationErrors.years}>
         <Select id="years" options={['Less than 1 year', '1–2 years', '3–5 years', '6–10 years', '10+ years']} value={data.years} onChange={v => set('years', v)} />
       </Field>
@@ -272,8 +312,13 @@ export default function CaregiverOnboarding() {
   const [sessionToken, setSessionToken] = useState('')
   const [otpExpirySeconds, setOtpExpirySeconds] = useState(600)
 
-  const [s1, setS1] = useState({ email: '', password: '', confirm: '', phone: '', country: '', terms: false })
-  const [s2, setS2] = useState({ photo: null, photoPreview: '', fullName: '', role: '', years: '', serviceArea: '', bio: '', philosophy: '' })
+  const [s1, setS1] = useState({ email: '', password: '', confirm: '', phone: '', country: '', terms: false, profileConsent: false })
+  const [s2, setS2] = useState({ 
+    photo: null, photoPreview: '', fullName: '', role: '', 
+    employmentStatus: 'open_to_opportunities', 
+    licenseNumber: '', licensingState: '', licenseExpiry: '', 
+    years: '', serviceArea: '', bio: '', philosophy: '' 
+  })
   const [s3, setS3] = useState({ careExp: [], settings: [], careTypes: [], skills: [] })
   const [s4, setS4] = useState({ credentials: [{ name: '', org: '', date: '', expiry: '', doc: null }], employment: [{ org: '', role: '', start: '', end: '', setting: '', responsibilities: '' }] })
   const [s5, setS5] = useState({ committed: false })
@@ -318,6 +363,10 @@ export default function CaregiverOnboarding() {
       if (!s1.terms) {
         errors.terms = 'You must agree to the Privacy Policy and Terms of Use'
       }
+
+      if (!s1.profileConsent) {
+        errors.profileConsent = 'You must acknowledge the profile visibility consent'
+      }
     }
 
     if (stepNum === 2) {
@@ -349,7 +398,7 @@ export default function CaregiverOnboarding() {
 
   const canAdvance = () => {
     if (step === 1) {
-      return s1.email && s1.password && s1.confirm && s1.phone && s1.country && s1.terms 
+      return s1.email && s1.password && s1.confirm && s1.phone && s1.country && s1.terms && s1.profileConsent
         && s1.password.length >= 8 && s1.password === s1.confirm
     }
     if (step === 2) {
@@ -450,6 +499,10 @@ export default function CaregiverOnboarding() {
         // Profile data
         fullName:       s2.fullName,
         role:           s2.role,
+        employmentStatus: s2.employmentStatus,
+        licenseNumber:  s2.licenseNumber || undefined,
+        licensingState: s2.licensingState || undefined,
+        licenseExpiry:  s2.licenseExpiry || undefined,
         serviceArea:    s2.serviceArea,
         yearsExp:       s2.years,
         bio:            s2.bio,

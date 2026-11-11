@@ -418,3 +418,32 @@
 .ob-page__signin-link:hover {
   color: var(--integrity-green);
 }
+
+
+/* Legal Checkboxes Container */
+.ob-legal-checkboxes {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #e5e5e5;
+}
+
+.ob-legal-checkboxes .ob-checkbox {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.ob-legal-checkboxes .ob-checkbox:last-of-type {
+  margin-bottom: 0;
+}
+
+.ob-legal-checkboxes .ob-checkbox span {
+  line-height: 1.6;
+}
+
+.ob-legal-checkboxes .ob-error {
+  margin-top: 8px;
+  margin-left: 28px;
+}

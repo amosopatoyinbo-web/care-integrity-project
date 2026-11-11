@@ -152,3 +152,30 @@
   font-size: 0.78rem;
   color: rgba(255, 255, 255, 0.5);
 }
+
+/* Legal Links in Footer Bottom */
+.footer__legal-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 8px 0;
+}
+
+.footer__legal-link {
+  color: var(--soft-cream);
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: color 0.2s ease;
+}
+
+.footer__legal-link:hover {
+  color: var(--accent-gold);
+  text-decoration: underline;
+}
+
+.footer__legal-separator {
+  color: var(--soft-cream);
+  opacity: 0.5;
+  font-size: 0.85rem;
+}
