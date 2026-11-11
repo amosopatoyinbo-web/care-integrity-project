@@ -68,80 +68,33 @@ export default function CaregiverProfileEdit() {
     setSuccess(false)
 
     try {
-      // Upload new photo if provided (with retry logic)
+      // Upload new photo if provided
       let photoUrl = profile.photoUrl
       if (photoFile) {
-        console.log('[CaregiverProfileEdit] Uploading new photo...')
-        let uploadSuccess = false
-        let retries = 3
-        let uploadError = null
-
-        while (retries > 0 && !uploadSuccess) {
-          try {
-            console.log(`[CaregiverProfileEdit] Photo upload attempt ${4 - retries}/3...`)
-            const response = await uploadApi.avatar(photoFile)
-            photoUrl = response.url
-            console.log('[CaregiverProfileEdit] Photo uploaded successfully:', photoUrl)
-            uploadSuccess = true
-          } catch (uploadErr) {
-            retries--
-            uploadError = uploadErr
-            console.warn(`[CaregiverProfileEdit] Photo upload failed (${retries} retries left):`, uploadErr.message)
-            if (retries > 0) {
-              await new Promise(resolve => setTimeout(resolve, 1000))
-            }
-          }
-        }
-
-        if (!uploadSuccess) {
-          throw new Error(`Failed to upload photo: ${uploadError?.message || 'Unknown error'}`)
-        }
+        const { url } = await uploadApi.avatar(photoFile)
+        photoUrl = url
       }
 
-      // Update profile (with retry logic)
-      console.log('[CaregiverProfileEdit] Updating profile...')
-      let updateSuccess = false
-      let retries = 3
-      let updateError = null
-
-      while (retries > 0 && !updateSuccess) {
-        try {
-          console.log(`[CaregiverProfileEdit] Profile update attempt ${4 - retries}/3...`)
-          await caregiverApi.updateMe({
-            fullName: profile.fullName,
-            role: profile.role,
-            serviceArea: profile.serviceArea,
-            yearsExp: profile.yearsExp,
-            bio: profile.bio,
-            carePhilosophy: profile.carePhilosophy,
-            photoUrl,
-            careTypes: profile.careTypes,
-            careSettings: profile.careSettings,
-            skills: profile.skills,
-            standards: profile.standards,
-            travelDistance: profile.travelDistance,
-            workAreas: profile.workAreas,
-          })
-          console.log('[CaregiverProfileEdit] Profile updated successfully')
-          updateSuccess = true
-        } catch (updateErr) {
-          retries--
-          updateError = updateErr
-          console.warn(`[CaregiverProfileEdit] Profile update failed (${retries} retries left):`, updateErr.message)
-          if (retries > 0) {
-            await new Promise(resolve => setTimeout(resolve, 1000))
-          }
-        }
-      }
-
-      if (!updateSuccess) {
-        throw new Error(`Failed to update profile: ${updateError?.message || 'Unknown error'}`)
-      }
+      // Update profile
+      await caregiverApi.updateMe({
+        fullName: profile.fullName,
+        role: profile.role,
+        serviceArea: profile.serviceArea,
+        yearsExp: profile.yearsExp,
+        bio: profile.bio,
+        carePhilosophy: profile.carePhilosophy,
+        photoUrl,
+        careTypes: profile.careTypes,
+        careSettings: profile.careSettings,
+        skills: profile.skills,
+        standards: profile.standards,
+        travelDistance: profile.travelDistance,
+        workAreas: profile.workAreas,
+      })
 
       setSuccess(true)
       setTimeout(() => navigate('/caregiver/dashboard'), 1500)
     } catch (err) {
-      console.error('[CaregiverProfileEdit] Save failed:', err)
       setError(err.message || 'Failed to update profile. Please try again.')
       setSaving(false)
     }

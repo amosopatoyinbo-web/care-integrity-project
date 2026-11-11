@@ -392,70 +392,46 @@ export default function AgencyOnboarding() {
       auth.setTokens(accessToken, refreshToken)
       auth.setUser(user)
       
-      // Longer delay to ensure localStorage writes complete and tokens are ready
-      await new Promise(resolve => setTimeout(resolve, 500))
+      // Small delay to ensure localStorage writes complete
+      await new Promise(resolve => setTimeout(resolve, 100))
       
       console.log('[AgencyOnboarding] Auth tokens set successfully')
       console.log('[AgencyOnboarding] Stored access token:', localStorage.getItem('cip_access')?.substring(0, 20) + '...')
       console.log('[AgencyOnboarding] Stored user:', JSON.parse(localStorage.getItem('cip_user')))
 
-      // Step 4: NOW upload files with authentication and retry logic
+      // Step 4: NOW upload files with authentication (optional, non-blocking)
       let logoUrl = ''
       let verificationDocUrl = ''
       
       if (s2.logo) {
-        console.log('[AgencyOnboarding] Uploading logo with authentication...')
-        const logoUploadResponse = await uploadApi.logo(s2.logo)
-        logoUrl = logoUploadResponse.url
-        console.log('[AgencyOnboarding] Logo uploaded:', logoUrl)
-        
-        // Update profile with logo URL (with retry logic)
-        let retries = 3
-        let updated = false
-        while (retries > 0 && !updated) {
-          try {
-            console.log(`[AgencyOnboarding] Updating profile with logo (attempt ${4 - retries}/3)...`)
-            await agencyApi.updateMe({ logoUrl })
-            console.log('[AgencyOnboarding] Profile updated with logo successfully')
-            updated = true
-          } catch (logoErr) {
-            retries--
-            console.warn(`[AgencyOnboarding] Logo update failed (${retries} retries left):`, logoErr.message)
-            if (retries > 0) {
-              await new Promise(resolve => setTimeout(resolve, 1000))
-            } else {
-              console.error('[AgencyOnboarding] Failed to update logo after 3 attempts')
-              setError('Logo uploaded but failed to save. Please update your profile after login.')
-            }
-          }
+        try {
+          console.log('[AgencyOnboarding] Uploading logo with authentication...')
+          const logoUploadResponse = await uploadApi.logo(s2.logo)
+          logoUrl = logoUploadResponse.url
+          console.log('[AgencyOnboarding] Logo uploaded:', logoUrl)
+          
+          // Update profile with logo URL
+          await agencyApi.updateMe({ logoUrl })
+          console.log('[AgencyOnboarding] Profile updated with logo')
+        } catch (logoErr) {
+          console.warn('[AgencyOnboarding] Logo upload failed:', logoErr.message)
+          console.warn('[AgencyOnboarding] Continuing anyway - user can upload logo later')
         }
       }
       
       if (s4.doc) {
-        console.log('[AgencyOnboarding] Uploading verification document with authentication...')
-        const docUploadResponse = await uploadApi.document(s4.doc)
-        verificationDocUrl = docUploadResponse.path
-        console.log('[AgencyOnboarding] Document uploaded:', verificationDocUrl)
-        
-        // Update profile with document URL (with retry logic)
-        let retries = 3
-        let updated = false
-        while (retries > 0 && !updated) {
-          try {
-            console.log(`[AgencyOnboarding] Updating profile with document (attempt ${4 - retries}/3)...`)
-            await agencyApi.updateMe({ verificationDocUrl })
-            console.log('[AgencyOnboarding] Profile updated with verification document successfully')
-            updated = true
-          } catch (docErr) {
-            retries--
-            console.warn(`[AgencyOnboarding] Document update failed (${retries} retries left):`, docErr.message)
-            if (retries > 0) {
-              await new Promise(resolve => setTimeout(resolve, 1000))
-            } else {
-              console.error('[AgencyOnboarding] Failed to update document after 3 attempts')
-              setError('Document uploaded but failed to save. Please update your profile after login.')
-            }
-          }
+        try {
+          console.log('[AgencyOnboarding] Uploading verification document with authentication...')
+          const docUploadResponse = await uploadApi.document(s4.doc)
+          verificationDocUrl = docUploadResponse.path
+          console.log('[AgencyOnboarding] Document uploaded:', verificationDocUrl)
+          
+          // Update profile with document URL
+          await agencyApi.updateMe({ verificationDocUrl })
+          console.log('[AgencyOnboarding] Profile updated with verification document')
+        } catch (docErr) {
+          console.warn('[AgencyOnboarding] Document upload failed:', docErr.message)
+          console.warn('[AgencyOnboarding] Continuing anyway - user can upload document later')
         }
       }
 
