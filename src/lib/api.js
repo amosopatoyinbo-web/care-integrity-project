@@ -75,18 +75,28 @@ async function request(path, options = {}, retry = true, isPostRegistration = fa
         console.log(`[API] Token refreshed, retrying request`)
         return request(path, options, false, false) // Don't retry again or add delay
       }
-      console.warn(`[API] Token refresh failed, clearing auth`)
-      auth.clearTokens()
-      // Redirect to the appropriate login page based on stored role
-      const user = auth.getUser()
-      if (user?.role === 'admin') {
-        window.location.href = '/admin/login'
-      } else if (user?.role === 'agency') {
-        window.location.href = '/agency/login'
+      
+      // FIX: Don't auto-redirect during post-registration flow - let retry logic handle it
+      if (!isPostRegistration) {
+        console.warn(`[API] Token refresh failed, clearing auth and redirecting`)
+        auth.clearTokens()
+        // Redirect to the appropriate login page based on stored role
+        const user = auth.getUser()
+        if (user?.role === 'admin') {
+          window.location.href = '/admin/login'
+        } else if (user?.role === 'agency') {
+          window.location.href = '/agency/login'
+        } else {
+          window.location.href = '/caregiver/login'
+        }
+        throw new Error('Session expired. Please log in again.')
       } else {
-        window.location.href = '/caregiver/login'
+        // During registration flow, throw 401 to let retry logic handle it
+        console.warn(`[API] 401 during post-registration, throwing for retry logic`)
+        const err = new Error(data.error || 'Authentication failed')
+        err.status = 401
+        throw err
       }
-      throw new Error('Session expired. Please log in again.')
     }
 
     if (!res.ok) {

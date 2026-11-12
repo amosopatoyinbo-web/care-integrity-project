@@ -472,19 +472,21 @@ export default function CaregiverOnboarding() {
    * Implements exponential backoff for 401 errors during post-registration flow
    * FIX: Handles race condition where tokens haven't replicated to secondary nodes yet
    */
-  async function retryWithBackoff(fn, maxRetries = 3, baseDelay = 1000) {
+  async function retryWithBackoff(fn, maxRetries = 5, baseDelay = 2000) {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         return await fn()
       } catch (err) {
         // Only retry on 401 errors (auth issues due to replica lag)
         if (err.status === 401 && attempt < maxRetries) {
-          const delay = baseDelay * Math.pow(2, attempt - 1) // Exponential backoff: 1s, 2s, 4s
+          const delay = baseDelay * Math.pow(1.5, attempt - 1) // Exponential backoff: 2s, 3s, 4.5s, 6.75s, 10s
           console.log(`[Retry] Attempt ${attempt} failed with 401, retrying in ${delay}ms...`)
+          console.log(`[Retry] Error message:`, err.message)
           await new Promise(resolve => setTimeout(resolve, delay))
           continue
         }
         // For other errors or max retries reached, throw
+        console.error(`[Retry] Max retries (${maxRetries}) reached or non-401 error:`, err.message)
         throw err
       }
     }
@@ -552,7 +554,9 @@ export default function CaregiverOnboarding() {
       // 1. localStorage writes complete across all browsers
       // 2. MongoDB replication completes to secondary nodes
       // 3. Tokens are available when credentials/employment endpoints are called
-      await new Promise(resolve => setTimeout(resolve, 2000)) // Increased from 100ms to 2000ms
+      // Increased to 3 seconds for more reliable replication
+      console.log('[CaregiverOnboarding] Waiting 3 seconds for database replication...')
+      await new Promise(resolve => setTimeout(resolve, 3000)) // Increased from 2000ms to 3000ms
       
       console.log('[CaregiverOnboarding] Auth tokens set successfully')
       console.log('[CaregiverOnboarding] Stored access token:', localStorage.getItem('cip_access')?.substring(0, 20) + '...')
