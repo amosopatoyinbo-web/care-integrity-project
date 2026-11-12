@@ -73,6 +73,53 @@ export default function AdminDashboard() {
     }
   }
 
+  async function handleDeleteAgency(agencyId, agencyName) {
+    const confirmed = window.confirm(
+      `⚠️ DELETE AGENCY: "${agencyName}"?\n\n` +
+      `This will PERMANENTLY delete:\n` +
+      `• Agency profile\n` +
+      `• Associated user account\n` +
+      `• All agency data\n\n` +
+      `⚠️ THIS ACTION CANNOT BE UNDONE!\n\n` +
+      `Type the agency name to confirm deletion.`
+    )
+    
+    if (!confirmed) return
+
+    try {
+      await agencyApi.deleteById(agencyId)
+      // Remove from local state immediately
+      setAgencies(agencies.filter(a => a._id !== agencyId))
+      alert('✓ Agency deleted successfully')
+    } catch (err) {
+      alert(`❌ Failed to delete agency: ${err.message || 'Unknown error'}`)
+    }
+  }
+
+  async function handleDeleteCaregiver(caregiverId, caregiverName) {
+    const confirmed = window.confirm(
+      `⚠️ DELETE CAREGIVER: "${caregiverName}"?\n\n` +
+      `This will PERMANENTLY delete:\n` +
+      `• Caregiver profile\n` +
+      `• Associated user account\n` +
+      `• All caregiver data\n` +
+      `• Training progress & certificates\n\n` +
+      `⚠️ THIS ACTION CANNOT BE UNDONE!\n\n` +
+      `Click OK to confirm deletion.`
+    )
+    
+    if (!confirmed) return
+
+    try {
+      await caregiverApi.deleteById(caregiverId)
+      // Remove from local state immediately
+      setCaregivers(caregivers.filter(c => c._id !== caregiverId))
+      alert('✓ Caregiver deleted successfully')
+    } catch (err) {
+      alert(`❌ Failed to delete caregiver: ${err.message || 'Unknown error'}`)
+    }
+  }
+
   if (loading) {
     return (
       <div className="adb-page">
@@ -266,7 +313,7 @@ export default function AdminDashboard() {
           {pendingAgencies.length > 0 ? (
             <div style={{ display: 'grid', gap: '16px' }}>
               {pendingAgencies.map(agency => (
-                <AgencyCard key={agency._id} agency={agency} onVerify={handleVerifyAgency} />
+                <AgencyCard key={agency._id} agency={agency} onVerify={handleVerifyAgency} onDelete={handleDeleteAgency} />
               ))}
             </div>
           ) : (
@@ -280,7 +327,7 @@ export default function AdminDashboard() {
             <h2 style={{ fontSize: '1.3rem', marginBottom: '16px' }}>Under Review ({underReviewAgencies.length})</h2>
             <div style={{ display: 'grid', gap: '16px' }}>
               {underReviewAgencies.map(agency => (
-                <AgencyCard key={agency._id} agency={agency} onVerify={handleVerifyAgency} />
+                <AgencyCard key={agency._id} agency={agency} onVerify={handleVerifyAgency} onDelete={handleDeleteAgency} />
               ))}
             </div>
           </section>
@@ -294,7 +341,7 @@ export default function AdminDashboard() {
             </h2>
             <div style={{ display: 'grid', gap: '16px' }}>
               {attentionAgencies.map(agency => (
-                <AgencyCard key={agency._id} agency={agency} onVerify={handleVerifyAgency} />
+                <AgencyCard key={agency._id} agency={agency} onVerify={handleVerifyAgency} onDelete={handleDeleteAgency} />
               ))}
             </div>
           </section>
@@ -306,7 +353,7 @@ export default function AdminDashboard() {
           {verifiedAgencies.length > 0 ? (
             <div style={{ display: 'grid', gap: '16px' }}>
               {verifiedAgencies.map(agency => (
-                <AgencyCard key={agency._id} agency={agency} onVerify={handleVerifyAgency} />
+                <AgencyCard key={agency._id} agency={agency} onVerify={handleVerifyAgency} onDelete={handleDeleteAgency} />
               ))}
             </div>
           ) : (
@@ -340,7 +387,7 @@ export default function AdminDashboard() {
           {caregivers.length > 0 ? (
             <div style={{ display: 'grid', gap: '16px' }}>
               {caregivers.map(caregiver => (
-                <CaregiverCard key={caregiver._id} caregiver={caregiver} />
+                <CaregiverCard key={caregiver._id} caregiver={caregiver} onDelete={handleDeleteCaregiver} />
               ))}
             </div>
           ) : (
@@ -353,7 +400,7 @@ export default function AdminDashboard() {
   )
 }
 
-function AgencyCard({ agency, onVerify }) {
+function AgencyCard({ agency, onVerify, onDelete }) {
   const statusColors = {
     pending: '#ffc107',
     under_review: '#0dcaf0',
@@ -456,12 +503,24 @@ function AgencyCard({ agency, onVerify }) {
             Reset to Pending
           </button>
         )}
+        <button 
+          className="btn btn-sm"
+          style={{ 
+            backgroundColor: '#dc3545', 
+            color: '#fff', 
+            border: 'none',
+            marginLeft: '8px'
+          }}
+          onClick={() => onDelete(agency._id, agency.name)}
+        >
+          🗑️ Delete Agency
+        </button>
       </div>
     </div>
   )
 }
 
-function CaregiverCard({ caregiver }) {
+function CaregiverCard({ caregiver, onDelete }) {
   return (
     <div style={{ 
       border: '1px solid #e0e0e0', 
@@ -561,6 +620,22 @@ function CaregiverCard({ caregiver }) {
           </p>
         </div>
       )}
+
+      {/* Delete Button */}
+      <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #e0e0e0' }}>
+        <button 
+          className="btn btn-sm"
+          style={{ 
+            backgroundColor: '#dc3545', 
+            color: '#fff', 
+            border: 'none',
+            width: '100%'
+          }}
+          onClick={() => onDelete(caregiver._id, caregiver.fullName)}
+        >
+          🗑️ Delete Caregiver Profile
+        </button>
+      </div>
     </div>
   )
 }
