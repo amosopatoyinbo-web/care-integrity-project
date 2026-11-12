@@ -467,6 +467,29 @@ export default function CaregiverOnboarding() {
     }
   }
 
+  /**
+   * Helper function to retry failed API calls due to MongoDB replica lag
+   * Implements exponential backoff for 401 errors during post-registration flow
+   * FIX: Handles race condition where tokens haven't replicated to secondary nodes yet
+   */
+  async function retryWithBackoff(fn, maxRetries = 3, baseDelay = 1000) {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        return await fn()
+      } catch (err) {
+        // Only retry on 401 errors (auth issues due to replica lag)
+        if (err.status === 401 && attempt < maxRetries) {
+          const delay = baseDelay * Math.pow(2, attempt - 1) // Exponential backoff: 1s, 2s, 4s
+          console.log(`[Retry] Attempt ${attempt} failed with 401, retrying in ${delay}ms...`)
+          await new Promise(resolve => setTimeout(resolve, delay))
+          continue
+        }
+        // For other errors or max retries reached, throw
+        throw err
+      }
+    }
+  }
+
   async function handleVerifyOTP(otp) {
     console.log('[CaregiverOnboarding] Starting OTP verification and registration')
     try {
@@ -525,8 +548,11 @@ export default function CaregiverOnboarding() {
       auth.setTokens(accessToken, refreshToken)
       auth.setUser(user)
       
-      // Small delay to ensure localStorage writes complete
-      await new Promise(resolve => setTimeout(resolve, 100))
+      // FIX: Increase delay to ensure:
+      // 1. localStorage writes complete across all browsers
+      // 2. MongoDB replication completes to secondary nodes
+      // 3. Tokens are available when credentials/employment endpoints are called
+      await new Promise(resolve => setTimeout(resolve, 2000)) // Increased from 100ms to 2000ms
       
       console.log('[CaregiverOnboarding] Auth tokens set successfully')
       console.log('[CaregiverOnboarding] Stored access token:', localStorage.getItem('cip_access')?.substring(0, 20) + '...')
@@ -551,12 +577,14 @@ export default function CaregiverOnboarding() {
 
         for (const cred of credentialsWithUrls) {
           console.log('[CaregiverOnboarding] Adding credential:', cred.name)
-          await caregiverApi.addCredential(cred)
+          // FIX: Use retry logic to handle MongoDB replica lag
+          await retryWithBackoff(() => caregiverApi.addCredential(cred))
         }
         console.log('[CaregiverOnboarding] All credentials added')
       } catch (credErr) {
-        console.warn('[CaregiverOnboarding] Failed to add credentials:', credErr.message)
-        console.warn('[CaregiverOnboarding] Continuing anyway - user can add credentials later')
+        console.warn('[CaregiverOnboarding] Failed to add credentials after retries:', credErr.message)
+        console.warn('[CaregiverOnboarding] User can add credentials later from profile page')
+        // Don't throw - allow user to complete registration with partial data
       }
 
       // Step 6: Add employment history
@@ -564,19 +592,21 @@ export default function CaregiverOnboarding() {
       try {
         for (const emp of s4.employment.filter(e => e.org && e.role && e.start)) {
           console.log('[CaregiverOnboarding] Adding employment:', emp.org, emp.role)
-          await caregiverApi.addEmployment({
+          // FIX: Use retry logic to handle MongoDB replica lag
+          await retryWithBackoff(() => caregiverApi.addEmployment({
             orgName:          emp.org,
             role:             emp.role,
             startDate:        emp.start,
             endDate:          emp.end || undefined,
             setting:          emp.setting,
             responsibilities: emp.responsibilities,
-          })
+          }))
         }
         console.log('[CaregiverOnboarding] All employment records added')
       } catch (empErr) {
-        console.warn('[CaregiverOnboarding] Failed to add employment:', empErr.message)
-        console.warn('[CaregiverOnboarding] Continuing anyway - user can add employment later')
+        console.warn('[CaregiverOnboarding] Failed to add employment after retries:', empErr.message)
+        console.warn('[CaregiverOnboarding] User can add employment later from profile page')
+        // Don't throw - allow user to complete registration with partial data
       }
 
       // Step 7: Navigate to dashboard
