@@ -469,6 +469,22 @@ export default function CaregiverOnboarding() {
 
   async function handleVerifyOTP(otp) {
     console.log('[CaregiverOnboarding] Starting OTP verification and registration')
+    
+    // CRITICAL DEBUG: Prevent any redirects during this process
+    const originalLocation = window.location.href
+    let redirectBlocked = false
+    
+    // Block location changes
+    const locationDescriptor = Object.getOwnPropertyDescriptor(window, 'location')
+    Object.defineProperty(window, 'location', {
+      get: () => locationDescriptor.get.call(window),
+      set: (val) => {
+        console.error('[DEBUG] ❌ REDIRECT BLOCKED:', val)
+        redirectBlocked = true
+        alert(`Redirect blocked to: ${val}\n\nCheck console for error details.`)
+      }
+    })
+    
     try {
       // Step 1: Verify OTP and get verified token
       console.log('[CaregiverOnboarding] Verifying OTP...')
@@ -545,6 +561,10 @@ export default function CaregiverOnboarding() {
 
       // Navigate to dashboard where the data will be added
       console.log('[CaregiverOnboarding] Navigating to dashboard...')
+      
+      // Restore location before navigating
+      Object.defineProperty(window, 'location', locationDescriptor)
+      
       navigate('/caregiver/profile?view=caregiver&setup=pending')
     } catch (err) {
       console.error('[CaregiverOnboarding] Registration error:', err)
@@ -553,7 +573,16 @@ export default function CaregiverOnboarding() {
         status: err.status,
         stack: err.stack
       })
+      
+      // Show error in alert so user can see it
+      alert(`Registration Error:\n\n${err.message}\n\nStatus: ${err.status || 'unknown'}\n\nCheck console for full details.`)
+      
       throw err
+    } finally {
+      // Restore location if it was blocked
+      if (redirectBlocked) {
+        Object.defineProperty(window, 'location', locationDescriptor)
+      }
     }
   }
 
