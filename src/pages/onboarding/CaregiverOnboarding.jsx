@@ -470,21 +470,6 @@ export default function CaregiverOnboarding() {
   async function handleVerifyOTP(otp) {
     console.log('[CaregiverOnboarding] Starting OTP verification and registration')
     
-    // CRITICAL DEBUG: Prevent any redirects during this process
-    const originalLocation = window.location.href
-    let redirectBlocked = false
-    
-    // Block location changes
-    const locationDescriptor = Object.getOwnPropertyDescriptor(window, 'location')
-    Object.defineProperty(window, 'location', {
-      get: () => locationDescriptor.get.call(window),
-      set: (val) => {
-        console.error('[DEBUG] ❌ REDIRECT BLOCKED:', val)
-        redirectBlocked = true
-        alert(`Redirect blocked to: ${val}\n\nCheck console for error details.`)
-      }
-    })
-    
     try {
       // Step 1: Verify OTP and get verified token
       console.log('[CaregiverOnboarding] Verifying OTP...')
@@ -561,28 +546,25 @@ export default function CaregiverOnboarding() {
 
       // Navigate to dashboard where the data will be added
       console.log('[CaregiverOnboarding] Navigating to dashboard...')
-      
-      // Restore location before navigating
-      Object.defineProperty(window, 'location', locationDescriptor)
-      
       navigate('/caregiver/profile?view=caregiver&setup=pending')
     } catch (err) {
-      console.error('[CaregiverOnboarding] Registration error:', err)
-      console.error('[CaregiverOnboarding] Error details:', {
+      console.error('[CaregiverOnboarding] ❌❌❌ REGISTRATION ERROR ❌❌❌')
+      console.error('[CaregiverOnboarding] Error message:', err.message)
+      console.error('[CaregiverOnboarding] Error status:', err.status)
+      console.error('[CaregiverOnboarding] Full error:', err)
+      console.error('[CaregiverOnboarding] Stack trace:', err.stack)
+      
+      // Store error in sessionStorage so we can retrieve it after redirect
+      sessionStorage.setItem('cip_registration_error', JSON.stringify({
         message: err.message,
         status: err.status,
-        stack: err.stack
-      })
+        timestamp: Date.now()
+      }))
       
-      // Show error in alert so user can see it
-      alert(`Registration Error:\n\n${err.message}\n\nStatus: ${err.status || 'unknown'}\n\nCheck console for full details.`)
-      
+      // Don't throw - let the error handler in OTPVerification deal with it
+      // This prevents the component from breaking
+      alert(`Registration failed!\n\nError: ${err.message}\nStatus: ${err.status || 'unknown'}\n\nPlease check the console for details.`)
       throw err
-    } finally {
-      // Restore location if it was blocked
-      if (redirectBlocked) {
-        Object.defineProperty(window, 'location', locationDescriptor)
-      }
     }
   }
 
