@@ -480,16 +480,8 @@ export default function CaregiverOnboarding() {
         throw new Error('Invalid response from server - no verified token received.')
       }
 
-      // Step 2: Upload profile photo if provided
-      let photoUrl = ''
-      if (s2.photo) {
-        console.log('[CaregiverOnboarding] Uploading profile photo...')
-        const { url } = await uploadApi.avatar(s2.photo)
-        photoUrl = url
-        console.log('[CaregiverOnboarding] Photo uploaded:', photoUrl)
-      }
-
-      // Step 3: Register caregiver account (CORE PROFILE ONLY)
+      // Step 2: Register caregiver account WITHOUT photo first
+      // Photo will be uploaded after we have auth tokens
       console.log('[CaregiverOnboarding] Registering caregiver account...')
       const registrationResponse = await caregiverApi.register({
         // Auth data
@@ -508,7 +500,7 @@ export default function CaregiverOnboarding() {
         yearsExp:       s2.years,
         bio:            s2.bio,
         carePhilosophy: s2.philosophy,
-        photoUrl,
+        photoUrl:       '',  // Will upload after registration
         careTypes:      s3.careTypes,
         careSettings:   s3.settings,
         skills:         s3.skills,
@@ -528,6 +520,22 @@ export default function CaregiverOnboarding() {
       
       console.log('[CaregiverOnboarding] Auth tokens set successfully')
       console.log('[CaregiverOnboarding] Registration complete!')
+      
+      // Step 5: Upload photo NOW that we have auth tokens
+      if (s2.photo) {
+        console.log('[CaregiverOnboarding] Uploading profile photo with auth token...')
+        try {
+          const { url } = await uploadApi.avatar(s2.photo)
+          console.log('[CaregiverOnboarding] Photo uploaded:', url)
+          
+          // Update profile with photo URL
+          await caregiverApi.updateMe({ photoUrl: url })
+          console.log('[CaregiverOnboarding] Profile updated with photo')
+        } catch (photoErr) {
+          console.error('[CaregiverOnboarding] Photo upload failed (non-fatal):', photoErr.message)
+          // Don't block registration if photo upload fails
+        }
+      }
       
       // NEW APPROACH: Store credentials and employment in sessionStorage to add AFTER login
       // This completely eliminates the token replication timing issue
