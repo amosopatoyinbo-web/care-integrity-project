@@ -94,6 +94,91 @@ export default function CaregiverProfile() {
     load()
   }, [viewMode, params])
 
+  // Process pending profile data from registration (credentials & employment)
+  useEffect(() => {
+    async function processPendingData() {
+      // Only process if this is caregiver viewing their own profile AND setup=pending in URL
+      if (!isCaregiver || params.get('setup') !== 'pending') return
+      
+      const pendingDataStr = sessionStorage.getItem('cip_pending_profile_data')
+      if (!pendingDataStr) return
+      
+      try {
+        const pendingData = JSON.parse(pendingDataStr)
+        console.log('[CaregiverProfile] Processing pending registration data:', pendingData)
+        
+        // Process credentials
+        if (pendingData.credentials && pendingData.credentials.length > 0) {
+          console.log('[CaregiverProfile] Adding', pendingData.credentials.length, 'credentials...')
+          for (const cred of pendingData.credentials) {
+            try {
+              // Upload document if exists
+              let documentUrl = ''
+              if (cred.doc) {
+                console.log('[CaregiverProfile] Uploading credential document:', cred.name)
+                const { uploadApi } = await import('../../lib/api')
+                const { path } = await uploadApi.document(cred.doc)
+                documentUrl = path
+              }
+              
+              // Add credential
+              await caregiverApi.addCredential({
+                name: cred.name,
+                org: cred.org,
+                issuedDate: cred.date,
+                expiryDate: cred.expiry,
+                documentUrl
+              })
+              console.log('[CaregiverProfile] ✅ Added credential:', cred.name)
+            } catch (err) {
+              console.error('[CaregiverProfile] Failed to add credential:', cred.name, err.message)
+            }
+          }
+        }
+        
+        // Process employment
+        if (pendingData.employment && pendingData.employment.length > 0) {
+          console.log('[CaregiverProfile] Adding', pendingData.employment.length, 'employment records...')
+          for (const emp of pendingData.employment) {
+            try {
+              await caregiverApi.addEmployment({
+                orgName: emp.org,
+                role: emp.role,
+                startDate: emp.start,
+                endDate: emp.end || undefined,
+                setting: emp.setting,
+                responsibilities: emp.responsibilities
+              })
+              console.log('[CaregiverProfile] ✅ Added employment:', emp.org, emp.role)
+            } catch (err) {
+              console.error('[CaregiverProfile] Failed to add employment:', emp.org, err.message)
+            }
+          }
+        }
+        
+        // Clear pending data and remove setup parameter from URL
+        sessionStorage.removeItem('cip_pending_profile_data')
+        console.log('[CaregiverProfile] ✅ Pending data processing complete')
+        
+        // Reload profile to show new data
+        const data = await caregiverApi.getMe()
+        setProfile(data)
+        
+        // Remove setup=pending from URL without triggering navigation
+        const newParams = new URLSearchParams(params)
+        newParams.delete('setup')
+        window.history.replaceState({}, '', `?${newParams.toString()}`)
+        
+      } catch (err) {
+        console.error('[CaregiverProfile] Error processing pending data:', err.message)
+      }
+    }
+    
+    // Delay processing to ensure auth tokens are ready
+    const timer = setTimeout(processPendingData, 1000)
+    return () => clearTimeout(timer)
+  }, [isCaregiver, params])
+
   if (loading) return (
     <div className="cp-page">
       <div className="cp-topbar">

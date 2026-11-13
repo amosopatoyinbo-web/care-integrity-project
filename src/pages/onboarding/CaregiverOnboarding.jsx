@@ -467,31 +467,6 @@ export default function CaregiverOnboarding() {
     }
   }
 
-  /**
-   * Helper function to retry failed API calls due to MongoDB replica lag
-   * Implements exponential backoff for 401 errors during post-registration flow
-   * FIX: Handles race condition where tokens haven't replicated to secondary nodes yet
-   */
-  async function retryWithBackoff(fn, maxRetries = 5, baseDelay = 2000) {
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      try {
-        return await fn()
-      } catch (err) {
-        // Only retry on 401 errors (auth issues due to replica lag)
-        if (err.status === 401 && attempt < maxRetries) {
-          const delay = baseDelay * Math.pow(1.5, attempt - 1) // Exponential backoff: 2s, 3s, 4.5s, 6.75s, 10s
-          console.log(`[Retry] Attempt ${attempt} failed with 401, retrying in ${delay}ms...`)
-          console.log(`[Retry] Error message:`, err.message)
-          await new Promise(resolve => setTimeout(resolve, delay))
-          continue
-        }
-        // For other errors or max retries reached, throw
-        console.error(`[Retry] Max retries (${maxRetries}) reached or non-401 error:`, err.message)
-        throw err
-      }
-    }
-  }
-
   async function handleVerifyOTP(otp) {
     console.log('[CaregiverOnboarding] Starting OTP verification and registration')
     try {
@@ -513,7 +488,7 @@ export default function CaregiverOnboarding() {
         console.log('[CaregiverOnboarding] Photo uploaded:', photoUrl)
       }
 
-      // Step 3: Register caregiver account
+      // Step 3: Register caregiver account (CORE PROFILE ONLY)
       console.log('[CaregiverOnboarding] Registering caregiver account...')
       const registrationResponse = await caregiverApi.register({
         // Auth data
@@ -550,72 +525,27 @@ export default function CaregiverOnboarding() {
       auth.setTokens(accessToken, refreshToken)
       auth.setUser(user)
       
-      // FIX: Increase delay to ensure:
-      // 1. localStorage writes complete across all browsers
-      // 2. MongoDB replication completes to secondary nodes
-      // 3. Tokens are available when credentials/employment endpoints are called
-      // Increased to 3 seconds for more reliable replication
-      console.log('[CaregiverOnboarding] Waiting 3 seconds for database replication...')
-      await new Promise(resolve => setTimeout(resolve, 3000)) // Increased from 2000ms to 3000ms
-      
       console.log('[CaregiverOnboarding] Auth tokens set successfully')
-      console.log('[CaregiverOnboarding] Stored access token:', localStorage.getItem('cip_access')?.substring(0, 20) + '...')
-      console.log('[CaregiverOnboarding] Stored user:', JSON.parse(localStorage.getItem('cip_user')))
-
-      // Step 5: Upload credential documents and add credentials
-      console.log('[CaregiverOnboarding] Processing credentials...')
-      try {
-        const credentialsWithUrls = await Promise.all(
-          s4.credentials
-            .filter(c => c.name && c.org)
-            .map(async c => {
-              let documentUrl = ''
-              if (c.doc) {
-                console.log('[CaregiverOnboarding] Uploading credential document:', c.name)
-                const { path } = await uploadApi.document(c.doc)
-                documentUrl = path
-              }
-              return { name: c.name, org: c.org, issuedDate: c.date, expiryDate: c.expiry, documentUrl }
-            })
-        )
-
-        for (const cred of credentialsWithUrls) {
-          console.log('[CaregiverOnboarding] Adding credential:', cred.name)
-          // FIX: Use retry logic to handle MongoDB replica lag
-          await retryWithBackoff(() => caregiverApi.addCredential(cred))
+      console.log('[CaregiverOnboarding] Registration complete!')
+      
+      // NEW APPROACH: Store credentials and employment in sessionStorage to add AFTER login
+      // This completely eliminates the token replication timing issue
+      if (s4.credentials.length > 0 || s4.employment.length > 0) {
+        console.log('[CaregiverOnboarding] Storing credentials and employment for post-registration processing...')
+        
+        const pendingData = {
+          credentials: s4.credentials.filter(c => c.name && c.org),
+          employment: s4.employment.filter(e => e.org && e.role && e.start),
+          timestamp: Date.now()
         }
-        console.log('[CaregiverOnboarding] All credentials added')
-      } catch (credErr) {
-        console.warn('[CaregiverOnboarding] Failed to add credentials after retries:', credErr.message)
-        console.warn('[CaregiverOnboarding] User can add credentials later from profile page')
-        // Don't throw - allow user to complete registration with partial data
+        
+        sessionStorage.setItem('cip_pending_profile_data', JSON.stringify(pendingData))
+        console.log('[CaregiverOnboarding] Stored', pendingData.credentials.length, 'credentials and', pendingData.employment.length, 'employment records')
       }
 
-      // Step 6: Add employment history
-      console.log('[CaregiverOnboarding] Processing employment history...')
-      try {
-        for (const emp of s4.employment.filter(e => e.org && e.role && e.start)) {
-          console.log('[CaregiverOnboarding] Adding employment:', emp.org, emp.role)
-          // FIX: Use retry logic to handle MongoDB replica lag
-          await retryWithBackoff(() => caregiverApi.addEmployment({
-            orgName:          emp.org,
-            role:             emp.role,
-            startDate:        emp.start,
-            endDate:          emp.end || undefined,
-            setting:          emp.setting,
-            responsibilities: emp.responsibilities,
-          }))
-        }
-        console.log('[CaregiverOnboarding] All employment records added')
-      } catch (empErr) {
-        console.warn('[CaregiverOnboarding] Failed to add employment after retries:', empErr.message)
-        console.warn('[CaregiverOnboarding] User can add employment later from profile page')
-        // Don't throw - allow user to complete registration with partial data
-      }
-
-      // Step 7: Navigate to dashboard
-      console.log('[CaregiverOnboarding] Registration complete! Navigating to dashboard...')
-      navigate('/caregiver/profile?view=caregiver')
+      // Navigate to dashboard where the data will be added
+      console.log('[CaregiverOnboarding] Navigating to dashboard...')
+      navigate('/caregiver/profile?view=caregiver&setup=pending')
     } catch (err) {
       console.error('[CaregiverOnboarding] Registration error:', err)
       console.error('[CaregiverOnboarding] Error details:', {
