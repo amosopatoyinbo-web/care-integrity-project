@@ -76,6 +76,14 @@ async function request(path, options = {}, retry = true, isPostRegistration = fa
         return request(path, options, false, false) // Don't retry again or add delay
       }
       
+      // CRITICAL DEBUG: Log the exact 401 error details before redirecting
+      console.error(`[API] ❌ 401 AUTHENTICATION FAILED`)
+      console.error(`[API] Path: ${path}`)
+      console.error(`[API] Error: ${data.error || 'Unknown error'}`)
+      console.error(`[API] Token exists: ${!!token}`)
+      console.error(`[API] IsPostRegistration: ${isPostRegistration}`)
+      console.error(`[API] User: ${JSON.stringify(auth.getUser())}`)
+      
       // FIX: Don't auto-redirect during post-registration flow - let retry logic handle it
       if (!isPostRegistration) {
         console.warn(`[API] Token refresh failed, clearing auth and redirecting`)
