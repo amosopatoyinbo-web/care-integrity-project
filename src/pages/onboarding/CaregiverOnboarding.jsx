@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+﻿import { useState, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import ProgressBar from '../../components/onboarding/ProgressBar'
 import ChipSelect from '../../components/onboarding/ChipSelect'
@@ -15,19 +15,19 @@ const CARE_TYPES      = ['Activities of Daily Living', 'Medication Reminders', '
 const SKILLS          = ['CPR Certified', 'First Aid', 'Dementia Training', 'Fall Prevention', 'Communication', 'Documentation', 'Empathy & Patience', 'Crisis Response', 'Cultural Competency']
 
 const STANDARDS = [
-  { num: '01', name: 'Compassion',          tagline: 'See the person—not just the task.' },
+  { num: '01', name: 'Compassion',          tagline: 'See the personâ€”not just the task.' },
   { num: '02', name: 'Dependability',        tagline: 'Be someone people can count on.' },
   { num: '03', name: 'Accountability',       tagline: 'Take responsibility for your actions.' },
   { num: '04', name: 'Safety',               tagline: 'Pay attention. Speak up. Act responsibly.' },
   { num: '05', name: 'Communication',        tagline: 'Clear. Respectful. Timely.' },
   { num: '06', name: 'Dignity & Respect',    tagline: 'Every person deserves both.' },
   { num: '07', name: 'Professionalism',      tagline: 'Treat caregiving like the profession it is.' },
-  { num: '08', name: 'Integrity',            tagline: 'Do the right thing—even when no one is watching.' },
+  { num: '08', name: 'Integrity',            tagline: 'Do the right thingâ€”even when no one is watching.' },
   { num: '09', name: 'Advocacy',             tagline: 'When something matters, speak up appropriately.' },
   { num: '10', name: 'Person-Centered Care', tagline: 'Put the person before the task list.' },
 ]
 
-/* ── Shared form components ───────────────────────────── */
+/* â”€â”€ Shared form components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 function Field({ label, id, required, hint, error, children }) {
   return (
@@ -47,7 +47,7 @@ function Input({ id, type = 'text', placeholder, value, onChange, ...rest }) {
 function Select({ id, options, value, onChange }) {
   return (
     <select id={id} className="ob-select" value={value} onChange={e => onChange(e.target.value)}>
-      <option value="">Select…</option>
+      <option value="">Selectâ€¦</option>
       {options.map(o => <option key={o} value={o}>{o}</option>)}
     </select>
   )
@@ -56,7 +56,7 @@ function Textarea({ id, placeholder, value, onChange, rows = 4 }) {
   return <textarea id={id} className="ob-textarea" placeholder={placeholder} value={value} onChange={e => onChange(e.target.value)} rows={rows} />
 }
 
-/* ── Steps ────────────────────────────────────────────── */
+/* â”€â”€ Steps â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 function Step1({ data, set, error, validationErrors }) {
   const [showPassword, setShowPassword] = useState(false)
@@ -71,7 +71,7 @@ function Step1({ data, set, error, validationErrors }) {
         <p className="ob-step__sub">Start building your professional caregiving profile.</p>
       </div>
       <div className="ob-privacy-notice" role="note">
-        <span aria-hidden="true">🔒</span>
+        <span aria-hidden="true">ðŸ”’</span>
         <p>Your phone number and email are <strong>private</strong> and will not appear on your public profile.</p>
       </div>
       {error && <p className="ob-error ob-error--banner" role="alert">{error}</p>}
@@ -82,7 +82,7 @@ function Step1({ data, set, error, validationErrors }) {
         <div style={{ position: 'relative' }}>
           <Input id="password" type={showPassword ? "text" : "password"} placeholder="Create a password" value={data.password} onChange={v => set('password', v)} style={{ paddingRight: '45px' }} />
           <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#666', fontSize: '18px' }} aria-label={showPassword ? "Hide password" : "Show password"}>
-            {showPassword ? '👁️' : '👁️‍🗨️'}
+            {showPassword ? 'ðŸ‘ï¸' : 'ðŸ‘ï¸â€ðŸ—¨ï¸'}
           </button>
         </div>
       </Field>
@@ -90,7 +90,7 @@ function Step1({ data, set, error, validationErrors }) {
         <div style={{ position: 'relative' }}>
           <Input id="confirm" type={showConfirm ? "text" : "password"} placeholder="Repeat your password" value={data.confirm} onChange={v => set('confirm', v)} style={{ paddingRight: '45px' }} />
           <button type="button" onClick={() => setShowConfirm(!showConfirm)} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#666', fontSize: '18px' }} aria-label={showConfirm ? "Hide password" : "Show password"}>
-            {showConfirm ? '👁️' : '👁️‍🗨️'}
+            {showConfirm ? 'ðŸ‘ï¸' : 'ðŸ‘ï¸â€ðŸ—¨ï¸'}
           </button>
         </div>
       </Field>
@@ -128,7 +128,7 @@ function Step2({ data, set, validationErrors }) {
       </div>
       <div className="ob-photo-upload">
         <div className="ob-photo-upload__preview">
-          {data.photoPreview ? <img src={data.photoPreview} alt="Profile preview" /> : <span aria-hidden="true">📷</span>}
+          {data.photoPreview ? <img src={data.photoPreview} alt="Profile preview" /> : <span aria-hidden="true">ðŸ“·</span>}
         </div>
         <div className="ob-photo-upload__actions">
           <button type="button" className="btn btn-blue-outline btn-sm" onClick={() => photoRef.current.click()}>Upload Photo</button>
@@ -174,7 +174,7 @@ function Step2({ data, set, validationErrors }) {
       )}
       
       <Field label="Years of Experience" id="years" required error={validationErrors.years}>
-        <Select id="years" options={['Less than 1 year', '1–2 years', '3–5 years', '6–10 years', '10+ years']} value={data.years} onChange={v => set('years', v)} />
+        <Select id="years" options={['Less than 1 year', '1â€“2 years', '3â€“5 years', '6â€“10 years', '10+ years']} value={data.years} onChange={v => set('years', v)} />
       </Field>
       <Field label="Primary Service Area" id="serviceArea" required hint="City, region, or zip code." error={validationErrors.serviceArea}>
         <Input id="serviceArea" placeholder="e.g. Seattle, WA" value={data.serviceArea} onChange={v => set('serviceArea', v)} />
@@ -263,7 +263,7 @@ function Step4({ data, set }) {
           </div>
           <Field label="Care Setting" id={`eset-${i}`}><Select id={`eset-${i}`} options={CARE_SETTINGS} value={e.setting} onChange={v => updateEmp(i, 'setting', v)} /></Field>
           <Field label="Key Responsibilities" id={`eresp-${i}`} hint="Brief description.">
-            <Textarea id={`eresp-${i}`} placeholder="Describe your responsibilities…" value={e.responsibilities} onChange={v => updateEmp(i, 'responsibilities', v)} rows={3} />
+            <Textarea id={`eresp-${i}`} placeholder="Describe your responsibilitiesâ€¦" value={e.responsibilities} onChange={v => updateEmp(i, 'responsibilities', v)} rows={3} />
           </Field>
         </div>
       ))}
@@ -298,7 +298,7 @@ function Step5({ data, set }) {
   )
 }
 
-/* ── Main component ───────────────────────────────────── */
+/* â”€â”€ Main component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 export default function CaregiverOnboarding() {
   const [step, setStep]       = useState(1)
@@ -529,8 +529,24 @@ export default function CaregiverOnboarding() {
           console.log('[CaregiverOnboarding] Photo uploaded:', url)
           
           // Update profile with photo URL
+
+          
           await caregiverApi.updateMe({ photoUrl: url })
+
+          
           console.log('[CaregiverOnboarding] Profile updated with photo')
+
+          
+          
+
+          
+          // Fetch the updated profile to pass to navigation
+
+          
+          const updatedProfile = await caregiverApi.getMe()
+
+          
+          console.log('[CaregiverOnboarding] Fetched updated profile with photo')
         } catch (photoErr) {
           console.error('[CaregiverOnboarding] Photo upload failed (non-fatal):', photoErr.message)
           // Don't block registration if photo upload fails
@@ -552,11 +568,33 @@ export default function CaregiverOnboarding() {
         console.log('[CaregiverOnboarding] Stored', pendingData.credentials.length, 'credentials and', pendingData.employment.length, 'employment records')
       }
 
-      // Navigate to dashboard where the data will be added
-      console.log('[CaregiverOnboarding] Navigating to dashboard...')
-      navigate('/caregiver/profile?view=caregiver&setup=pending')
+      // Navigate to profile page with updated profile data
+
+
+      console.log('[CaregiverOnboarding] Navigating to profile page...')
+
+
+      
+
+
+      // Pass updated profile via navigation state if photo was uploaded
+
+
+      const navigationState = s2.photo && typeof updatedProfile !== 'undefined' 
+
+
+        ? { updatedProfile, setupPending: true }
+
+
+        : { setupPending: true }
+
+
+      
+
+
+      navigate('/caregiver/profile?view=caregiver&setup=pending', { state: navigationState })
     } catch (err) {
-      console.error('[CaregiverOnboarding] ❌❌❌ REGISTRATION ERROR ❌❌❌')
+      console.error('[CaregiverOnboarding] âŒâŒâŒ REGISTRATION ERROR âŒâŒâŒ')
       console.error('[CaregiverOnboarding] Error message:', err.message)
       console.error('[CaregiverOnboarding] Error status:', err.status)
       console.error('[CaregiverOnboarding] Full error:', err)
@@ -636,7 +674,7 @@ export default function CaregiverOnboarding() {
         <div className="ob-form__actions">
           {step > 1 && (
             <button type="button" className="btn btn-blue-outline" onClick={() => { setValidationErrors({}); setApiError(''); setStep(s => s - 1) }}>
-              ← Back
+              â† Back
             </button>
           )}
           {step < 5 ? (
@@ -645,7 +683,7 @@ export default function CaregiverOnboarding() {
             </button>
           ) : (
             <button type="submit" className="btn btn-green" disabled={!canAdvance() || loading}>
-              {loading ? 'Creating Profile…' : 'Create Profile'}
+              {loading ? 'Creating Profileâ€¦' : 'Create Profile'}
             </button>
           )}
         </div>
