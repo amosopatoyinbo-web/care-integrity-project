@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { caregiverApi, requestApi, recognitionApi, auth, authApi, verificationApi } from '../../lib/api'
 import TrainingTab from '../../components/training/TrainingTab'
 import './CaregiverDashboard.css'
@@ -201,6 +201,7 @@ function RequestCard({ req, onRefresh }) {
 export default function CaregiverDashboard() {
   const [tab, setTab]               = useState('requests')
   const navigate                    = useNavigate()
+  const location                    = useLocation()
   const [profile, setProfile]       = useState(null)
   const [requests, setRequests]     = useState([])
   const [recognition, setRecognition] = useState([])
@@ -212,16 +213,39 @@ export default function CaregiverDashboard() {
     setLoading(true)
     setError('')
     try {
-      const [prof, reqs] = await Promise.all([
-        caregiverApi.getMe(),
-        requestApi.list(),
-      ])
-      setProfile(prof)
-      setRequests(reqs || [])
+      // ?? KEY FIX: Check location state for updated profile first (avoids stale cache)
+      const updatedProfile = location.state?.updatedProfile
+      
+      if (updatedProfile) {
+        // Use fresh profile from navigation state
+        console.log('[CaregiverDashboard] Using updated profile from navigation state')
+        setProfile(updatedProfile)
+        
+        // Load requests and recognition
+        const reqs = await requestApi.list()
+        setRequests(reqs || [])
+        
+        if (updatedProfile._id) {
+          const rec = await recognitionApi.getByCaregiverId(updatedProfile._id)
+          setRecognition(rec || [])
+        }
+        
+        // Clear navigation state to prevent persistence
+        window.history.replaceState({}, document.title)
+      } else {
+        // Fall back to API fetch when no navigation state
+        console.log('[CaregiverDashboard] Loading profile from API')
+        const [prof, reqs] = await Promise.all([
+          caregiverApi.getMe(),
+          requestApi.list(),
+        ])
+          setProfile(prof)
+        setRequests(reqs || [])
 
-      if (prof?._id) {
-        const rec = await recognitionApi.getByCaregiverId(prof._id)
-        setRecognition(rec || [])
+        if (prof?._id) {
+          const rec = await recognitionApi.getByCaregiverId(prof._id)
+          setRecognition(rec || [])
+        }
       }
     } catch (err) {
       // 404 = user logged in but never completed onboarding — prompt them to finish
@@ -235,7 +259,7 @@ export default function CaregiverDashboard() {
     }
   }, [])
 
-  useEffect(() => { loadData() }, [loadData])
+  useEffect(() => { loadData() }, [loadData, location])
 
   const pending  = requests.filter(r => r.status === 'pending')
   const accepted = requests.filter(r => r.status === 'accepted')

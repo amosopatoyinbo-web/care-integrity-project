@@ -34,6 +34,7 @@ export default function CaregiverProfileEdit() {
 
   const [photoFile, setPhotoFile] = useState(null)
   const [photoPreview, setPhotoPreview] = useState('')
+  const [uploadedUrl, setUploadedUrl] = useState('')
 
   // Load existing profile
   useEffect(() => {
@@ -78,10 +79,14 @@ export default function CaregiverProfileEdit() {
       if (photoFile) {
         const { url } = await uploadApi.avatar(photoFile)
         photoUrl = url
+        
+        // 🔥 KEY FIX: Update preview with R2 URL immediately (replaces blob URL)
+        setPhotoPreview(url)
+        setUploadedUrl(url)
       }
 
       // Update profile
-      await caregiverApi.updateMe({
+      const updatedProfile = await caregiverApi.updateMe({
         fullName: profile.fullName,
         role: profile.role,
         employmentStatus: profile.employmentStatus,
@@ -101,8 +106,11 @@ export default function CaregiverProfileEdit() {
         workAreas: profile.workAreas,
       })
 
+      // 🔥 KEY FIX: Update local state with server response
+      setProfile(updatedProfile)
+
       setSuccess(true)
-      setTimeout(() => navigate('/caregiver/dashboard'), 1500)
+      setTimeout(() => navigate('/caregiver/dashboard', { state: { updatedProfile: updatedProfile } }), 1500)
     } catch (err) {
       setError(err.message || 'Failed to update profile. Please try again.')
       setSaving(false)

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { agencyApi, requestApi, recognitionApi, verificationApi, accountabilityApi, auth, authApi } from '../../lib/api'
 import './AgencyDashboard.css'
 
@@ -80,6 +80,7 @@ function AccountabilityForm({ agencyId, caregiverId, onDone, onRefresh }) {
 export default function AgencyDashboard() {
   const [tab, setTab]                   = useState('overview')
   const navigate                        = useNavigate()
+  const location                        = useLocation()
   const [agency, setAgency]             = useState(null)
   const [requests, setRequests]         = useState([])
   const [recognition, setRecognition]   = useState([])
@@ -94,18 +95,41 @@ export default function AgencyDashboard() {
     setLoading(true)
     setError('')
     try {
-      const [ag, reqs, acct, pv] = await Promise.all([
-        agencyApi.getMe(),
-        requestApi.list(),
-        accountabilityApi.list(),
+      // ?? KEY FIX: Check location state for updated profile first (avoids stale cache)
+      const updatedProfile = location.state?.updatedProfile
+      
+      if (updatedProfile) {
+        // Use fresh profile from navigation state
+        console.log('[AgencyDashboard] Using updated profile from navigation state')
+        setAgency(updatedProfile)
+        
+        // Load other data
+        const [reqs, acct, pv] = await Promise.all([
+          requestApi.list(),
+          accountabilityApi.list(),
         verificationApi.getPending(),
       ])
-      setAgency(ag)
-      setRequests(reqs || [])
-      setAcct(acct || [])
-      setPendingVerif(pv || [])
+        setRequests(reqs || [])
+        setAcct(acct || [])
+        setPendingVerif(pv || [])
+        
+        // Clear navigation state to prevent persistence
+        window.history.replaceState({}, document.title)
+      } else {
+        // Fall back to API fetch when no navigation state
+        console.log('[AgencyDashboard] Loading profile from API')
+        const [ag, reqs2, acct2, pv2] = await Promise.all([
+          agencyApi.getMe(),
+          requestApi.list(),
+          accountabilityApi.list(),
+          verificationApi.getPending(),
+        ])
+        setAgency(ag)
+        setRequests(reqs2 || [])
+        setAcct(acct2 || [])
+        setPendingVerif(pv2 || [])
 
-      if (ag?._id) {
+        if (ag?._id) {
         const rec = await recognitionApi.getByAgencyId(ag._id).catch(() => [])
         setRecognition(rec || [])
       }
@@ -121,7 +145,7 @@ export default function AgencyDashboard() {
     }
   }, [])
 
-  useEffect(() => { loadData() }, [loadData])
+  useEffect(() => { loadData() }, [loadData, location])
 
   const pending  = requests.filter(r => r.status === 'pending')
   const accepted = requests.filter(r => r.status === 'accepted')

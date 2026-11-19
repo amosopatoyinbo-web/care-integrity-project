@@ -28,6 +28,7 @@ export default function AgencyProfileEdit() {
 
   const [logoFile, setLogoFile] = useState(null)
   const [logoPreview, setLogoPreview] = useState('')
+  const [uploadedUrl, setUploadedUrl] = useState('')
 
   // Load existing profile
   useEffect(() => {
@@ -72,10 +73,14 @@ export default function AgencyProfileEdit() {
       if (logoFile) {
         const { url } = await uploadApi.logo(logoFile)
         logoUrl = url
+        
+        // ?? KEY FIX: Update preview with R2 URL immediately (replaces blob URL)
+        setLogoPreview(url)
+        setUploadedUrl(url)
       }
 
       // Update profile
-      await agencyApi.updateMe({
+      const updatedProfile = await agencyApi.updateMe({
         name: profile.name,
         orgType: profile.orgType,
         location: profile.location,
@@ -91,8 +96,11 @@ export default function AgencyProfileEdit() {
         focus: profile.focus,
       })
 
+      // ?? KEY FIX: Update local state with server response
+      setProfile(updatedProfile)
+
       setSuccess(true)
-      setTimeout(() => navigate('/agency/dashboard'), 1500)
+      setTimeout(() => navigate('/agency/dashboard', { state: { updatedProfile: updatedProfile } }), 1500)
     } catch (err) {
       setError(err.message || 'Failed to update profile. Please try again.')
       setSaving(false)
