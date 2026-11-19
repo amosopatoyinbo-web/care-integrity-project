@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback } from 'react'
+﻿import { useState, useEffect, useCallback } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { agencyApi, requestApi, recognitionApi, verificationApi, accountabilityApi, auth, authApi } from '../../lib/api'
 import './AgencyDashboard.css'
 
-/* ── Badges ───────────────────────────────────────────── */
+/* â”€â”€ Badges â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const REQ_STATUS = {
   pending:  { label: 'Pending',   cls: 'adb-badge--pending'  },
   accepted: { label: 'Accepted',  cls: 'adb-badge--accepted' },
@@ -26,7 +26,7 @@ function VerifBadge({ status }) {
   return <span className={`adb-badge ${s.cls}`}>{s.label}</span>
 }
 
-/* ── Accountability form ──────────────────────────────── */
+/* â”€â”€ Accountability form â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function AccountabilityForm({ agencyId, caregiverId, onDone, onRefresh }) {
   const [fact, setFact]         = useState('')
   const [evidence, setEvidence] = useState('')
@@ -57,26 +57,26 @@ function AccountabilityForm({ agencyId, caregiverId, onDone, onRefresh }) {
       </div>
       <div>
         <label style={{ display: 'block', fontSize: '0.84rem', fontWeight: 600, marginBottom: 5 }}>
-          Fact — what happened <span style={{ color: '#c0392b' }}>*</span>
+          Fact â€” what happened <span style={{ color: '#c0392b' }}>*</span>
         </label>
-        <textarea className="adb-textarea" rows={4} placeholder="Describe what was observed…" value={fact} onChange={e => setFact(e.target.value)} required />
+        <textarea className="adb-textarea" rows={4} placeholder="Describe what was observedâ€¦" value={fact} onChange={e => setFact(e.target.value)} required />
       </div>
       <div>
         <label style={{ display: 'block', fontSize: '0.84rem', fontWeight: 600, marginBottom: 5 }}>Supporting Evidence (optional)</label>
-        <textarea className="adb-textarea" rows={3} placeholder="Any additional context or documentation…" value={evidence} onChange={e => setEvidence(e.target.value)} />
+        <textarea className="adb-textarea" rows={3} placeholder="Any additional context or documentationâ€¦" value={evidence} onChange={e => setEvidence(e.target.value)} />
       </div>
       {error && <p style={{ color: '#c0392b', fontSize: '0.82rem' }}>{error}</p>}
       <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
         <button type="button" className="btn btn-blue-outline btn-sm" onClick={onDone}>Cancel</button>
         <button type="submit" className="btn btn-blue btn-sm" disabled={!fact.trim() || loading}>
-          {loading ? 'Submitting…' : 'Submit Concern'}
+          {loading ? 'Submittingâ€¦' : 'Submit Concern'}
         </button>
       </div>
     </form>
   )
 }
 
-/* ── Main dashboard ───────────────────────────────────── */
+/* â”€â”€ Main dashboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 export default function AgencyDashboard() {
   const [tab, setTab]                   = useState('overview')
   const navigate                        = useNavigate()
@@ -130,11 +130,12 @@ export default function AgencyDashboard() {
         setPendingVerif(pv2 || [])
 
         if (ag?._id) {
-        const rec = await recognitionApi.getByAgencyId(ag._id).catch(() => [])
-        setRecognition(rec || [])
+          const rec = await recognitionApi.getByAgencyId(ag._id).catch(() => [])
+          setRecognition(rec || [])
       }
+    }
     } catch (err) {
-      // 404 = user logged in but never completed agency onboarding — send them to finish it
+      // 404 = user logged in but never completed agency onboarding â€” send them to finish it
       if (err.status === 404 || err.message?.toLowerCase().includes('not found')) {
         navigate('/agency/register', { replace: true })
         return
@@ -152,7 +153,7 @@ export default function AgencyDashboard() {
   const declined = requests.filter(r => r.status === 'declined')
 
   const STAT_CARDS = [
-    { key: 'caregivers',     label: 'Caregivers',              value: '—',                        sub: 'Browse profiles',              color: 'var(--trust-blue)' },
+    { key: 'caregivers',     label: 'Caregivers',              value: 'â€”',                        sub: 'Browse profiles',              color: 'var(--trust-blue)' },
     { key: 'requests',       label: 'Interview Requests',      value: requests.length,             sub: `${pending.length} awaiting`,   color: 'var(--integrity-green)' },
     { key: 'verifications',  label: 'Employment Verifications',value: pendingVerif.length,         sub: 'Pending review',               color: 'var(--calm-aqua)' },
     { key: 'recognition',    label: 'Recognition Given',       value: recognition.length,          sub: 'All time',                     color: 'var(--accent-gold)' },
@@ -162,7 +163,7 @@ export default function AgencyDashboard() {
   if (loading) return (
     <div className="adb-page">
       <div className="adb-topbar"><Link to="/"><img src="/Main Logo.png" alt="The Care Integrity Project" style={{ height: 42 }} /></Link></div>
-      <div style={{ textAlign: 'center', padding: '80px 24px', color: 'var(--charcoal-light)' }}>Loading dashboard…</div>
+      <div style={{ textAlign: 'center', padding: '80px 24px', color: 'var(--charcoal-light)' }}>Loading dashboardâ€¦</div>
     </div>
   )
 
@@ -216,12 +217,12 @@ export default function AgencyDashboard() {
 
         <main className="adb-main">
 
-          {/* ── Overview ── */}
+          {/* â”€â”€ Overview â”€â”€ */}
           {tab === 'overview' && (
             <>
               <div className="adb-welcome">
                 <h1 className="adb-welcome__heading">Welcome, {agency?.name}</h1>
-                <p className="adb-welcome__sub">{agency?.location} · {agency?.size}</p>
+                <p className="adb-welcome__sub">{agency?.location} Â· {agency?.size}</p>
               </div>
 
               <div className="adb-stat-grid">
@@ -249,14 +250,14 @@ export default function AgencyDashboard() {
               <div className="adb-panel">
                 <div className="adb-panel__header">
                   <span className="adb-section-title">Recent Interview Requests</span>
-                  <button className="adb-panel__viewall" onClick={() => setTab('requests')}>View all →</button>
+                  <button className="adb-panel__viewall" onClick={() => setTab('requests')}>View all â†’</button>
                 </div>
                 {requests.slice(0, 3).map(r => (
                   <div key={r._id} className="adb-list-item">
                     <div className="adb-list-item__avatar">{r.caregiverId?.fullName?.split(' ').map(n=>n[0]).join('') || 'CG'}</div>
                     <div className="adb-list-item__body">
                       <div className="adb-list-item__name">{r.caregiverId?.fullName}</div>
-                      <div className="adb-list-item__meta">{r.reason} · {new Date(r.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+                      <div className="adb-list-item__meta">{r.reason} Â· {new Date(r.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
                     </div>
                     <RequestBadge status={r.status} />
                   </div>
@@ -266,7 +267,7 @@ export default function AgencyDashboard() {
             </>
           )}
 
-          {/* ── Requests ── */}
+          {/* â”€â”€ Requests â”€â”€ */}
           {tab === 'requests' && (
             <div className="adb-panel">
               <div className="adb-panel__header"><span className="adb-section-title">Interview Requests</span></div>
@@ -282,8 +283,8 @@ export default function AgencyDashboard() {
                     <div key={r._id} className="adb-list-item">
                       <div className="adb-list-item__avatar">{r.caregiverId?.fullName?.split(' ').map(n=>n[0]).join('') || 'CG'}</div>
                       <div className="adb-list-item__body">
-                        <div className="adb-list-item__name">{r.caregiverId?.fullName} <span className="adb-list-item__role">— {r.caregiverId?.role}</span></div>
-                        <div className="adb-list-item__meta">Reason: {r.reason} · Sent: {new Date(r.createdAt).toLocaleDateString()}</div>
+                        <div className="adb-list-item__name">{r.caregiverId?.fullName} <span className="adb-list-item__role">â€” {r.caregiverId?.role}</span></div>
+                        <div className="adb-list-item__meta">Reason: {r.reason} Â· Sent: {new Date(r.createdAt).toLocaleDateString()}</div>
                         {r.caregiverResponse && <div className="adb-caregiver-response">{r.caregiverResponse}</div>}
                       </div>
                       <RequestBadge status={r.status} />
@@ -298,7 +299,7 @@ export default function AgencyDashboard() {
             </div>
           )}
 
-          {/* ── Verifications ── */}
+          {/* â”€â”€ Verifications â”€â”€ */}
           {tab === 'verifications' && (
             <div className="adb-panel">
               <div className="adb-section-title" style={{ marginBottom: 12 }}>Employment Verification</div>
@@ -308,7 +309,7 @@ export default function AgencyDashboard() {
                   <div className="adb-list-item__avatar">{item.caregiverName?.split(' ').map(n=>n[0]).join('') || 'CG'}</div>
                   <div className="adb-list-item__body">
                     <div className="adb-list-item__name">{item.caregiverName}</div>
-                    <div className="adb-list-item__meta">{item.employment?.role} · {item.employment?.startDate} – {item.employment?.endDate || 'Present'}</div>
+                    <div className="adb-list-item__meta">{item.employment?.role} Â· {item.employment?.startDate} â€“ {item.employment?.endDate || 'Present'}</div>
                   </div>
                   <div style={{ display: 'flex', gap: 8 }}>
                     <button className="btn btn-green btn-sm" onClick={async () => {
@@ -325,7 +326,7 @@ export default function AgencyDashboard() {
             </div>
           )}
 
-          {/* ── Recognition ── */}
+          {/* â”€â”€ Recognition â”€â”€ */}
           {tab === 'recognition' && (
             <div className="adb-panel">
               <div className="adb-section-title" style={{ marginBottom: 12 }}>Professional Recognition</div>
@@ -335,7 +336,7 @@ export default function AgencyDashboard() {
                   <div className="adb-list-item__avatar">{r.caregiverId?.fullName?.split(' ').map(n=>n[0]).join('') || 'CG'}</div>
                   <div className="adb-list-item__body">
                     <div className="adb-list-item__name">{r.caregiverId?.fullName}</div>
-                    <div className="adb-list-item__meta">Standard: <strong>{r.standard}</strong> · {new Date(r.createdAt).toLocaleDateString()}</div>
+                    <div className="adb-list-item__meta">Standard: <strong>{r.standard}</strong> Â· {new Date(r.createdAt).toLocaleDateString()}</div>
                   </div>
                   <span className="adb-badge adb-badge--accepted">Recognized</span>
                 </div>
@@ -346,18 +347,18 @@ export default function AgencyDashboard() {
             </div>
           )}
 
-          {/* ── Accountability ── */}
+          {/* â”€â”€ Accountability â”€â”€ */}
           {tab === 'accountability' && (
             <div className="adb-panel">
               <div className="adb-section-title" style={{ marginBottom: 12 }}>Accountability</div>
-              <p className="adb-panel__note">Document concerns using the FACT → EVIDENCE → RESPONSE → RESOLUTION process. Caregivers are always given an opportunity to respond.</p>
+              <p className="adb-panel__note">Document concerns using the FACT â†’ EVIDENCE â†’ RESPONSE â†’ RESOLUTION process. Caregivers are always given an opportunity to respond.</p>
               {accountability.length > 0 ? accountability.map((a, i) => (
                 <div key={i} className="adb-list-item">
                   <div className="adb-list-item__avatar">{a.caregiverId?.fullName?.split(' ').map(n=>n[0]).join('') || 'CG'}</div>
                   <div className="adb-list-item__body">
                     <div className="adb-list-item__name">{a.caregiverId?.fullName}</div>
-                    <div className="adb-list-item__meta">Status: <strong>{a.status?.replace('_', ' ')}</strong> · {new Date(a.createdAt).toLocaleDateString()}</div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--charcoal-light)', marginTop: 3 }}>{a.fact?.slice(0, 80)}…</div>
+                    <div className="adb-list-item__meta">Status: <strong>{a.status?.replace('_', ' ')}</strong> Â· {new Date(a.createdAt).toLocaleDateString()}</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--charcoal-light)', marginTop: 3 }}>{a.fact?.slice(0, 80)}â€¦</div>
                   </div>
                   <span className={`adb-badge ${a.status === 'resolved' ? 'adb-badge--accepted' : 'adb-badge--pending'}`}>
                     {a.status === 'resolved' ? 'Resolved' : 'Pending'}
@@ -384,7 +385,7 @@ export default function AgencyDashboard() {
             </div>
           )}
 
-          {/* ── Caregivers ── */}
+          {/* â”€â”€ Caregivers â”€â”€ */}
           {tab === 'caregivers' && (
             <div className="adb-panel">
               <div className="adb-section-title" style={{ marginBottom: 12 }}>Caregivers</div>
@@ -395,7 +396,7 @@ export default function AgencyDashboard() {
             </div>
           )}
 
-          {/* ── Profile ── */}
+          {/* â”€â”€ Profile â”€â”€ */}
           {tab === 'profile' && agency && (
             <div className="adb-panel">
               <div className="adb-section-title" style={{ marginBottom: 16 }}>Organization Profile</div>
@@ -406,7 +407,7 @@ export default function AgencyDashboard() {
                   </div>
                   <div className="adb-org-profile-card__info">
                     <div className="adb-org-card__name">{agency.name}</div>
-                    <div className="adb-org-card__meta">{agency.orgType} · {agency.location}</div>
+                    <div className="adb-org-card__meta">{agency.orgType} Â· {agency.location}</div>
                     <VerifBadge status={agency.verificationStatus} />
                   </div>
                 </div>
