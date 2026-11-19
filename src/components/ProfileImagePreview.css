@@ -1,0 +1,118 @@
+﻿/* ProfileImagePreview Component Styles */
+
+.profile-image-preview {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f9f9f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Placeholder */
+.profile-image-preview__placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px;
+  text-align: center;
+  color: #999;
+  border: 2px dashed #ddd;
+  border-radius: 6px;
+  width: calc(100% - 16px);
+  height: calc(100% - 16px);
+}
+
+.profile-image-preview__icon {
+  width: 48px;
+  height: 48px;
+  color: #ccc;
+}
+
+.profile-image-preview__text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+}
+
+/* Image */
+.profile-image-preview__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.3s ease;
+}
+
+.profile-image-preview__image--loading {
+  opacity: 0;
+}
+
+/* Loading state */
+.profile-image-preview__loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(249, 249, 249, 0.9);
+}
+
+.profile-image-preview__spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e0e0e0;
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .profile-image-preview {
+    width: 160px;
+    height: 160px;
+  }
+
+  .profile-image-preview__icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .profile-image-preview__text {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-image-preview {
+    width: 140px;
+    height: 140px;
+  }
+
+  .profile-image-preview__icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .profile-image-preview__text {
+    font-size: 12px;
+  }
+
+  .profile-image-preview__spinner {
+    width: 32px;
+    height: 32px;
+    border-width: 3px;
+  }
+}
