@@ -467,8 +467,49 @@ export default function CaregiverOnboarding() {
     }
   }
 
-  async function handleVerifyOTP(otp) {
+    async function handleVerifyOTP(otp) {
     console.log('[CaregiverOnboarding] Starting OTP verification and registration')
+    
+    // Helper function to upload credential documents
+    async function uploadCredentialDocuments(credentials) {
+      console.log('[CaregiverOnboarding] Uploading', credentials.length, 'credential documents...')
+      const processed = []
+      
+      for (const cred of credentials) {
+        try {
+          let documentUrl = ''
+          
+          // Only upload if there's a File object
+          if (cred.doc && cred.doc instanceof File) {
+            console.log('[CaregiverOnboarding] Uploading document for:', cred.name)
+            const { url } = await uploadApi.document(cred.doc)
+            documentUrl = url
+            console.log('[CaregiverOnboarding] ✓ Document uploaded:', cred.name)
+          }
+          
+          // Store credential with URL, not File object
+          processed.push({
+            name: cred.name,
+            org: cred.org,
+            issuedDate: cred.date,
+            expiryDate: cred.expiry,
+            documentUrl  // String URL, not File
+          })
+        } catch (err) {
+          console.error('[CaregiverOnboarding] ✗ Document upload failed for', cred.name, ':', err.message)
+          // Store without document URL on failure
+          processed.push({
+            name: cred.name,
+            org: cred.org,
+            issuedDate: cred.date,
+            expiryDate: cred.expiry,
+            documentUrl: ''
+          })
+        }
+      }
+      
+      return processed
+    }
     
     try {
       // Step 1: Verify OTP and get verified token
@@ -513,7 +554,7 @@ export default function CaregiverOnboarding() {
         throw new Error('Registration succeeded but tokens were not returned. Please contact support.')
       }
 
-      // Step 4: Set authentication tokens and user data
+      // Step 3: Set authentication tokens and user data
       console.log('[CaregiverOnboarding] Setting auth tokens and user data...')
       auth.setTokens(accessToken, refreshToken)
       auth.setUser(user)
@@ -521,7 +562,9 @@ export default function CaregiverOnboarding() {
       console.log('[CaregiverOnboarding] Auth tokens set successfully')
       console.log('[CaregiverOnboarding] Registration complete!')
       
-      // Step 5: Upload photo NOW that we have auth tokens
+      // Step 4: Upload photo NOW that we have auth tokens (FIXED: declare updatedProfile outside if block)
+      let updatedProfile = null  // FIX: Declare outside if block
+      
       if (s2.photo) {
         console.log('[CaregiverOnboarding] Uploading profile photo with auth token...')
         try {
@@ -529,23 +572,11 @@ export default function CaregiverOnboarding() {
           console.log('[CaregiverOnboarding] Photo uploaded:', url)
           
           // Update profile with photo URL
-
-          
           await caregiverApi.updateMe({ photoUrl: url })
-
-          
           console.log('[CaregiverOnboarding] Profile updated with photo')
-
-          
-          
-
           
           // Fetch the updated profile to pass to navigation
-
-          
-          const updatedProfile = await caregiverApi.getMe()
-
-          
+          updatedProfile = await caregiverApi.getMe()  // FIX: Assign to outer variable
           console.log('[CaregiverOnboarding] Fetched updated profile with photo')
         } catch (photoErr) {
           console.error('[CaregiverOnboarding] Photo upload failed (non-fatal):', photoErr.message)
@@ -553,13 +584,18 @@ export default function CaregiverOnboarding() {
         }
       }
       
-      // NEW APPROACH: Store credentials and employment in sessionStorage to add AFTER login
-      // This completely eliminates the token replication timing issue
-      if (s4.credentials.length > 0 || s4.employment.length > 0) {
-        console.log('[CaregiverOnboarding] Storing credentials and employment for post-registration processing...')
+      // Step 5: Upload credential documents NOW that we have auth tokens (NEW)
+      const filteredCredentials = s4.credentials.filter(c => c.name && c.org)
+      const processedCredentials = filteredCredentials.length > 0 
+        ? await uploadCredentialDocuments(filteredCredentials)
+        : []
+      
+      // Step 6: Store processed data in sessionStorage (URLs not Files)
+      if (processedCredentials.length > 0 || s4.employment.length > 0) {
+        console.log('[CaregiverOnboarding] Storing processed credentials and employment...')
         
         const pendingData = {
-          credentials: s4.credentials.filter(c => c.name && c.org),
+          credentials: processedCredentials,  // Already have document URLs
           employment: s4.employment.filter(e => e.org && e.role && e.start),
           timestamp: Date.now()
         }
@@ -568,33 +604,17 @@ export default function CaregiverOnboarding() {
         console.log('[CaregiverOnboarding] Stored', pendingData.credentials.length, 'credentials and', pendingData.employment.length, 'employment records')
       }
 
-      // Navigate to profile page with updated profile data
-
-
+      // Step 7: Navigate to profile page with updated profile data (FIXED)
       console.log('[CaregiverOnboarding] Navigating to profile page...')
-
-
       
-
-
-      // Pass updated profile via navigation state if photo was uploaded
-
-
-      const navigationState = s2.photo && typeof updatedProfile !== 'undefined' 
-
-
+      // FIX: Use updatedProfile directly (now accessible)
+      const navigationState = updatedProfile 
         ? { updatedProfile, setupPending: true }
-
-
         : { setupPending: true }
-
-
       
-
-
       navigate('/caregiver/profile?view=caregiver&setup=pending', { state: navigationState })
     } catch (err) {
-      console.error('[CaregiverOnboarding] âŒâŒâŒ REGISTRATION ERROR âŒâŒâŒ')
+      console.error('[CaregiverOnboarding] ❌❌❌ REGISTRATION ERROR ❌❌❌')
       console.error('[CaregiverOnboarding] Error message:', err.message)
       console.error('[CaregiverOnboarding] Error status:', err.status)
       console.error('[CaregiverOnboarding] Full error:', err)
