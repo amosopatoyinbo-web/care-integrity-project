@@ -6,6 +6,7 @@ import OTPVerification from '../../components/OTPVerification'
 import { authApi, caregiverApi, uploadApi, auth } from '../../lib/api'
 import { PROFESSIONAL_ROLES, EMPLOYMENT_STATUS_OPTIONS, US_STATES, requiresLicense } from '../../constants/professionalCategories'
 import './CaregiverOnboarding.css'
+import { FiLock, FiEye, FiEyeOff, FiCamera } from 'react-icons/fi'
 
 const STEPS = ['Account', 'About You', 'Experience', 'Training', 'Commitment']
 
@@ -71,7 +72,7 @@ function Step1({ data, set, error, validationErrors }) {
         <p className="ob-step__sub">Start building your professional caregiving profile.</p>
       </div>
       <div className="ob-privacy-notice" role="note">
-        <span aria-hidden="true">ðŸ”’</span>
+        <FiLock aria-hidden="true" size={18} style={{ marginRight: "8px" }} />
         <p>Your phone number and email are <strong>private</strong> and will not appear on your public profile.</p>
       </div>
       {error && <p className="ob-error ob-error--banner" role="alert">{error}</p>}
@@ -82,7 +83,7 @@ function Step1({ data, set, error, validationErrors }) {
         <div style={{ position: 'relative' }}>
           <Input id="password" type={showPassword ? "text" : "password"} placeholder="Create a password" value={data.password} onChange={v => set('password', v)} style={{ paddingRight: '45px' }} />
           <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#666', fontSize: '18px' }} aria-label={showPassword ? "Hide password" : "Show password"}>
-            {showPassword ? 'ðŸ‘ï¸' : 'ðŸ‘ï¸â€ðŸ—¨ï¸'}
+            {showPassword ? <FiEye size={18} /> : <FiEyeOff size={18} />}
           </button>
         </div>
       </Field>
@@ -90,7 +91,7 @@ function Step1({ data, set, error, validationErrors }) {
         <div style={{ position: 'relative' }}>
           <Input id="confirm" type={showConfirm ? "text" : "password"} placeholder="Repeat your password" value={data.confirm} onChange={v => set('confirm', v)} style={{ paddingRight: '45px' }} />
           <button type="button" onClick={() => setShowConfirm(!showConfirm)} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#666', fontSize: '18px' }} aria-label={showConfirm ? "Hide password" : "Show password"}>
-            {showConfirm ? 'ðŸ‘ï¸' : 'ðŸ‘ï¸â€ðŸ—¨ï¸'}
+            {showConfirm ? <FiEye size={18} /> : <FiEyeOff size={18} />}
           </button>
         </div>
       </Field>
@@ -128,7 +129,7 @@ function Step2({ data, set, validationErrors }) {
       </div>
       <div className="ob-photo-upload">
         <div className="ob-photo-upload__preview">
-          {data.photoPreview ? <img src={data.photoPreview} alt="Profile preview" /> : <span aria-hidden="true">ðŸ“·</span>}
+          {data.photoPreview ? <img src={data.photoPreview} alt="Profile preview" /> : <FiLock aria-hidden="true" size={18} style={{ marginRight: "8px" }} />}
         </div>
         <div className="ob-photo-upload__actions">
           <button type="button" className="btn btn-blue-outline btn-sm" onClick={() => photoRef.current.click()}>Upload Photo</button>
