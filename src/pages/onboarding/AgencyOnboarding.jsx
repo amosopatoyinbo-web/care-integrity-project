@@ -1,10 +1,11 @@
-import { useState, useRef } from 'react'
+﻿import { useState, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import ProgressBar from '../../components/onboarding/ProgressBar'
 import ChipSelect from '../../components/onboarding/ChipSelect'
 import { authApi, agencyApi, uploadApi, auth } from '../../lib/api'
 import OTPVerification from '../../components/OTPVerification'
 import './AgencyOnboarding.css'
+import { FiEye, FiEyeOff } from 'react-icons/fi'
 
 const STEPS = ['Account', 'Organization', 'Services', 'Verification']
 
@@ -57,7 +58,7 @@ function Step1({ data, set, error, validationErrors }) {
         <div style={{ position: 'relative' }}>
           <Input id="password" type={showPassword ? "text" : "password"} placeholder="Create a password" value={data.password} onChange={v => set('password', v)} style={{ paddingRight: '45px' }} />
           <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#666', fontSize: '18px' }} aria-label={showPassword ? "Hide password" : "Show password"}>
-            {showPassword ? '👁️' : '👁️‍🗨️'}
+            {showPassword ? <FiEye size={18} /> : <FiEyeOff size={18} />}
           </button>
         </div>
       </Field>

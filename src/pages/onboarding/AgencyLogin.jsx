@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { authApi, auth } from '../../lib/api'
 import OTPVerification from '../../components/OTPVerification'
 import './Login.css'
+import { FiEye, FiEyeOff } from 'react-icons/fi'
 
 export default function AgencyLogin() {
   const navigate = useNavigate()
@@ -239,7 +240,7 @@ export default function AgencyLogin() {
                 }}
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
-                {showPassword ? '👁️' : '👁️‍🗨️'}
+                {showPassword ? <FiEye size={18} /> : <FiEyeOff size={18} />}
               </button>
             </div>
           </div>

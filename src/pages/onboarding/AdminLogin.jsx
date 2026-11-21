@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { authApi, auth } from '../../lib/api'
 import './Login.css'
+import { FiEye, FiEyeOff } from 'react-icons/fi'
 
 export default function AdminLogin() {
   const navigate = useNavigate()
@@ -162,7 +163,7 @@ export default function AdminLogin() {
                 }}
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
-                {showPassword ? '👁️' : '👁️‍🗨️'}
+                {showPassword ? <FiEye size={18} /> : <FiEyeOff size={18} />}
               </button>
             </div>
           </div>
