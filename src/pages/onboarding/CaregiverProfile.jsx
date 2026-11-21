@@ -263,7 +263,7 @@ export default function CaregiverProfile() {
             <Link to="/agency/dashboard" className="btn btn-blue-outline btn-sm">Agency Dashboard</Link>
           )}
           {previewMode && (
-            <button className="btn btn-blue btn-sm" onClick={() => setPreview(false)}>â† Exit Preview</button>
+            <button className="btn btn-blue btn-sm" onClick={() => setPreview(false)}>← Exit Preview</button>
           )}
         </div>
       </div>

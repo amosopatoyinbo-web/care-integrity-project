@@ -250,7 +250,7 @@ export default function AgencyDashboard() {
               <div className="adb-panel">
                 <div className="adb-panel__header">
                   <span className="adb-section-title">Recent Interview Requests</span>
-                  <button className="adb-panel__viewall" onClick={() => setTab('requests')}>View all â†’</button>
+                  <button className="adb-panel__viewall" onClick={() => setTab('requests')}>View all ←’</button>
                 </div>
                 {requests.slice(0, 3).map(r => (
                   <div key={r._id} className="adb-list-item">
@@ -351,7 +351,7 @@ export default function AgencyDashboard() {
           {tab === 'accountability' && (
             <div className="adb-panel">
               <div className="adb-section-title" style={{ marginBottom: 12 }}>Accountability</div>
-              <p className="adb-panel__note">Document concerns using the FACT â†’ EVIDENCE â†’ RESPONSE â†’ RESOLUTION process. Caregivers are always given an opportunity to respond.</p>
+              <p className="adb-panel__note">Document concerns using the FACT ←’ EVIDENCE ←’ RESPONSE ←’ RESOLUTION process. Caregivers are always given an opportunity to respond.</p>
               {accountability.length > 0 ? accountability.map((a, i) => (
                 <div key={i} className="adb-list-item">
                   <div className="adb-list-item__avatar">{a.caregiverId?.fullName?.split(' ').map(n=>n[0]).join('') || 'CG'}</div>

@@ -695,7 +695,7 @@ export default function CaregiverOnboarding() {
         <div className="ob-form__actions">
           {step > 1 && (
             <button type="button" className="btn btn-blue-outline" onClick={() => { setValidationErrors({}); setApiError(''); setStep(s => s - 1) }}>
-              â† Back
+              ← Back
             </button>
           )}
           {step < 5 ? (
