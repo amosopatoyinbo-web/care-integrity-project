@@ -218,8 +218,8 @@ function Step4({ data, set }) {
   const docRef = useRef()
   function addCredential() { set('credentials', [...data.credentials, { name: '', org: '', date: '', expiry: '', doc: null }]) }
   function updateCred(i, key, val) { const c = [...data.credentials]; c[i] = { ...c[i], [key]: val }; set('credentials', c) }
-  function addEmployment() { set('employment', [...data.employment, { org: '', role: '', start: '', end: '', setting: '', responsibilities: '' }]) }
-  function updateEmp(i, key, val) { const e = [...data.employment]; e[i] = { ...e[i], [key]: val }; set('employment', e) }
+  function addEmployment() { set('employment', [...data.employment, { org: '', role: '', start: '', end: '', current: false, setting: '', responsibilities: '' }]) }
+  function updateEmp(i, key, val) { const e = [...data.employment]; e[i] = { ...e[i], [key]: val }; if (key === 'current' && val) e[i].end = 'Present'; if (key === 'current' && !val && e[i].end === 'Present') e[i].end = ''; set('employment', e) }
 
   return (
     <div className="ob-step">
@@ -321,7 +321,7 @@ export default function CaregiverOnboarding() {
     years: '', serviceArea: '', bio: '', philosophy: '' 
   })
   const [s3, setS3] = useState({ careExp: [], settings: [], careTypes: [], skills: [] })
-  const [s4, setS4] = useState({ credentials: [{ name: '', org: '', date: '', expiry: '', doc: null }], employment: [{ org: '', role: '', start: '', end: '', setting: '', responsibilities: '' }] })
+  const [s4, setS4] = useState({ credentials: [{ name: '', org: '', date: '', expiry: '', doc: null }], employment: [{ org: '', role: '', start: '', end: '', current: false, setting: '', responsibilities: '' }] })
   const [s5, setS5] = useState({ committed: false })
 
   const navigate = useNavigate()
