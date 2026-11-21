@@ -175,7 +175,7 @@ function Step2({ data, set, validationErrors }) {
       )}
       
       <Field label="Years of Experience" id="years" required error={validationErrors.years}>
-        <Select id="years" options={['Less than 1 year', '1â€“2 years', '3â€“5 years', '6â€“10 years', '10+ years']} value={data.years} onChange={v => set('years', v)} />
+        <Select id="years" options={['Less than 1 year', '1–2 years', '3–5 years', '6–10 years', '10+ years']} value={data.years} onChange={v => set('years', v)} />
       </Field>
       <Field label="Primary Service Area" id="serviceArea" required hint="City, region, or zip code." error={validationErrors.serviceArea}>
         <Input id="serviceArea" placeholder="e.g. Seattle, WA" value={data.serviceArea} onChange={v => set('serviceArea', v)} />
