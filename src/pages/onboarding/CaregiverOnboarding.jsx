@@ -1,4 +1,4 @@
-﻿import { useState, useRef } from 'react'
+﻿﻿import { useState, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import ProgressBar from '../../components/onboarding/ProgressBar'
 import ChipSelect from '../../components/onboarding/ChipSelect'
@@ -48,7 +48,7 @@ function Input({ id, type = 'text', placeholder, value, onChange, ...rest }) {
 function Select({ id, options, value, onChange }) {
   return (
     <select id={id} className="ob-select" value={value} onChange={e => onChange(e.target.value)}>
-      <option value="">Selectâ€¦</option>
+      <option value="">Select…</option>
       {options.map(o => <option key={o} value={o}>{o}</option>)}
     </select>
   )
@@ -264,7 +264,7 @@ function Step4({ data, set }) {
           </div>
           <Field label="Care Setting" id={`eset-${i}`}><Select id={`eset-${i}`} options={CARE_SETTINGS} value={e.setting} onChange={v => updateEmp(i, 'setting', v)} /></Field>
           <Field label="Key Responsibilities" id={`eresp-${i}`} hint="Brief description.">
-            <Textarea id={`eresp-${i}`} placeholder="Describe your responsibilitiesâ€¦" value={e.responsibilities} onChange={v => updateEmp(i, 'responsibilities', v)} rows={3} />
+            <Textarea id={`eresp-${i}`} placeholder="Describe your responsibilities…" value={e.responsibilities} onChange={v => updateEmp(i, 'responsibilities', v)} rows={3} />
           </Field>
         </div>
       ))}
@@ -704,7 +704,7 @@ export default function CaregiverOnboarding() {
             </button>
           ) : (
             <button type="submit" className="btn btn-green" disabled={!canAdvance() || loading}>
-              {loading ? 'Creating Profileâ€¦' : 'Create Profile'}
+              {loading ? 'Creating Profile…' : 'Create Profile'}
             </button>
           )}
         </div>
