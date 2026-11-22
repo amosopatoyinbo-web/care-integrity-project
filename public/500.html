@@ -1,0 +1,75 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Server Error - The Care Integrity Project</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      background: linear-gradient(135deg, #0a2d52 0%, #1a4d7a 100%);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      text-align: center;
+      max-width: 600px;
+    }
+    h1 {
+      font-size: 120px;
+      font-weight: 800;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #ff6b6b 0%, #ffa8a8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    h2 {
+      font-size: 32px;
+      margin-bottom: 16px;
+      font-weight: 700;
+    }
+    p {
+      font-size: 18px;
+      margin-bottom: 40px;
+      opacity: 0.9;
+      line-height: 1.6;
+    }
+    .btn {
+      display: inline-block;
+      background: white;
+      color: #0a2d52;
+      padding: 16px 40px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 16px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      margin: 0 8px;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .btn-secondary {
+      background: transparent;
+      border: 2px solid white;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>500</h1>
+    <h2>Something Went Wrong</h2>
+    <p>We're experiencing technical difficulties. Our team has been notified and we're working to fix this. Please try again in a few moments.</p>
+    <a href="/" class="btn">Go Back Home</a>
+    <a href="javascript:location.reload()" class="btn btn-secondary">Refresh Page</a>
+  </div>
+</body>
+</html>
