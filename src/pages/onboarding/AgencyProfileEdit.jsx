@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { agencyApi, uploadApi } from '../../lib/api'
+import ProfileImagePreview from '../../components/ProfileImagePreview'
 import './AgencyOnboarding.css'
 
 export default function AgencyProfileEdit() {
@@ -71,12 +72,41 @@ export default function AgencyProfileEdit() {
       // Upload new logo if provided
       let logoUrl = profile.logoUrl
       if (logoFile) {
-        const { url } = await uploadApi.logo(logoFile)
-        logoUrl = url
-        
-        // ?? KEY FIX: Update preview with R2 URL immediately (replaces blob URL)
-        setLogoPreview(url)
-        setUploadedUrl(url)
+        try {
+          const { url } = await uploadApi.logo(logoFile)
+          logoUrl = url
+          
+          // ?? KEY FIX: Update preview with R2 URL immediately (replaces blob URL)
+          setLogoPreview(url)
+          setUploadedUrl(url)
+        } catch (uploadErr) {
+          // Classify and display user-friendly error messages based on error type
+          let errorMessage = 'Failed to upload logo. Please try again.'
+          
+          // Check for specific error types
+          if (uploadErr.status === 413 || uploadErr.message?.toLowerCase().includes('size') || uploadErr.message?.toLowerCase().includes('large')) {
+            errorMessage = 'Logo file is too large. Maximum size is 10MB.'
+          } else if (uploadErr.status === 400 || uploadErr.message?.toLowerCase().includes('type') || uploadErr.message?.toLowerCase().includes('format') || uploadErr.message?.toLowerCase().includes('invalid')) {
+            errorMessage = 'Invalid file type. Please upload JPG, PNG, or WEBP.'
+          } else if (uploadErr.message?.toLowerCase().includes('network') || uploadErr.message?.toLowerCase().includes('connection') || uploadErr.name === 'NetworkError') {
+            errorMessage = 'Failed to upload logo. Please check your connection and try again.'
+          }
+          
+          // Log error with context for debugging
+          console.error('[AgencyProfileEdit] Logo upload failed:', {
+            agencyId: profile._id,
+            operation: 'logo_upload',
+            fileName: logoFile.name,
+            fileSize: logoFile.size,
+            fileType: logoFile.type,
+            error: uploadErr.message || uploadErr,
+            status: uploadErr.status
+          })
+          
+          setError(errorMessage)
+          setSaving(false)
+          return
+        }
       }
 
       // Update profile
@@ -102,6 +132,11 @@ export default function AgencyProfileEdit() {
       setSuccess(true)
       setTimeout(() => navigate('/agency/dashboard', { state: { updatedProfile: updatedProfile } }), 1500)
     } catch (err) {
+      console.error('[AgencyProfileEdit] Profile update failed:', {
+        agencyId: profile._id,
+        operation: 'profile_update',
+        error: err.message || err
+      })
       setError(err.message || 'Failed to update profile. Please try again.')
       setSaving(false)
     }
@@ -153,11 +188,11 @@ export default function AgencyProfileEdit() {
           <div className="ob-field">
             <label className="ob-label">Organization Logo</label>
             <div className="ob-logo-upload">
-              {logoPreview ? (
-                <img src={logoPreview} alt="Logo preview" className="ob-logo-preview" />
-              ) : (
-                <div className="ob-logo-placeholder">No logo</div>
-              )}
+              <ProfileImagePreview 
+                preview={logoPreview} 
+                alt="Agency Logo Preview"
+                placeholder="No Logo"
+              />
               <input
                 type="file"
                 accept="image/*"

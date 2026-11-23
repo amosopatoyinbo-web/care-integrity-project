@@ -1,9 +1,10 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useSearchParams, useLocation } from 'react-router-dom'
 import InterviewRequestModal from './InterviewRequestModal'
 import { caregiverApi, recognitionApi, auth } from '../../lib/api'
 import trainingApi from '../../lib/trainingApi'
 import { formatTravelDistance, formatWorkAreas } from '../../constants/locations'
+import ProfileAvatar from '../../components/ProfileAvatar'
 import './CaregiverProfile.css'
 
 /* â”€â”€ Status badge map â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
@@ -259,7 +260,7 @@ export default function CaregiverProfile() {
               <Link to="/caregiver/dashboard" className="btn btn-blue btn-sm">My Dashboard</Link>
             </>
           )}
-          {(isAgency || !isCaregiver) && (
+          {isAgency && (
             <Link to="/agency/dashboard" className="btn btn-blue-outline btn-sm">Agency Dashboard</Link>
           )}
           {previewMode && (
@@ -281,16 +282,18 @@ export default function CaregiverProfile() {
         {/* Sidebar */}
         <aside className="cp-sidebar">
           <div className="cp-avatar-wrap">
-            {profile.photoUrl
-              ? <img src={profile.photoUrl} alt={profile.fullName} className="cp-avatar cp-avatar--photo" />
-              : <div className="cp-avatar">{initials}</div>
-            }
+            <ProfileAvatar 
+              photoUrl={profile.photoUrl} 
+              fullName={profile.fullName} 
+              size="medium"
+              alt={profile.fullName}
+            />
             <div className="cp-verified-ring" aria-label="Profile active" />
           </div>
 
           <h1 className="cp-name">{profile.fullName}</h1>
           <p className="cp-role">{profile.role}</p>
-          <p className="cp-meta">{profile.serviceArea}{profile.yearsExp ? ` Â· ${profile.yearsExp}` : ''}</p>
+          <p className="cp-meta">{profile.serviceArea}{profile.yearsExp ? ` · ${profile.yearsExp}` : ''}</p>
           <p className="cp-member">Member since {profile.memberSince || new Date(profile.createdAt).getFullYear()}</p>
 
           {/* Action button */}
@@ -327,7 +330,7 @@ export default function CaregiverProfile() {
               {recognition.map((r, i) => (
                 <div key={i} className="cp-recognition-item">
                   <span className="cp-recognition-standard">{r.standard}</span>
-                  <span className="cp-recognition-from">{r.agencyId?.name} Â· {new Date(r.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
+                  <span className="cp-recognition-from">{r.agencyId?.name} · {new Date(r.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
                 </div>
               ))}
             </div>
@@ -426,7 +429,7 @@ export default function CaregiverProfile() {
                       <div className="cp-entry-card__title">{c.name}</div>
                       <div className="cp-entry-card__sub">{c.org}</div>
                       <div className="cp-entry-card__dates">
-                        {c.issuedDate && `Issued ${c.issuedDate}`}{c.expiryDate ? ` Â· Expires ${c.expiryDate}` : ''}
+                        {c.issuedDate && `Issued ${c.issuedDate}`}{c.expiryDate ? ` · Expires ${c.expiryDate}` : ''}
                       </div>
                     </div>
                     <Badge status={c.status} />
@@ -481,7 +484,7 @@ export default function CaregiverProfile() {
                     <div>
                       <div className="cp-entry-card__title">{e.role}</div>
                       <div className="cp-entry-card__sub">{e.orgName}</div>
-                      <div className="cp-entry-card__dates">{e.startDate} â€“ {e.endDate || 'Present'}{e.setting ? ` Â· ${e.setting}` : ''}</div>
+                      <div className="cp-entry-card__dates">{e.startDate} â€“ {e.endDate || 'Present'}{e.setting ? ` · ${e.setting}` : ''}</div>
                     </div>
                     <Badge status={e.status} />
                   </div>

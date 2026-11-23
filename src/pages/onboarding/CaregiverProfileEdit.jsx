@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { caregiverApi, uploadApi, auth } from '../../lib/api'
 import { TRAVEL_DISTANCES, KENTUCKY_COUNTIES } from '../../constants/locations'
 import { PROFESSIONAL_ROLES, EMPLOYMENT_STATUS_OPTIONS, US_STATES, requiresLicense } from '../../constants/professionalCategories'
+import ProfileImagePreview from '../../components/ProfileImagePreview'
 import './CaregiverProfile.css'
 
 export default function CaregiverProfileEdit() {
@@ -77,12 +78,42 @@ export default function CaregiverProfileEdit() {
       // Upload new photo if provided
       let photoUrl = profile.photoUrl
       if (photoFile) {
-        const { url } = await uploadApi.avatar(photoFile)
-        photoUrl = url
-        
-        // 🔥 KEY FIX: Update preview with R2 URL immediately (replaces blob URL)
-        setPhotoPreview(url)
-        setUploadedUrl(url)
+        try {
+          const { url } = await uploadApi.avatar(photoFile)
+          photoUrl = url
+          
+          // 🔥 KEY FIX: Update preview with R2 URL immediately (replaces blob URL)
+          setPhotoPreview(url)
+          setUploadedUrl(url)
+        } catch (uploadErr) {
+          // Log error with context for debugging
+          console.error('[CaregiverProfileEdit] Image upload failed:', {
+            userId: auth.getUser()?.id,
+            operation: 'avatar_upload',
+            fileName: photoFile.name,
+            fileSize: photoFile.size,
+            fileType: photoFile.type,
+            error: uploadErr.message,
+            status: uploadErr.status
+          })
+
+          // Classify and display user-friendly error messages
+          let errorMessage = 'Failed to upload image. Please try again.'
+          
+          if (uploadErr.status === 413 || uploadErr.message?.toLowerCase().includes('size') || uploadErr.message?.toLowerCase().includes('large')) {
+            errorMessage = 'Image file is too large. Maximum size is 10MB.'
+          } else if (uploadErr.status === 400 || uploadErr.message?.toLowerCase().includes('type') || uploadErr.message?.toLowerCase().includes('format')) {
+            errorMessage = 'Invalid file type. Please upload JPG, PNG, or WEBP.'
+          } else if (uploadErr.status === 0 || uploadErr.message?.toLowerCase().includes('network') || uploadErr.message?.toLowerCase().includes('connection')) {
+            errorMessage = 'Failed to upload image. Please check your connection and try again.'
+          } else if (uploadErr.status === 408 || uploadErr.message?.toLowerCase().includes('timeout')) {
+            errorMessage = 'Upload timed out. Please try again.'
+          }
+          
+          setError(errorMessage)
+          setSaving(false)
+          return
+        }
       }
 
       // Update profile
@@ -112,6 +143,14 @@ export default function CaregiverProfileEdit() {
       setSuccess(true)
       setTimeout(() => navigate('/caregiver/dashboard', { state: { updatedProfile: updatedProfile } }), 1500)
     } catch (err) {
+      // Log profile update error with context
+      console.error('[CaregiverProfileEdit] Profile update failed:', {
+        userId: auth.getUser()?.id,
+        operation: 'profile_update',
+        error: err.message,
+        status: err.status
+      })
+      
       setError(err.message || 'Failed to update profile. Please try again.')
       setSaving(false)
     }
@@ -170,11 +209,11 @@ export default function CaregiverProfileEdit() {
           <div className="cp-field">
             <label className="cp-label">Profile Photo</label>
             <div className="cp-photo-upload">
-              {photoPreview ? (
-                <img src={photoPreview} alt="Preview" className="cp-photo-preview" />
-              ) : (
-                <div className="cp-photo-placeholder">No photo</div>
-              )}
+              <ProfileImagePreview 
+                preview={photoPreview} 
+                alt="Profile Photo Preview"
+                placeholder={profile?.fullName ? `${profile.fullName.charAt(0)}` : 'P'}
+              />
               <input
                 type="file"
                 accept="image/*"

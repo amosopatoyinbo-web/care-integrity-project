@@ -1,12 +1,12 @@
 /* ============================================================
-   THE CARE INTEGRITY PROJECT — API Client
+   THE CARE INTEGRITY PROJECT � API Client
    Centralises all fetch calls to the backend.
    Handles token storage, refresh, and error normalisation.
    ============================================================ */
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
 
-/* ── Token helpers ───────────────────────────────────────── */
+/* -- Token helpers ----------------------------------------- */
 
 export const auth = {
   getAccess:      () => localStorage.getItem('cip_access'),
@@ -18,7 +18,7 @@ export const auth = {
   isLoggedIn:     () => !!localStorage.getItem('cip_access'),
 }
 
-/* ── Core fetch wrapper ──────────────────────────────────── */
+/* -- Core fetch wrapper ------------------------------------ */
 
 async function request(path, options = {}, retry = true, isPostRegistration = false) {
   console.log(`[API] Request: ${options.method || 'GET'} ${path}`)
@@ -76,35 +76,13 @@ async function request(path, options = {}, retry = true, isPostRegistration = fa
         return request(path, options, false, false) // Don't retry again or add delay
       }
       
-      // CRITICAL DEBUG: Log the exact 401 error details before redirecting
-      console.error(`[API] ❌ 401 AUTHENTICATION FAILED`)
+      // Token refresh failed - clear auth and throw error (let React components handle navigation)
+      console.error(`[API] ? Token refresh failed`)
       console.error(`[API] Path: ${path}`)
-      console.error(`[API] Error: ${data.error || 'Unknown error'}`)
-      console.error(`[API] Token exists: ${!!token}`)
-      console.error(`[API] IsPostRegistration: ${isPostRegistration}`)
-      console.error(`[API] User: ${JSON.stringify(auth.getUser())}`)
-      
-      // FIX: Don't auto-redirect during post-registration flow - let retry logic handle it
-      if (!isPostRegistration) {
-        console.warn(`[API] Token refresh failed, clearing auth and redirecting`)
-        auth.clearTokens()
-        // Redirect to the appropriate login page based on stored role
-        const user = auth.getUser()
-        if (user?.role === 'admin') {
-          window.location.href = '/admin/login'
-        } else if (user?.role === 'agency') {
-          window.location.href = '/agency/login'
-        } else {
-          window.location.href = '/caregiver/login'
-        }
-        throw new Error('Session expired. Please log in again.')
-      } else {
-        // During registration flow, throw 401 to let retry logic handle it
-        console.warn(`[API] 401 during post-registration, throwing for retry logic`)
-        const err = new Error(data.error || 'Authentication failed')
-        err.status = 401
-        throw err
-      }
+      auth.clearTokens()
+      const err = new Error('Session expired. Please log in again.')
+      err.status = 401
+      throw err
     }
 
     if (!res.ok) {
@@ -156,7 +134,7 @@ async function tryRefresh() {
   } catch { return false }
 }
 
-/* ── Convenience methods ─────────────────────────────────── */
+/* -- Convenience methods ----------------------------------- */
 
 const api = {
   get:    (path, opts)   => request(path, { method: 'GET',    ...opts }),
@@ -169,7 +147,7 @@ const api = {
   postRegistration: (path, body) => request(path, { method: 'POST', body }, true, true),
 }
 
-/* ── Auth endpoints ──────────────────────────────────────── */
+/* -- Auth endpoints ---------------------------------------- */
 
 export const authApi = {
   register: async (data) => {
@@ -206,7 +184,7 @@ export const authApi = {
   resetPassword:  (email, verificationToken, newPassword) => api.post('/auth/reset-password', { email, verificationToken, newPassword }),
 }
 
-/* ── Caregiver endpoints ─────────────────────────────────── */
+/* -- Caregiver endpoints ----------------------------------- */
 
 export const caregiverApi = {
   register: async (data) => {
@@ -241,7 +219,7 @@ export const caregiverApi = {
   deleteById:           (id)        => api.delete(`/caregivers/${id}`),  // Admin only
 }
 
-/* ── Agency endpoints ────────────────────────────────────── */
+/* -- Agency endpoints -------------------------------------- */
 
 export const agencyApi = {
   register: async (data) => {
@@ -257,7 +235,7 @@ export const agencyApi = {
   deleteById: (id)      => api.delete(`/agencies/${id}`),  // Admin only
 }
 
-/* ── Interview request endpoints ─────────────────────────── */
+/* -- Interview request endpoints --------------------------- */
 
 export const requestApi = {
   list:     (status)      => api.get(`/requests${status ? `?status=${status}` : ''}`),
@@ -267,7 +245,7 @@ export const requestApi = {
   withdraw: (id)          => api.delete(`/requests/${id}`),
 }
 
-/* ── Recognition endpoints ───────────────────────────────── */
+/* -- Recognition endpoints --------------------------------- */
 
 export const recognitionApi = {
   getByCaregiverId: (caregiverId) => api.get(`/recognition?caregiverId=${caregiverId}`),
@@ -276,7 +254,7 @@ export const recognitionApi = {
   remove:           (id)          => api.delete(`/recognition/${id}`),
 }
 
-/* ── Verification endpoints ──────────────────────────────── */
+/* -- Verification endpoints -------------------------------- */
 
 export const verificationApi = {
   getPending:  ()                           => api.get('/verification/pending'),
@@ -284,7 +262,7 @@ export const verificationApi = {
   claim:       (employmentId, agencyName)   => api.post('/verification/claim', { employmentId, agencyName }),
 }
 
-/* ── Accountability endpoints ────────────────────────────── */
+/* -- Accountability endpoints ------------------------------ */
 
 export const accountabilityApi = {
   list:    ()       => api.get('/accountability'),
@@ -293,12 +271,77 @@ export const accountabilityApi = {
   getById: (id)     => api.get(`/accountability/${id}`),
 }
 
-/* ── Upload endpoints ────────────────────────────────────── */
+/* -- Upload endpoints -------------------------------------- */
+
+/**
+ * Validates that an image URL is from R2 storage and uses HTTPS protocol
+ * @param {string} url - The image URL to validate
+ * @throws {Error} If URL is invalid or not from R2 storage
+ * @returns {string} The validated URL
+ */
+function isValidImageUrl(url) {
+  if (!url || typeof url !== 'string') {
+    throw new Error('Invalid image URL: URL is required')
+  }
+
+  // Check HTTPS protocol requirement
+  if (!url.startsWith('https://')) {
+    console.error('[Upload Validation] Non-HTTPS URL detected:', url)
+    throw new Error('Invalid image URL: Must use HTTPS protocol')
+  }
+
+  // Check for R2 domain (r2.dev or r2.cloudflarestorage.com)
+  if (!url.includes('r2.dev') && !url.includes('r2.cloudflarestorage.com')) {
+    console.error('[Upload Validation] Non-R2 domain detected:', url)
+    throw new Error('Invalid image URL: Must be from R2 storage (r2.dev)')
+  }
+
+  console.log('[Upload Validation] URL validated successfully:', url)
+  return url
+}
 
 export const uploadApi = {
-  avatar:   (file) => { const f = new FormData(); f.append('file', file); return api.upload('/uploads/avatar', f) },
-  logo:     (file) => { const f = new FormData(); f.append('file', file); return api.upload('/uploads/logo', f) },
-  document: (file) => { const f = new FormData(); f.append('file', file); return api.upload('/uploads/document', f) },
+  avatar: async (file) => {
+    const f = new FormData()
+    f.append('file', file)
+    const response = await api.upload('/uploads/avatar', f)
+    
+    // Validate the returned URL before returning to caller
+    if (response && response.url) {
+      try {
+        isValidImageUrl(response.url)
+      } catch (error) {
+        console.error('[Upload] Avatar URL validation failed:', error.message)
+        throw error
+      }
+    }
+    
+    return response
+  },
+  
+  logo: async (file) => {
+    const f = new FormData()
+    f.append('file', file)
+    const response = await api.upload('/uploads/logo', f)
+    
+    // Validate the returned URL before returning to caller
+    if (response && response.url) {
+      try {
+        isValidImageUrl(response.url)
+      } catch (error) {
+        console.error('[Upload] Logo URL validation failed:', error.message)
+        throw error
+      }
+    }
+    
+    return response
+  },
+  
+  document: (file) => {
+    const f = new FormData()
+    f.append('file', file)
+    return api.upload('/uploads/document', f)
+  },
 }
 
 export default api

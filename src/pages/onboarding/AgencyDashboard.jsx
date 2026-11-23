@@ -1,6 +1,7 @@
 ﻿import { useState, useEffect, useCallback } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { agencyApi, requestApi, recognitionApi, verificationApi, accountabilityApi, auth, authApi } from '../../lib/api'
+import ProfileAvatar from '../../components/ProfileAvatar'
 import './AgencyDashboard.css'
 
 /* â”€â”€ Badges â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
@@ -402,9 +403,12 @@ export default function AgencyDashboard() {
               <div className="adb-section-title" style={{ marginBottom: 16 }}>Organization Profile</div>
               <div className="adb-org-profile-card">
                 <div className="adb-org-profile-card__top">
-                  <div className="adb-org-card__logo">
-                    {agency.logoUrl ? <img src={agency.logoUrl} alt={agency.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }} onError={(e) => { e.target.style.display='none'; e.target.parentElement.textContent = agency.name?.slice(0, 2).toUpperCase() }} /> : agency.name?.slice(0, 2).toUpperCase()}
-                  </div>
+                  <ProfileAvatar 
+                    photoUrl={agency.logoUrl} 
+                    fullName={agency.agencyName || agency.name} 
+                    size="large"
+                    alt={`${agency.name} logo`}
+                  />
                   <div className="adb-org-profile-card__info">
                     <div className="adb-org-card__name">{agency.name}</div>
                     <div className="adb-org-card__meta">{agency.orgType} Â· {agency.location}</div>

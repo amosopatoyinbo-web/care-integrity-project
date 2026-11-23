@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { caregiverApi, requestApi, recognitionApi, auth, authApi, verificationApi } from '../../lib/api'
 import TrainingTab from '../../components/training/TrainingTab'
+import ProfileAvatar from '../../components/ProfileAvatar'
 import './CaregiverDashboard.css'
 
 /* ── Status badge ─────────────────────────────────────── */
@@ -302,7 +303,11 @@ export default function CaregiverDashboard() {
         {/* Sidebar nav */}
         <nav className="cgd-nav" aria-label="Caregiver dashboard navigation">
           <div className="cgd-nav__greeting">
-            <div className="cgd-nav__avatar">{profile?.fullName?.split(' ').map(n => n[0]).join('').slice(0, 2) || 'CG'}</div>
+            <ProfileAvatar 
+              photoUrl={profile?.photoUrl} 
+              fullName={profile?.fullName} 
+              size="small" 
+            />
             <div>
               <div className="cgd-nav__name">{profile?.fullName || 'Caregiver'}</div>
               <div className="cgd-nav__role">{profile?.role || ''}</div>
@@ -361,6 +366,17 @@ export default function CaregiverDashboard() {
           {tab === 'profile' && (
             <div className="cgd-panel">
               <div className="cgd-panel__header"><h2 className="cgd-section-title">My Profile</h2></div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '24px', marginBottom: '24px', padding: '20px', background: 'var(--soft-cream)', borderRadius: 'var(--radius-md)' }}>
+                <ProfileAvatar 
+                  photoUrl={profile?.photoUrl} 
+                  fullName={profile?.fullName} 
+                  size="large" 
+                />
+                <div>
+                  <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--trust-blue)', marginBottom: '4px' }}>{profile?.fullName}</h3>
+                  <p style={{ fontSize: '1rem', color: 'var(--charcoal-light)', marginBottom: '8px' }}>{profile?.role}</p>
+                </div>
+              </div>
               <div className="cgd-profile-summary">
                 {[
                   ['Name',         profile?.fullName],

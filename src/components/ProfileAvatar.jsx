@@ -10,13 +10,21 @@ import './ProfileAvatar.css'
  * - Error handling with automatic fallback
  * - Size variants: small (50px), medium (100px), large (150px)
  * - Responsive and accessible
+ * 
+ * @param {string} photoUrl - URL of the profile image (optional)
+ * @param {string} fullName - Full name for initials fallback (supports 'name' alias)
+ * @param {'small'|'medium'|'large'} size - Avatar size variant (default: 'medium')
+ * @param {string} alt - Alt text for accessibility
  */
 export default function ProfileAvatar({ 
   photoUrl, 
-  name = 'User', 
+  fullName,
+  name, // Alias for fullName (backward compatibility)
   size = 'medium',
   alt = 'Profile avatar'
 }) {
+  // Support both 'fullName' and 'name' props for flexibility
+  const displayName = fullName || name || 'User'
   const [loading, setLoading] = useState(!!photoUrl)
   const [error, setError] = useState(false)
 
@@ -30,7 +38,7 @@ export default function ProfileAvatar({
     return name.slice(0, 2).toUpperCase()
   }
 
-  const initials = getInitials(name)
+  const initials = getInitials(displayName)
 
   // Handle image load success
   const handleLoad = () => {
