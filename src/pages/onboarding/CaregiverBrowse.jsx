@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { caregiverApi, auth, authApi } from '../../lib/api'
 import RecognitionModal from './RecognitionModal'
 import { formatTravelDistance, getCountyShortName } from '../../constants/locations'
@@ -22,7 +22,8 @@ export default function CaregiverBrowse() {
   const [total,      setTotal]      = useState(0)
   const [loading,    setLoading]    = useState(true)
   const [error,      setError]      = useState('')
-  const [search,     setSearch]     = useState('')
+  const [searchParams]               = useSearchParams()
+  const [search,     setSearch]     = useState(searchParams.get('q') || '')
   const [roleFilter, setRoleFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [areaFilter, setAreaFilter] = useState('')

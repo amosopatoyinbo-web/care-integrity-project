@@ -3,7 +3,27 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { caregiverApi, requestApi, recognitionApi, auth, authApi, verificationApi } from '../../lib/api'
 import TrainingTab from '../../components/training/TrainingTab'
 import ProfileAvatar from '../../components/ProfileAvatar'
+import { FiMenu, FiX, FiVideo, FiCalendar } from 'react-icons/fi'
 import './CaregiverDashboard.css'
+
+/* ── Helpers ──────────────────────────────────────────── */
+const pad = n => String(n).padStart(2, '0')
+/** Local-time value for <input type="datetime-local">. */
+function localInputValue(date) {
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`
+}
+const minProposeValue = () => localInputValue(new Date(Date.now() + 60 * 60 * 1000))
+const fmtDate = d => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+const fmtDateTime = d => new Date(d).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })
+
+const REQUEST_TABS = [
+  { key: 'all',       label: 'All',       match: () => true },
+  { key: 'pending',   label: 'Pending',   match: r => r.status === 'pending' },
+  { key: 'accepted',  label: 'Accepted',  match: r => r.status === 'accepted' },
+  { key: 'scheduled', label: 'Scheduled', match: r => r.status === 'scheduled' || r.status === 'completed' },
+  { key: 'hired',     label: 'Hired',     match: r => r.status === 'hired' },
+  { key: 'declined',  label: 'Declined',  match: r => r.status === 'declined' },
+]
 
 /* ── Status badge ─────────────────────────────────────── */
 const STATUS_MAP = {
@@ -125,12 +145,53 @@ function RespondPanel({ req, onDone, onRefresh }) {
 }
 
 /* ── Request card ─────────────────────────────────────── */
-function RequestCard({ req, onRefresh }) {
+function RequestCard({ req, onRefresh, onOpenEmployment }) {
   const [expanded, setExpanded]     = useState(false)
   const [respondOpen, setRespond]   = useState(false)
   const [declineOpen, setDecline]   = useState(false)
   const [loading, setLoading]       = useState(false)
   const [error, setError]           = useState('')
+  const [proposing, setProposing]   = useState(false)
+  const [proposeTime, setProposeTime] = useState('')
+  const [proposeNote, setProposeNote] = useState('')
+  const [schedBusy, setSchedBusy]   = useState(false)
+  const [schedError, setSchedError] = useState('')
+
+  async function handleConfirmSchedule() {
+    setSchedBusy(true)
+    setSchedError('')
+    try {
+      await requestApi.confirmSchedule(req._id)
+      onRefresh()
+    } catch (err) {
+      setSchedError(err.message || 'Could not confirm availability.')
+    } finally {
+      setSchedBusy(false)
+    }
+  }
+
+  async function handleProposeTime() {
+    const d = new Date(proposeTime)
+    if (!proposeTime || isNaN(d.getTime()) || d.getTime() < Date.now() + 60 * 60 * 1000) {
+      setSchedError('Please choose a time at least one hour from now.')
+      return
+    }
+    setSchedBusy(true)
+    setSchedError('')
+    try {
+      const body = { proposedTime: d.toISOString() }
+      if (proposeNote.trim()) body.note = proposeNote.trim()
+      await requestApi.proposeTime(req._id, body)
+      setProposing(false)
+      setProposeTime('')
+      setProposeNote('')
+      onRefresh()
+    } catch (err) {
+      setSchedError(err.message || 'Could not send your proposed time.')
+    } finally {
+      setSchedBusy(false)
+    }
+  }
 
   async function handleDecline(reason) {
     setLoading(true)
@@ -155,7 +216,7 @@ function RequestCard({ req, onRefresh }) {
     <>
       <div className="cgd-request-card">
         <div className="cgd-request-card__top">
-          <div className="cgd-avatar">{req.agencyId?.name?.slice(0, 2).toUpperCase() || 'AG'}</div>
+          <ProfileAvatar photoUrl={req.agencyId?.logoUrl} fullName={req.agencyId?.name || 'Agency'} size="small" alt={req.agencyId?.name || 'Agency'} />
           <div className="cgd-request-card__body">
             <div className="cgd-request-card__agency">{req.agencyId?.name || 'Unknown Agency'}</div>
             <div className="cgd-request-card__meta">{req.reason} · {new Date(req.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
@@ -175,31 +236,90 @@ function RequestCard({ req, onRefresh }) {
         )}
         {error && <p style={{ color: '#c0392b', fontSize: '0.8rem', marginTop: 6 }}>{error}</p>}
 
+        {req.status === 'accepted' && req.caregiverProposedTime && (
+          <div className="cgd-sched cgd-sched--waiting">
+            <strong>You suggested:</strong> {fmtDateTime(req.caregiverProposedTime)}
+            {req.caregiverProposedNote && <div className="cgd-sched__note">"{req.caregiverProposedNote}"</div>}
+            <div className="cgd-sched__hint">Waiting for the agency to choose a time.</div>
+          </div>
+        )}
+
         {req.status === 'scheduled' && (
-          <div className="request-scheduled">
-            <span className="status-badge scheduled">Interview Scheduled</span>
-            {req.scheduledAt && (
-              <p className="scheduled-time">
-                <strong>Scheduled:</strong> {new Date(req.scheduledAt).toLocaleString()}
-              </p>
+          <div className="cgd-sched">
+            <div className="cgd-sched__head">
+              <FiCalendar aria-hidden="true" />
+              <span>{req.scheduledAt ? fmtDateTime(req.scheduledAt) : 'Time to be confirmed'}</span>
+              {req.caregiverConfirmed && <span className="cgd-badge cgd-badge--accepted">Confirmed</span>}
+            </div>
+
+            {req.caregiverConfirmed ? (
+              <>
+                {req.meetLink && (
+                  <a href={req.meetLink} target="_blank" rel="noopener noreferrer" className="btn btn-green btn-sm cgd-tap">
+                    <FiVideo aria-hidden="true" /> Join Meeting
+                  </a>
+                )}
+                <p className="cgd-sched__hint">Check your email for reminders before the interview.</p>
+              </>
+            ) : (
+              <>
+                <p className="cgd-sched__hint">The agency proposed this time. Confirm it to receive the meeting link.</p>
+                {!proposing && (
+                  <div className="cgd-sched__actions">
+                    <button className="btn btn-green btn-sm cgd-tap" onClick={handleConfirmSchedule} disabled={schedBusy}>
+                      {schedBusy ? 'Confirming…' : 'Confirm Availability'}
+                    </button>
+                    <button className="btn btn-blue-outline btn-sm cgd-tap" onClick={() => { setProposing(true); setSchedError('') }} disabled={schedBusy}>
+                      Request Different Time
+                    </button>
+                  </div>
+                )}
+                {proposing && (
+                  <div className="cgd-sched__form">
+                    <label htmlFor={`propose-${req._id}`}>Suggest a different date &amp; time</label>
+                    <input
+                      id={`propose-${req._id}`}
+                      type="datetime-local"
+                      className="cgd-input"
+                      value={proposeTime}
+                      min={minProposeValue()}
+                      onChange={e => setProposeTime(e.target.value)}
+                    />
+                    <label htmlFor={`propose-note-${req._id}`}>Note (optional)</label>
+                    <textarea
+                      id={`propose-note-${req._id}`}
+                      className="cgd-respond-textarea"
+                      rows={2}
+                      maxLength={500}
+                      value={proposeNote}
+                      onChange={e => setProposeNote(e.target.value)}
+                      placeholder="Let the agency know why, or when else you are free."
+                    />
+                    <div className="cgd-sched__actions">
+                      <button className="btn btn-blue btn-sm cgd-tap" onClick={handleProposeTime} disabled={schedBusy || !proposeTime}>
+                        {schedBusy ? 'Sending…' : 'Send Proposed Time'}
+                      </button>
+                      <button className="btn btn-blue-outline btn-sm cgd-tap" onClick={() => { setProposing(false); setSchedError('') }} disabled={schedBusy}>
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
-            {req.meetLink && (
-              <a
-                href={req.meetLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="join-meeting-btn"
-              >
-                Join Meeting
-              </a>
-            )}
-            <p className="reminder-note">Check your email for reminders before the interview.</p>
+            {schedError && <p className="cgd-sched__error">{schedError}</p>}
           </div>
         )}
         {req.status === 'hired' && (
-          <div className="request-hired">
-            <span className="status-badge hired">Hired ✓</span>
-            <p>Congratulations! You have been hired{req.agencyId?.orgName ? ` by ${req.agencyId.orgName}` : (req.agencyId?.name ? ` by ${req.agencyId.name}` : '')}.</p>
+          <div className="request-hired cgd-hired">
+            <span className="cgd-badge cgd-badge--accepted">Hired</span>
+            <p>
+              Congratulations! You have been hired by <strong>{req.agencyId?.orgName || req.agencyId?.name || 'the agency'}</strong>
+              {req.hiredAt ? ` on ${fmtDate(req.hiredAt)}` : ''}.
+            </p>
+            {onOpenEmployment && (
+              <button className="cgd-action-link" onClick={onOpenEmployment}>View Employment History →</button>
+            )}
           </div>
         )}
         {req.status === 'completed' && (
@@ -245,6 +365,20 @@ export default function CaregiverDashboard() {
   const [loading, setLoading]       = useState(true)
   const [error, setError]           = useState('')
   const currentUser                 = auth.getUser()
+  const [reqTab, setReqTab]         = useState('all')
+  const [navOpen, setNavOpen]       = useState(false)
+
+  // Lock page scroll while the mobile drawer is open
+  useEffect(() => {
+    document.body.style.overflow = navOpen ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [navOpen])
+
+  const signOut = async () => {
+    await authApi.logout().catch(() => {})
+    auth.clearTokens()
+    navigate('/caregiver/login', { replace: true })
+  }
 
   const loadData = useCallback(async () => {
     setLoading(true)
@@ -321,23 +455,31 @@ export default function CaregiverDashboard() {
 
       {/* Topbar */}
       <div className="cgd-topbar">
-        <Link to="/" className="cgd-topbar__logo"><img src="/Main Logo.png" alt="The Care Integrity Project" /></Link>
-        <div className="cgd-topbar__right">
+        <div className="cgd-topbar__left">
+          <button
+            className="cgd-hamburger"
+            aria-label={navOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={navOpen}
+            onClick={() => setNavOpen(o => !o)}
+          >
+            {navOpen ? <FiX aria-hidden="true" /> : <FiMenu aria-hidden="true" />}
+          </button>
+          <Link to="/" className="cgd-topbar__logo"><img src="/Main Logo.png" alt="The Care Integrity Project" /></Link>
+        </div>
+        <div className="cgd-topbar__right cgd-topbar__desktop">
           <Link to="/caregiver/profile/edit" className="btn btn-green-outline btn-sm">Edit Profile</Link>
           <Link to="/caregiver/profile?view=caregiver" className="btn btn-blue-outline btn-sm">My Profile</Link>
           <Link to={`/caregiver/profile?id=${profile?._id}`} className="btn btn-blue btn-sm">Public Preview</Link>
-          <button className="btn btn-sm cgd-logout-btn" onClick={async () => {
-            await authApi.logout().catch(() => {})
-            auth.clearTokens()
-            navigate('/caregiver/login', { replace: true })
-          }}>Sign Out</button>
+          <button className="btn btn-sm cgd-logout-btn" onClick={signOut}>Sign Out</button>
         </div>
       </div>
 
+      {navOpen && <div className="cgd-backdrop" onClick={() => setNavOpen(false)} aria-hidden="true" />}
+
       <div className="cgd-layout">
 
-        {/* Sidebar nav */}
-        <nav className="cgd-nav" aria-label="Caregiver dashboard navigation">
+        {/* Sidebar nav (slides in as an overlay on mobile) */}
+        <nav className={`cgd-nav${navOpen ? ' cgd-nav--open' : ''}`} aria-label="Caregiver dashboard navigation">
           <div className="cgd-nav__greeting">
             <ProfileAvatar 
               photoUrl={profile?.photoUrl} 
@@ -357,11 +499,17 @@ export default function CaregiverDashboard() {
             { key: 'recognition', label: 'Recognition' },
             { key: 'standards',   label: 'Care Integrity Standards' },
           ].map(item => (
-            <button key={item.key} className={`cgd-nav__item${tab === item.key ? ' active' : ''}`} onClick={() => setTab(item.key)}>
+            <button key={item.key} className={`cgd-nav__item${tab === item.key ? ' active' : ''}`} onClick={() => { setTab(item.key); setNavOpen(false) }}>
               {item.label}
               {item.count > 0 && <span className="cgd-nav__count">{item.count}</span>}
             </button>
           ))}
+          <div className="cgd-nav__mobile-only">
+            <Link to="/caregiver/profile/edit" className="cgd-nav__item" onClick={() => setNavOpen(false)}>Edit Profile</Link>
+            <Link to="/caregiver/profile?view=caregiver" className="cgd-nav__item" onClick={() => setNavOpen(false)}>My Profile (full)</Link>
+            <Link to={`/caregiver/profile?id=${profile?._id}`} className="cgd-nav__item" onClick={() => setNavOpen(false)}>Public Preview</Link>
+            <button className="cgd-nav__item cgd-nav__item--danger" onClick={signOut}>Sign Out</button>
+          </div>
         </nav>
 
         {/* Main content */}
@@ -374,43 +522,29 @@ export default function CaregiverDashboard() {
                 <h2 className="cgd-section-title">Interview Requests</h2>
                 <p className="cgd-section-sub">You control whether to respond to any request.</p>
               </div>
-              {pending.length > 0 && (
-                <div className="cgd-request-group">
-                  <div className="cgd-request-group__label">New Requests ({pending.length})</div>
-                  {pending.map(r => <RequestCard key={r._id} req={r} onRefresh={loadData} />)}
-                </div>
-              )}
-              {accepted.length > 0 && (
-                <div className="cgd-request-group">
-                  <div className="cgd-request-group__label">Accepted ({accepted.length})</div>
-                  {accepted.map(r => <RequestCard key={r._id} req={r} onRefresh={loadData} />)}
-                </div>
-              )}
-              {declined.length > 0 && (
-                <div className="cgd-request-group">
-                  <div className="cgd-request-group__label">Declined ({declined.length})</div>
-                  {declined.map(r => <RequestCard key={r._id} req={r} onRefresh={loadData} />)}
-                </div>
-              )}
-              {requests.filter(r => r.status === 'scheduled').length > 0 && (
-                <div className="cgd-request-group">
-                  <div className="cgd-request-group__label">Interview Scheduled ({requests.filter(r => r.status === 'scheduled').length})</div>
-                  {requests.filter(r => r.status === 'scheduled').map(r => <RequestCard key={r._id} req={r} onRefresh={loadData} />)}
-                </div>
-              )}
-              {requests.filter(r => r.status === 'completed').length > 0 && (
-                <div className="cgd-request-group">
-                  <div className="cgd-request-group__label">Interview Completed ({requests.filter(r => r.status === 'completed').length})</div>
-                  {requests.filter(r => r.status === 'completed').map(r => <RequestCard key={r._id} req={r} onRefresh={loadData} />)}
-                </div>
-              )}
-              {requests.filter(r => r.status === 'hired').length > 0 && (
-                <div className="cgd-request-group">
-                  <div className="cgd-request-group__label">Hired ({requests.filter(r => r.status === 'hired').length})</div>
-                  {requests.filter(r => r.status === 'hired').map(r => <RequestCard key={r._id} req={r} onRefresh={loadData} />)}
-                </div>
-              )}
-              {requests.length === 0 && (
+              <div className="cgd-tabs" role="tablist" aria-label="Interview request status">
+                {REQUEST_TABS.map(t => {
+                  const count = requests.filter(t.match).length
+                  return (
+                    <button
+                      key={t.key}
+                      role="tab"
+                      aria-selected={reqTab === t.key}
+                      className={`cgd-tabs__tab${reqTab === t.key ? ' active' : ''}`}
+                      onClick={() => setReqTab(t.key)}
+                    >
+                      {t.label}
+                      <span className="cgd-tabs__count">{count}</span>
+                    </button>
+                  )
+                })}
+              </div>
+              {requests.filter(REQUEST_TABS.find(t => t.key === reqTab).match).map(r => (
+                <RequestCard key={r._id} req={r} onRefresh={loadData} onOpenEmployment={() => setTab('employment')} />
+              ))}
+              {requests.length > 0 && requests.filter(REQUEST_TABS.find(t => t.key === reqTab).match).length === 0 && (
+                <div className="cgd-empty">No requests in this category.</div>
+              )}              {requests.length === 0 && (
                 <div className="cgd-empty">No interview requests yet. Your profile is visible to agencies who may reach out.</div>
               )}
             </div>

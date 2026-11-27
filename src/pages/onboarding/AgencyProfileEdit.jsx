@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { agencyApi, uploadApi } from '../../lib/api'
-import ProfileImagePreview from '../../components/ProfileImagePreview'
+import ProfileAvatar from '../../components/ProfileAvatar'
 import './AgencyOnboarding.css'
+import '../../components/PhotoUpload.css'
 
 export default function AgencyProfileEdit() {
   const navigate = useNavigate()
@@ -188,17 +189,22 @@ export default function AgencyProfileEdit() {
           <div className="ob-field">
             <label className="ob-label">Organization Logo</label>
             <div className="ob-logo-upload">
-              <ProfileImagePreview 
-                preview={logoPreview} 
-                alt="Agency Logo Preview"
-                placeholder="No Logo"
-              />
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleLogoSelect}
-                className="ob-logo-input"
-              />
+              <div className="cp-photo-circle">
+                <ProfileAvatar
+                  key={logoPreview || 'none'}
+                  photoUrl={logoPreview}
+                  fullName={profile?.name}
+                  size="large"
+                  alt="Agency logo preview"
+                />
+              </div>
+              <div className="cp-photo-actions">
+                <label className="btn btn-blue-outline btn-sm cp-photo-btn">
+                  Upload Logo
+                  <input type="file" accept="image/*" onChange={handleLogoSelect} hidden />
+                </label>
+                <p className="cp-photo-hint">JPG, PNG or WEBP. Saved when you click Save Changes.</p>
+              </div>
             </div>
           </div>
 

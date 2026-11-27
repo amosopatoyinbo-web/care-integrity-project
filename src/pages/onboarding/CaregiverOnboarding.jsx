@@ -16,19 +16,19 @@ const CARE_TYPES      = ['Activities of Daily Living', 'Medication Reminders', '
 const SKILLS          = ['CPR Certified', 'First Aid', 'Dementia Training', 'Fall Prevention', 'Communication', 'Documentation', 'Empathy & Patience', 'Crisis Response', 'Cultural Competency']
 
 const STANDARDS = [
-  { num: '01', name: 'Compassion',          tagline: 'See the personâ€”not just the task.' },
+  { num: '01', name: 'Compassion',          tagline: 'See the person—not just the task.' },
   { num: '02', name: 'Dependability',        tagline: 'Be someone people can count on.' },
   { num: '03', name: 'Accountability',       tagline: 'Take responsibility for your actions.' },
   { num: '04', name: 'Safety',               tagline: 'Pay attention. Speak up. Act responsibly.' },
   { num: '05', name: 'Communication',        tagline: 'Clear. Respectful. Timely.' },
   { num: '06', name: 'Dignity & Respect',    tagline: 'Every person deserves both.' },
   { num: '07', name: 'Professionalism',      tagline: 'Treat caregiving like the profession it is.' },
-  { num: '08', name: 'Integrity',            tagline: 'Do the right thingâ€”even when no one is watching.' },
+  { num: '08', name: 'Integrity',            tagline: 'Do the right thing—even when no one is watching.' },
   { num: '09', name: 'Advocacy',             tagline: 'When something matters, speak up appropriately.' },
   { num: '10', name: 'Person-Centered Care', tagline: 'Put the person before the task list.' },
 ]
 
-/* â”€â”€ Shared form components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Shared form components ───────────────────────────── */
 
 function Field({ label, id, required, hint, error, children }) {
   return (
@@ -57,7 +57,7 @@ function Textarea({ id, placeholder, value, onChange, rows = 4 }) {
   return <textarea id={id} className="ob-textarea" placeholder={placeholder} value={value} onChange={e => onChange(e.target.value)} rows={rows} />
 }
 
-/* â”€â”€ Steps â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Steps ────────────────────────────────────────────── */
 
 function Step1({ data, set, error, validationErrors }) {
   const [showPassword, setShowPassword] = useState(false)
@@ -299,7 +299,7 @@ function Step5({ data, set }) {
   )
 }
 
-/* â”€â”€ Main component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Main component ───────────────────────────────────── */
 
 export default function CaregiverOnboarding() {
   const [step, setStep]       = useState(1)

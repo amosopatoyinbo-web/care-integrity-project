@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { caregiverApi, uploadApi, auth } from '../../lib/api'
 import { TRAVEL_DISTANCES, KENTUCKY_COUNTIES } from '../../constants/locations'
 import { PROFESSIONAL_ROLES, EMPLOYMENT_STATUS_OPTIONS, US_STATES, requiresLicense } from '../../constants/professionalCategories'
-import ProfileImagePreview from '../../components/ProfileImagePreview'
+import ProfileAvatar from '../../components/ProfileAvatar'
 import './CaregiverProfile.css'
+import '../../components/PhotoUpload.css'
 
 export default function CaregiverProfileEdit() {
   const navigate = useNavigate()
@@ -209,17 +210,22 @@ export default function CaregiverProfileEdit() {
           <div className="cp-field">
             <label className="cp-label">Profile Photo</label>
             <div className="cp-photo-upload">
-              <ProfileImagePreview 
-                preview={photoPreview} 
-                alt="Profile Photo Preview"
-                placeholder={profile?.fullName ? `${profile.fullName.charAt(0)}` : 'P'}
-              />
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handlePhotoSelect}
-                className="cp-photo-input"
-              />
+              <div className="cp-photo-circle">
+                <ProfileAvatar
+                  key={photoPreview || 'none'}
+                  photoUrl={photoPreview}
+                  fullName={profile?.fullName}
+                  size="large"
+                  alt="Profile photo preview"
+                />
+              </div>
+              <div className="cp-photo-actions">
+                <label className="btn btn-blue-outline btn-sm cp-photo-btn">
+                  Upload Photo
+                  <input type="file" accept="image/*" onChange={handlePhotoSelect} hidden />
+                </label>
+                <p className="cp-photo-hint">JPG, PNG or WEBP. Saved when you click Save Changes.</p>
+              </div>
             </div>
           </div>
 

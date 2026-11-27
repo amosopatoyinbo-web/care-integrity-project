@@ -1,5 +1,5 @@
 /* ============================================================
-   THE CARE INTEGRITY PROJECT � API Client
+   THE CARE INTEGRITY PROJECT — API Client
    Centralises all fetch calls to the backend.
    Handles token storage, refresh, and error normalisation.
    ============================================================ */
@@ -245,6 +245,8 @@ export const requestApi = {
   withdraw: (id)          => api.delete(`/requests/${id}`),
   schedule: (id, data)    => api.patch(`/requests/${id}/schedule`, data),
   hire:     (id)          => api.patch(`/requests/${id}/hire`),
+  confirmSchedule: (id)       => api.patch(`/requests/${id}/confirm-schedule`),
+  proposeTime:     (id, data) => api.patch(`/requests/${id}/propose-time`, data),
 }
 
 /* -- Recognition endpoints --------------------------------- */

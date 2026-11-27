@@ -1,0 +1,15 @@
+/* Circular photo/logo upload used on the profile edit pages */
+.cp-photo-circle {
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid var(--integrity-green);
+  box-shadow: var(--shadow-sm);
+  line-height: 0;
+  flex-shrink: 0;
+}
+.cp-photo-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+.cp-photo-btn { cursor: pointer; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
+.cp-photo-hint { font-size: 0.78rem; color: var(--charcoal-pale); margin: 0; }
+@media (max-width: 600px) {
+  .cp-photo-actions { align-items: center; }
+}

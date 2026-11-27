@@ -7,7 +7,7 @@ import { formatTravelDistance, formatWorkAreas } from '../../constants/locations
 import ProfileAvatar from '../../components/ProfileAvatar'
 import './CaregiverProfile.css'
 
-/* â”€â”€ Status badge map â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Status badge map ─────────────────────────────────── */
 const STATUS_MAP = {
   'verified':           { label: 'Verified',             cls: 'badge--verified' },
   'caregiver_reported': { label: 'Caregiver Reported',   cls: 'badge--reported' },
@@ -25,7 +25,7 @@ function Badge({ status }) {
 function PrivacyGuard() {
   return (
     <div className="cp-privacy-banner" role="note">
-      <span className="cp-privacy-banner__lock" aria-hidden="true">ðŸ”’</span>
+      <span className="cp-privacy-banner__lock" aria-hidden="true">🔒</span>
       <div>
         <strong>Contact information is private.</strong>
         <p>Use <em>Request an Interview</em> to connect with this caregiver. Personal email, phone, and address are never shared publicly.</p>
@@ -155,7 +155,7 @@ export default function CaregiverProfile() {
                 expiryDate: cred.expiry,
                 documentUrl
               })
-              console.log('[CaregiverProfile] âœ… Added credential:', cred.name)
+              console.log('[CaregiverProfile] ✅ Added credential:', cred.name)
             } catch (err) {
               console.error('[CaregiverProfile] Failed to add credential:', cred.name, err.message)
             }
@@ -175,7 +175,7 @@ export default function CaregiverProfile() {
                 setting: emp.setting,
                 responsibilities: emp.responsibilities
               })
-              console.log('[CaregiverProfile] âœ… Added employment:', emp.org, emp.role)
+              console.log('[CaregiverProfile] ✅ Added employment:', emp.org, emp.role)
             } catch (err) {
               console.error('[CaregiverProfile] Failed to add employment:', emp.org, err.message)
             }
@@ -184,7 +184,7 @@ export default function CaregiverProfile() {
         
         // Clear pending data and remove setup parameter from URL
         sessionStorage.removeItem('cip_pending_profile_data')
-        console.log('[CaregiverProfile] âœ… Pending data processing complete')
+        console.log('[CaregiverProfile] ✅ Pending data processing complete')
         
         // Reload profile to show new data
         const data = await caregiverApi.getMe()
@@ -210,7 +210,7 @@ export default function CaregiverProfile() {
       <div className="cp-topbar">
         <Link to="/" className="cp-topbar__logo"><img src="/Main Logo.png" alt="The Care Integrity Project" /></Link>
       </div>
-      <div style={{ textAlign: 'center', padding: '80px 24px', color: 'var(--charcoal-light)' }}>Loading profileâ€¦</div>
+      <div style={{ textAlign: 'center', padding: '80px 24px', color: 'var(--charcoal-light)' }}>Loading profile…</div>
     </div>
   )
 
@@ -220,7 +220,7 @@ export default function CaregiverProfile() {
         <Link to="/" className="cp-topbar__logo"><img src="/Main Logo.png" alt="The Care Integrity Project" /></Link>
       </div>
       <div style={{ textAlign: 'center', padding: '80px 24px', maxWidth: '500px', margin: '0 auto' }}>
-        <div style={{ fontSize: '3rem', marginBottom: '16px' }}>ðŸ”</div>
+        <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🔍</div>
         <h2 style={{ color: 'var(--charcoal)', marginBottom: '12px', fontSize: '1.5rem' }}>
           {error?.includes('No caregiver selected') ? 'No Caregiver Selected' : 'Profile Not Found'}
         </h2>
@@ -272,7 +272,7 @@ export default function CaregiverProfile() {
       {/* Preview banner */}
       {previewMode && (
         <div className="cp-preview-banner" role="status">
-          You are previewing your public profile â€” exactly as agencies see it.
+          You are previewing your public profile — exactly as agencies see it.
           <button onClick={() => setPreview(false)} className="cp-preview-banner__close">Exit Preview</button>
         </div>
       )}
@@ -305,11 +305,11 @@ export default function CaregiverProfile() {
             <Link to="/caregiver/dashboard" className="btn btn-blue cp-interview-btn">My Dashboard</Link>
           ) : null}
 
-          {/* Private block â€” caregiver only, not in preview */}
+          {/* Private block — caregiver only, not in preview */}
           {showPrivate && currentUser && (
-            <div className="cp-private-block" aria-label="Private â€” only you see this">
-              <div className="cp-private-block__label">Private â€” Only You See This</div>
-              <div className="cp-private-block__row"><span>âœ‰</span><span>{currentUser.email}</span></div>
+            <div className="cp-private-block" aria-label="Private — only you see this">
+              <div className="cp-private-block__label">Private — Only You See This</div>
+              <div className="cp-private-block__row"><span>✉</span><span>{currentUser.email}</span></div>
             </div>
           )}
 
@@ -466,7 +466,7 @@ export default function CaregiverProfile() {
                       </div>
                     </div>
                     <div className="cp-certificate-badge__status">
-                      <span className="cp-badge badge--verified">âœ“ Verified</span>
+                      <span className="cp-badge badge--verified">✓ Verified</span>
                     </div>
                   </div>
                 ))}
@@ -484,7 +484,7 @@ export default function CaregiverProfile() {
                     <div>
                       <div className="cp-entry-card__title">{e.role}</div>
                       <div className="cp-entry-card__sub">{e.orgName}</div>
-                      <div className="cp-entry-card__dates">{e.startDate} â€“ {e.endDate || 'Present'}{e.setting ? ` · ${e.setting}` : ''}</div>
+                      <div className="cp-entry-card__dates">{e.startDate} – {e.endDate || 'Present'}{e.setting ? ` · ${e.setting}` : ''}</div>
                     </div>
                     <Badge status={e.status} />
                   </div>
