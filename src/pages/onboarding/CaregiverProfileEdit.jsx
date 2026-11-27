@@ -41,6 +41,7 @@ export default function CaregiverProfileEdit() {
   const [photoFile, setPhotoFile] = useState(null)
   const [photoPreview, setPhotoPreview] = useState('')
   const [uploadedUrl, setUploadedUrl] = useState('')
+  const [photoStatus, setPhotoStatus] = useState('') // '' | 'uploading' | 'saved'
 
   // Load existing profile
   useEffect(() => {
@@ -62,15 +63,39 @@ export default function CaregiverProfileEdit() {
     loadProfile()
   }, [navigate])
 
-  function handlePhotoSelect(e) {
-    const file = e.target.files?.[0]
+  /* Autosave: upload the photo and save it to the profile as soon as it is chosen. */
+  async function handlePhotoSelect(e) {
+    const input = e.target
+    const file = input.files?.[0]
+    input.value = '' // allow choosing the same file again
     if (!file) return
     if (!file.type.startsWith('image/')) {
       setError('Please select an image file.')
       return
     }
-    setPhotoFile(file)
+    const previous = profile.photoUrl || ''
+    setError('')
+    setPhotoStatus('uploading')
     setPhotoPreview(URL.createObjectURL(file))
+    try {
+      const { url } = await uploadApi.avatar(file)
+      const updated = await caregiverApi.updateMe({ photoUrl: url })
+      const saved = updated?.photoUrl || url
+      setProfile(prev => ({ ...prev, photoUrl: saved }))
+      setPhotoPreview(saved)
+      setUploadedUrl(saved)
+      setPhotoFile(null)
+      setPhotoStatus('saved')
+    } catch (uploadErr) {
+      console.error('[CaregiverProfileEdit] Photo autosave failed:', { error: uploadErr.message, status: uploadErr.status })
+      let msg = 'Could not save your photo. Please try again.'
+      if (uploadErr.status === 413 || /size|large/i.test(uploadErr.message || '')) msg = 'Image file is too large. Maximum size is 10MB.'
+      else if (uploadErr.status === 400 || /type|format/i.test(uploadErr.message || '')) msg = 'Invalid file type. Please upload JPG, PNG, or WEBP.'
+      else if (uploadErr.status === 0 || /network|connection/i.test(uploadErr.message || '')) msg = 'Upload failed. Please check your connection and try again.'
+      setError(msg)
+      setPhotoPreview(previous)
+      setPhotoStatus('')
+    }
   }
 
   async function handleSubmit(e) {
@@ -225,11 +250,15 @@ export default function CaregiverProfileEdit() {
                 />
               </div>
               <div className="cp-photo-actions">
-                <label className="btn btn-blue-outline btn-sm cp-photo-btn">
-                  Upload Photo
-                  <input type="file" accept="image/*" onChange={handlePhotoSelect} hidden />
+                <label className={`btn btn-blue-outline btn-sm cp-photo-btn${photoStatus === 'uploading' ? ' is-busy' : ''}`} aria-disabled={photoStatus === 'uploading'}>
+                  {photoStatus === 'uploading' ? 'Uploading…' : profile.photoUrl ? 'Change Photo' : 'Upload Photo'}
+                  <input type="file" accept="image/*" onChange={handlePhotoSelect} disabled={photoStatus === 'uploading'} hidden />
                 </label>
-                <p className="cp-photo-hint">JPG, PNG or WEBP. Saved when you click Save Changes.</p>
+                <p className="cp-photo-hint" role="status" aria-live="polite">
+                  {photoStatus === 'uploading' ? 'Uploading and saving your photo…'
+                    : photoStatus === 'saved' ? '✓ Photo saved'
+                    : 'JPG, PNG or WEBP. Saved automatically when you choose a photo.'}
+                </p>
               </div>
             </div>
           </div>

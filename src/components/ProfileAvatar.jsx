@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+﻿import { useState, useEffect } from 'react'
 import './ProfileAvatar.css'
 
 /**
@@ -27,6 +27,12 @@ export default function ProfileAvatar({
   const displayName = fullName || name || 'User'
   const [loading, setLoading] = useState(!!photoUrl)
   const [error, setError] = useState(false)
+
+  // A new URL (e.g. just uploaded, or data arrived after first render) gets a fresh attempt.
+  useEffect(() => {
+    setError(false)
+    setLoading(!!photoUrl)
+  }, [photoUrl])
 
   // Generate initials from name
   const getInitials = (name) => {

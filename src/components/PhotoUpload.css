@@ -13,3 +13,6 @@
 @media (max-width: 600px) {
   .cp-photo-actions { align-items: center; }
 }
+
+/* Upload button while an autosave is in progress */
+.cp-photo-btn.is-busy { opacity: 0.6; pointer-events: none; cursor: progress; }

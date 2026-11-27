@@ -34,6 +34,7 @@ export default function AgencyProfileEdit() {
   const [logoFile, setLogoFile] = useState(null)
   const [logoPreview, setLogoPreview] = useState('')
   const [uploadedUrl, setUploadedUrl] = useState('')
+  const [logoStatus, setLogoStatus] = useState('') // '' | 'uploading' | 'saved'
 
   // Load existing profile
   useEffect(() => {
@@ -55,15 +56,39 @@ export default function AgencyProfileEdit() {
     loadProfile()
   }, [navigate])
 
-  function handleLogoSelect(e) {
-    const file = e.target.files?.[0]
+  /* Autosave: upload the logo and save it to the profile as soon as it is chosen. */
+  async function handleLogoSelect(e) {
+    const input = e.target
+    const file = input.files?.[0]
+    input.value = '' // allow choosing the same file again
     if (!file) return
     if (!file.type.startsWith('image/')) {
       setError('Please select an image file.')
       return
     }
-    setLogoFile(file)
+    const previous = profile.logoUrl || ''
+    setError('')
+    setLogoStatus('uploading')
     setLogoPreview(URL.createObjectURL(file))
+    try {
+      const { url } = await uploadApi.logo(file)
+      const updated = await agencyApi.updateMe({ logoUrl: url })
+      const saved = updated?.logoUrl || url
+      setProfile(prev => ({ ...prev, logoUrl: saved }))
+      setLogoPreview(saved)
+      setUploadedUrl(saved)
+      setLogoFile(null)
+      setLogoStatus('saved')
+    } catch (uploadErr) {
+      console.error('[AgencyProfileEdit] Logo autosave failed:', { error: uploadErr.message, status: uploadErr.status })
+      let msg = 'Could not save your logo. Please try again.'
+      if (uploadErr.status === 413 || /size|large/i.test(uploadErr.message || '')) msg = 'Logo file is too large. Maximum size is 10MB.'
+      else if (uploadErr.status === 400 || /type|format|invalid/i.test(uploadErr.message || '')) msg = 'Invalid file type. Please upload JPG, PNG, or WEBP.'
+      else if (uploadErr.status === 0 || /network|connection/i.test(uploadErr.message || '')) msg = 'Upload failed. Please check your connection and try again.'
+      setError(msg)
+      setLogoPreview(previous)
+      setLogoStatus('')
+    }
   }
 
   async function handleSubmit(e) {
@@ -200,11 +225,15 @@ export default function AgencyProfileEdit() {
                 />
               </div>
               <div className="cp-photo-actions">
-                <label className="btn btn-blue-outline btn-sm cp-photo-btn">
-                  Upload Logo
-                  <input type="file" accept="image/*" onChange={handleLogoSelect} hidden />
+                <label className={`btn btn-blue-outline btn-sm cp-photo-btn${logoStatus === 'uploading' ? ' is-busy' : ''}`} aria-disabled={logoStatus === 'uploading'}>
+                  {logoStatus === 'uploading' ? 'Uploading…' : profile.logoUrl ? 'Change Logo' : 'Upload Logo'}
+                  <input type="file" accept="image/*" onChange={handleLogoSelect} disabled={logoStatus === 'uploading'} hidden />
                 </label>
-                <p className="cp-photo-hint">JPG, PNG or WEBP. Saved when you click Save Changes.</p>
+                <p className="cp-photo-hint" role="status" aria-live="polite">
+                  {logoStatus === 'uploading' ? 'Uploading and saving your logo…'
+                    : logoStatus === 'saved' ? '✓ Logo saved'
+                    : 'JPG, PNG or WEBP. Saved automatically when you choose a logo.'}
+                </p>
               </div>
             </div>
           </div>

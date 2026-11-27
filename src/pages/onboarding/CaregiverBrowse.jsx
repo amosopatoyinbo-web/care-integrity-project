@@ -20,6 +20,20 @@ function Badge({ status }) {
   return <span className={`cbr-badge ${s.cls}`}>{s.label}</span>
 }
 
+/* Card photo with an initials fallback when there is no photo or it fails to load. */
+function BrowseAvatar({ photoUrl, fullName }) {
+  const [failed, setFailed] = useState(false)
+  useEffect(() => { setFailed(false) }, [photoUrl])
+  if (photoUrl && !failed) {
+    return <img src={photoUrl} alt={fullName || 'Caregiver'} className="cbr-card__photo" loading="lazy" onError={() => setFailed(true)} />
+  }
+  return (
+    <span className="cbr-card__initials">
+      {(fullName || 'CG').trim().split(/\s+/).map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+    </span>
+  )
+}
+
 export default function CaregiverBrowse() {
   const [caregivers, setCaregivers] = useState([])
   const [page,       setPage]       = useState(1)
@@ -195,12 +209,7 @@ export default function CaregiverBrowse() {
             {filtered.map(cg => (
               <div key={cg._id} className="cbr-card">
                 <div className="cbr-card__avatar">
-                  {cg.photoUrl
-                    ? <img src={cg.photoUrl} alt={cg.fullName} className="cbr-card__photo" onError={(e) => e.target.style.display='none'} />
-                    : <span className="cbr-card__initials">
-                        {cg.fullName?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
-                      </span>
-                  }
+                  <BrowseAvatar photoUrl={cg.photoUrl} fullName={cg.fullName} />
                 </div>
                 <div className="cbr-card__body">
                   <h3 className="cbr-card__name">{fixMojibake(cg.fullName)}</h3>
