@@ -13,6 +13,7 @@ import CaregiverJourneyPanel from '../../components/hiring/CaregiverJourneyPanel
 import { REQUEST_TAB_DEFS, matchesTab, needsAction } from '../../components/hiring/hiringJourney'
 import { ProfileCompletionCard, WelcomeGuide } from '../../components/profileCompletion/ProfileCompletion'
 import { caregiverChecklist, progress, isNewProfile } from '../../components/profileCompletion/profileChecklist'
+import { CredentialModal, EmploymentModal, ConfirmDelete } from '../../components/profileRecords/RecordModals'
 
 /* ── Helpers ──────────────────────────────────────────── */
 const pad = n => String(n).padStart(2, '0')
@@ -359,6 +360,9 @@ export default function CaregiverDashboard() {
   const currentUser                 = auth.getUser()
   const [reqTab, setReqTab]         = useState('all')
   const [navOpen, setNavOpen]       = useState(false)
+  // { type: 'credential' | 'employment' | 'delete', item, kind? } — null when closed
+  const [recordModal, setRecordModal] = useState(null)
+  const [recordNotice, setRecordNotice] = useState('')
 
   // Lock page scroll while the mobile drawer is open
   useEffect(() => {
@@ -430,6 +434,31 @@ export default function CaregiverDashboard() {
 
   /* Overview data (derived from what is already loaded) */
   const goTab = key => { setTab(key); setNavOpen(false) }
+  /* Credential / employment saves update the loaded profile in place (no full reload). */
+  const listKey = type => (type === 'credential' ? 'credentials' : 'employment')
+  function handleRecordSaved(type, saved, editing) {
+    const key = listKey(type)
+    setProfile(prev => {
+      const list = prev?.[key] || []
+      return { ...prev, [key]: editing ? list.map(x => (x._id === saved._id ? { ...x, ...saved } : x)) : [...list, saved] }
+    })
+    setRecordModal(null)
+    setRecordNotice(`${type === 'credential' ? 'Credential' : 'Position'} ${editing ? 'updated' : 'added'}.`)
+  }
+  async function handleRecordDelete(kind, item) {
+    if (kind === 'credential') await caregiverApi.deleteCredential(item._id)
+    else await caregiverApi.deleteEmployment(item._id)
+    const key = listKey(kind)
+    setProfile(prev => ({ ...prev, [key]: (prev?.[key] || []).filter(x => x._id !== item._id) }))
+    setRecordModal(null)
+    setRecordNotice(`${kind === 'credential' ? 'Credential' : 'Position'} deleted.`)
+  }
+  useEffect(() => {
+    if (!recordNotice) return
+    const t = setTimeout(() => setRecordNotice(''), 3500)
+    return () => clearTimeout(t)
+  }, [recordNotice])
+
   const checklist = caregiverChecklist(profile)
   const profileIncomplete = checklist.length > 0 && progress(checklist).done < checklist.length
   const pcUserId = currentUser?.id || currentUser?._id || profile?._id
@@ -500,6 +529,30 @@ export default function CaregiverDashboard() {
       />
 
       {navOpen && <div className="cgd-backdrop" onClick={() => setNavOpen(false)} aria-hidden="true" />}
+
+      {recordModal?.type === 'credential' && (
+        <CredentialModal
+          credential={recordModal.item}
+          onClose={() => setRecordModal(null)}
+          onSaved={(saved, editing) => handleRecordSaved('credential', saved, editing)}
+        />
+      )}
+      {recordModal?.type === 'employment' && (
+        <EmploymentModal
+          position={recordModal.item}
+          defaultRole={profile?.role}
+          onClose={() => setRecordModal(null)}
+          onSaved={(saved, editing) => handleRecordSaved('employment', saved, editing)}
+        />
+      )}
+      {recordModal?.type === 'delete' && (
+        <ConfirmDelete
+          what={recordModal.kind === 'credential' ? `"${recordModal.item.name}"` : `"${recordModal.item.role} — ${recordModal.item.orgName}"`}
+          onCancel={() => setRecordModal(null)}
+          onConfirm={() => handleRecordDelete(recordModal.kind, recordModal.item)}
+        />
+      )}
+      {recordNotice && <div className="cgd-toast" role="status" aria-live="polite">✓ {recordNotice}</div>}
 
       <WelcomeGuide
         items={checklist}
@@ -708,7 +761,7 @@ export default function CaregiverDashboard() {
                 <p className="cgd-section-sub">Upload documents to request verification.</p>
               </div>
               {profile?.credentials?.length > 0 ? profile.credentials.map(c => (
-                <div key={c._id} className="cgd-entry-card">
+                <div key={c._id} className="cgd-entry-card cgd-entry-card--actions">
                   <div className="cgd-entry-card__left">
                     <div className="cgd-entry-card__title">{c.name}</div>
                     <div className="cgd-entry-card__sub">
@@ -735,12 +788,20 @@ export default function CaregiverDashboard() {
                       </a>
                     )}
                   </div>
-                  <span className={`cgd-badge ${c.status === 'verified' ? 'cgd-badge--accepted' : 'cgd-badge--pending'}`}>
-                    {c.status === 'verified' ? 'Verified' : 'Caregiver Reported'}
-                  </span>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+                    <span className={`cgd-badge ${c.status === 'verified' ? 'cgd-badge--accepted' : 'cgd-badge--pending'}`}>
+                      {c.status === 'verified' ? 'Verified' : 'Caregiver Reported'}
+                    </span>
+                    {c.status !== 'verified' && (
+                      <div className="rec-entry-actions">
+                        <button type="button" className="rec-link-btn" onClick={() => setRecordModal({ type: 'credential', item: c })}>{c.documentUrl ? 'Edit' : 'Edit / add document'}</button>
+                        <button type="button" className="rec-link-btn rec-link-btn--danger" onClick={() => setRecordModal({ type: 'delete', kind: 'credential', item: c })}>Delete</button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )) : <div className="cgd-empty">No credentials added yet.</div>}
-              <Link to="/caregiver/profile?view=caregiver" className="cgd-add-btn" style={{ marginTop: 12, display: 'inline-flex' }}>+ Add Credential</Link>
+              <button type="button" className="cgd-add-btn rec-add-btn" style={{ marginTop: 12, display: 'inline-flex' }} onClick={() => setRecordModal({ type: 'credential', item: null })}>+ Add Credential</button>
             </div>
           )}
 
@@ -777,10 +838,18 @@ export default function CaregiverDashboard() {
                         Request Verification
                       </button>
                     )}
+                    {e.status !== 'verified' && (
+                      <div className="rec-entry-actions">
+                        {(!e.status || e.status === 'caregiver_reported') && (
+                          <button type="button" className="rec-link-btn" onClick={() => setRecordModal({ type: 'employment', item: e })}>Edit</button>
+                        )}
+                        <button type="button" className="rec-link-btn rec-link-btn--danger" onClick={() => setRecordModal({ type: 'delete', kind: 'employment', item: e })}>Delete</button>
+                      </div>
+                    )}
                   </div>
                 </div>
               )) : <div className="cgd-empty">No employment history added yet.</div>}
-              <Link to="/caregiver/profile?view=caregiver" className="cgd-add-btn" style={{ marginTop: 12, display: 'inline-flex' }}>+ Add Position</Link>
+              <button type="button" className="cgd-add-btn rec-add-btn" style={{ marginTop: 12, display: 'inline-flex' }} onClick={() => setRecordModal({ type: 'employment', item: null })}>+ Add Position</button>
             </div>
           )}
 

@@ -409,3 +409,13 @@ a.cgd-nav__item { text-decoration: none; box-sizing: border-box; }
 
 /* Sidebar dot: profile incomplete */
 .cgd-nav__dot { width: 8px; height: 8px; border-radius: 50%; background: #d4af37; margin-left: auto; flex-shrink: 0; }
+
+/* Short confirmation after saving or deleting a credential / position */
+.cgd-toast {
+  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 1100;
+  background: var(--trust-blue); color: #fff; padding: 12px 20px; border-radius: 999px;
+  font-size: 0.88rem; font-weight: 600; box-shadow: 0 8px 24px rgba(0,0,0,0.2); max-width: calc(100vw - 32px);
+}
+@media (max-width: 768px) {
+  .cgd-entry-card--actions { flex-wrap: wrap; }
+}
