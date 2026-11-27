@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { caregiverApi, uploadApi, auth } from '../../lib/api'
 import { TRAVEL_DISTANCES, KENTUCKY_COUNTIES } from '../../constants/locations'
 import { PROFESSIONAL_ROLES, EMPLOYMENT_STATUS_OPTIONS, US_STATES, requiresLicense } from '../../constants/professionalCategories'
 import ProfileAvatar from '../../components/ProfileAvatar'
 import SubNav from '../../components/SubNav'
+import { homePath } from '../../lib/navTrail'
 import './CaregiverProfile.css'
 import '../../components/PhotoUpload.css'
 
@@ -193,6 +194,9 @@ export default function CaregiverProfileEdit() {
 
   return (
     <div className="cp-page">
+      <div className="cp-topbar">
+        <Link to={homePath()} className="cp-topbar__logo"><img src="/Main Logo.png" alt="The Care Integrity Project" /></Link>
+      </div>
       <SubNav />
       <div className="cp-container">
         <header className="cp-header">
