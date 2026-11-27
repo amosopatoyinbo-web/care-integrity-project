@@ -90,10 +90,21 @@ img, video { max-width: 100%; }
 
   /* Request / entry cards */
   .cgd-request-card, .adb-req-card { padding: 14px 12px; }
-  .cgd-request-card__top, .adb-req-card__main { gap: 10px; }
-  .cgd-request-card__top { flex-wrap: wrap; }
-  .cgd-request-card__top > .cgd-badge { order: -1; margin-left: auto; }
-  .adb-req-card__main { flex-wrap: wrap; }
+
+  /* Card header (logo · text · status badge): the badge gets its own line at the top,
+     then logo and text side by side with the text using the full remaining width. */
+  .cgd-request-card__top, .adb-req-card__main {
+    display: grid; grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 12px; row-gap: 10px; align-items: start;
+  }
+  .cgd-request-card__top > .cgd-badge,
+  .adb-req-card__main > .adb-req-card__side {
+    grid-column: 1 / -1; grid-row: 1; justify-self: start; margin: 0;
+  }
+  .cgd-request-card__top > .profile-avatar,
+  .adb-req-card__main > .profile-avatar { grid-column: 1; grid-row: 2; }
+  .cgd-request-card__body, .adb-req-card__body { grid-column: 2; grid-row: 2; }
+  .cgd-request-card__meta, .adb-req-card__meta { line-height: 1.45; }
   .cgd-entry-card { flex-direction: column; align-items: stretch; gap: 10px; }
   .cgd-entry-card > div:last-child { align-items: flex-start !important; }
   .rec-entry-actions { justify-content: flex-start; }
