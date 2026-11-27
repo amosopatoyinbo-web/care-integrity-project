@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react'
+import { FiArrowLeft } from 'react-icons/fi'
 import { Link, useSearchParams, useLocation } from 'react-router-dom'
 import InterviewRequestModal from './InterviewRequestModal'
 import { caregiverApi, recognitionApi, auth } from '../../lib/api'
 import trainingApi from '../../lib/trainingApi'
 import { formatTravelDistance, formatWorkAreas } from '../../constants/locations'
 import ProfileAvatar from '../../components/ProfileAvatar'
+import SubNav from '../../components/SubNav'
+import { homePath } from '../../lib/navTrail'
 import './CaregiverProfile.css'
 import { fixMojibake } from '../../lib/fixText'
 
@@ -206,11 +209,17 @@ export default function CaregiverProfile() {
     return () => clearTimeout(timer)
   }, [isCaregiver, params])
 
+  const dashCrumb = { label: 'Dashboard', to: homePath() }
+  const baseTrail = isAgency
+    ? [dashCrumb, { label: 'Browse Caregivers', to: '/caregivers/browse' }, { label: 'Profile' }]
+    : [dashCrumb, { label: 'My Profile' }]
+
   if (loading) return (
     <div className="cp-page">
       <div className="cp-topbar">
-        <Link to="/" className="cp-topbar__logo"><img src="/Main Logo.png" alt="The Care Integrity Project" /></Link>
+        <Link to={homePath()} className="cp-topbar__logo"><img src="/Main Logo.png" alt="The Care Integrity Project" /></Link>
       </div>
+      <SubNav trail={baseTrail} />
       <div style={{ textAlign: 'center', padding: '80px 24px', color: 'var(--charcoal-light)' }}>Loading profile…</div>
     </div>
   )
@@ -218,8 +227,9 @@ export default function CaregiverProfile() {
   if (error || !profile) return (
     <div className="cp-page">
       <div className="cp-topbar">
-        <Link to="/" className="cp-topbar__logo"><img src="/Main Logo.png" alt="The Care Integrity Project" /></Link>
+        <Link to={homePath()} className="cp-topbar__logo"><img src="/Main Logo.png" alt="The Care Integrity Project" /></Link>
       </div>
+      <SubNav trail={baseTrail} />
       <div style={{ textAlign: 'center', padding: '80px 24px', maxWidth: '500px', margin: '0 auto' }}>
         <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🔍</div>
         <h2 style={{ color: 'var(--charcoal)', marginBottom: '12px', fontSize: '1.5rem' }}>
@@ -251,7 +261,7 @@ export default function CaregiverProfile() {
 
       {/* Topbar */}
       <div className="cp-topbar">
-        <Link to="/" className="cp-topbar__logo">
+        <Link to={homePath()} className="cp-topbar__logo">
           <img src="/Main Logo.png" alt="The Care Integrity Project" />
         </Link>
         <div className="cp-topbar__right">
@@ -265,10 +275,17 @@ export default function CaregiverProfile() {
             <Link to="/agency/dashboard" className="btn btn-blue-outline btn-sm">Agency Dashboard</Link>
           )}
           {previewMode && (
-            <button className="btn btn-blue btn-sm" onClick={() => setPreview(false)}>← Exit Preview</button>
+            <button className="btn btn-blue btn-sm" onClick={() => setPreview(false)}><FiArrowLeft aria-hidden="true" /> Exit Preview</button>
           )}
         </div>
       </div>
+      <SubNav trail={
+        isAgency
+          ? [dashCrumb, { label: 'Browse Caregivers', to: '/caregivers/browse' }, { label: profile.fullName || 'Profile' }]
+          : previewMode
+            ? [dashCrumb, { label: 'My Profile' }, { label: 'Public Preview' }]
+            : [dashCrumb, { label: 'My Profile' }]
+      } />
 
       {/* Preview banner */}
       {previewMode && (

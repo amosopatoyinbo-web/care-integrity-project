@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { agencyApi, uploadApi } from '../../lib/api'
 import ProfileAvatar from '../../components/ProfileAvatar'
+import SubNav from '../../components/SubNav'
 import './AgencyOnboarding.css'
 import '../../components/PhotoUpload.css'
 
@@ -172,10 +173,8 @@ export default function AgencyProfileEdit() {
     <div className="ob-page">
       <div className="ob-page__content">
         <header className="ob-page__header">
-          <button className="btn btn-outline btn-sm" onClick={() => navigate('/agency/dashboard')}>
-            ← Back to Dashboard
-          </button>
           <img src="/Main Logo.png" alt="The Care Integrity Project" className="ob-page__logo" />
+          <SubNav />
           <h1 className="ob-page__heading">Edit Agency Profile</h1>
           <p className="ob-page__sub">Update your organization's information.</p>
         </header>

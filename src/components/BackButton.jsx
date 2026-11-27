@@ -7,6 +7,7 @@ export function fallbackPath() {
   const role = auth.getUser()?.role
   if (role === 'agency') return '/agency/dashboard'
   if (role === 'caregiver') return '/caregiver/dashboard'
+  if (role === 'admin') return '/admin/dashboard'
   return '/'
 }
 

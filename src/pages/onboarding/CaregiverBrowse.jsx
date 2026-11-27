@@ -6,6 +6,8 @@ import InterviewRequestModal from './InterviewRequestModal'
 import { fixMojibake } from '../../lib/fixText'
 import { formatTravelDistance, getCountyShortName } from '../../constants/locations'
 import { PROFESSIONAL_ROLES, EMPLOYMENT_STATUS_OPTIONS } from '../../constants/professionalCategories'
+import SubNav from '../../components/SubNav'
+import { homePath } from '../../lib/navTrail'
 import './CaregiverBrowse.css'
 
 function Badge({ status }) {
@@ -77,11 +79,10 @@ export default function CaregiverBrowse() {
 
       {/* Topbar */}
       <div className="cbr-topbar">
-        <Link to="/" className="cbr-topbar__logo">
+        <Link to={homePath()} className="cbr-topbar__logo">
           <img src="/Main Logo.png" alt="The Care Integrity Project" />
         </Link>
         <div className="cbr-topbar__right">
-          <Link to="/agency/dashboard" className="btn btn-blue-outline btn-sm">← Dashboard</Link>
           <button className="btn btn-sm cbr-logout-btn" onClick={async () => {
             await authApi.logout().catch(() => {})
             auth.clearTokens()
@@ -89,6 +90,7 @@ export default function CaregiverBrowse() {
           }}>Sign Out</button>
         </div>
       </div>
+      <SubNav />
 
       <div className="cbr-inner">
         <div className="cbr-header">

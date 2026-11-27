@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
-import { NavLink, Link, useLocation } from 'react-router-dom'
+import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom'
+import { auth, authApi } from '../lib/api'
+import { homePath } from '../lib/navTrail'
 import './Navbar.css'
 
 
@@ -101,20 +103,42 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
+  const location = useLocation()
+  const navigate = useNavigate()
+  const [, setAuthTick] = useState(0)
+  useEffect(() => {
+    const onStorage = () => setAuthTick(n => n + 1)
+    window.addEventListener('storage', onStorage)
+    return () => window.removeEventListener('storage', onStorage)
+  }, [])
+  /* Re-read auth on every render; route changes re-render this component via useLocation. */
+  const loggedIn = auth.isLoggedIn()
+  const home = homePath()
+  void location
+
   const close = () => { setMenuOpen(false); setMobileExpanded(null) }
+  const signOut = async () => {
+    close()
+    await authApi.logout().catch(() => {})
+    auth.clearTokens()
+    navigate('/')
+  }
 
   return (
     <header className={`navbar${scrolled ? ' navbar--scrolled' : ''}`} role="banner">
       <div className="navbar__inner">
 
         {/* Logo */}
-        <Link to="/" className="navbar__logo" onClick={close} aria-label="The Care Integrity Project — Home">
+        <Link to={home} className="navbar__logo" onClick={close} aria-label="The Care Integrity Project — Home">
           <img src="/Main Logo.png" alt="The Care Integrity Project" className="navbar__logo-img" onError={(e) => e.target.src='/image 5.png'} />
         </Link>
 
         {/* Desktop Nav */}
         <nav className="navbar__nav" aria-label="Main navigation">
           <ul className="navbar__links" role="list">
+            {loggedIn && (
+              <li><Link to={home} className="navbar__link">Home</Link></li>
+            )}
             {navItems.map((item) => (
               <li key={item.label}>
                 {item.dropdown
@@ -136,12 +160,21 @@ export default function Navbar() {
           </ul>
 
           <div className="navbar__ctas">
-            <Link to="/caregiver/login" className="btn btn-green-outline btn-sm">
-              Caregiver Login
-            </Link>
-            <Link to="/agency/login" className="btn btn-blue-outline btn-sm">
-              Agency Login
-            </Link>
+            {loggedIn ? (
+              <>
+                <Link to={home} className="btn btn-blue btn-sm">My Dashboard</Link>
+                <button type="button" className="btn btn-blue-outline btn-sm" onClick={signOut}>Sign Out</button>
+              </>
+            ) : (
+              <>
+                <Link to="/caregiver/login" className="btn btn-green-outline btn-sm">
+                  Caregiver Login
+                </Link>
+                <Link to="/agency/login" className="btn btn-blue-outline btn-sm">
+                  Agency Login
+                </Link>
+              </>
+            )}
           </div>
         </nav>
 
@@ -160,6 +193,9 @@ export default function Navbar() {
       {/* Mobile Menu */}
       <div id="mobile-menu" className={`navbar__mobile${menuOpen ? ' open' : ''}`} aria-hidden={!menuOpen}>
         <ul className="navbar__mobile-links" role="list">
+          {loggedIn && (
+            <li><Link to={home} className="navbar__link" onClick={close}>Home</Link></li>
+          )}
 
           {/* About — simple link */}
           <li>
@@ -206,12 +242,21 @@ export default function Navbar() {
         </ul>
 
         <div className="navbar__mobile-ctas">
-          <Link to="/caregiver/login" className="btn btn-green-outline" onClick={close}>
-            Caregiver Login
-          </Link>
-          <Link to="/agency/login" className="btn btn-blue-outline" onClick={close}>
-            Agency Login
-          </Link>
+          {loggedIn ? (
+            <>
+              <Link to={home} className="btn btn-blue" onClick={close}>My Dashboard</Link>
+              <button type="button" className="btn btn-blue-outline" onClick={signOut}>Sign Out</button>
+            </>
+          ) : (
+            <>
+              <Link to="/caregiver/login" className="btn btn-green-outline" onClick={close}>
+                Caregiver Login
+              </Link>
+              <Link to="/agency/login" className="btn btn-blue-outline" onClick={close}>
+                Agency Login
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </header>

@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
+import SubNav from '../../components/SubNav'
+import { homePath } from '../../lib/navTrail'
 import { caregiverApi, requestApi, recognitionApi, auth, authApi, verificationApi } from '../../lib/api'
 import TrainingTab from '../../components/training/TrainingTab'
 import ProfileAvatar from '../../components/ProfileAvatar'
@@ -332,6 +334,15 @@ function RequestCard({ req, onRefresh, onOpenEmployment }) {
   )
 }
 
+const TAB_LABELS = {
+  requests: 'Interview Requests',
+  profile: 'My Profile',
+  credentials: 'Credentials & Training',
+  employment: 'Employment History',
+  recognition: 'Recognition',
+  standards: 'Care Integrity Standards',
+}
+
 /* ── Main dashboard ───────────────────────────────────── */
 export default function CaregiverDashboard() {
   const [tab, setTab]               = useState('requests')
@@ -416,14 +427,16 @@ export default function CaregiverDashboard() {
 
   if (loading) return (
     <div className="cgd-page">
-      <div className="cgd-topbar"><Link to="/"><img src="/Main Logo.png" alt="The Care Integrity Project" style={{ height: 42 }} /></Link></div>
+      <div className="cgd-topbar"><Link to={homePath()}><img src="/Main Logo.png" alt="The Care Integrity Project" style={{ height: 42 }} /></Link></div>
+      <SubNav />
       <div style={{ textAlign: 'center', padding: '80px 24px', color: 'var(--charcoal-light)' }}>Loading…</div>
     </div>
   )
 
   if (error) return (
     <div className="cgd-page">
-      <div className="cgd-topbar"><Link to="/"><img src="/Main Logo.png" alt="The Care Integrity Project" style={{ height: 42 }} /></Link></div>
+      <div className="cgd-topbar"><Link to={homePath()}><img src="/Main Logo.png" alt="The Care Integrity Project" style={{ height: 42 }} /></Link></div>
+      <SubNav />
       <div style={{ textAlign: 'center', padding: '80px 24px', color: '#c0392b' }}>{error}</div>
     </div>
   )
@@ -442,7 +455,7 @@ export default function CaregiverDashboard() {
           >
             {navOpen ? <FiX aria-hidden="true" /> : <FiMenu aria-hidden="true" />}
           </button>
-          <Link to="/" className="cgd-topbar__logo"><img src="/Main Logo.png" alt="The Care Integrity Project" /></Link>
+          <Link to={homePath()} className="cgd-topbar__logo"><img src="/Main Logo.png" alt="The Care Integrity Project" /></Link>
         </div>
         <div className="cgd-topbar__right cgd-topbar__desktop">
           <Link to="/caregiver/profile/edit" className="btn btn-green-outline btn-sm">Edit Profile</Link>
@@ -451,6 +464,8 @@ export default function CaregiverDashboard() {
           <button className="btn btn-sm cgd-logout-btn" onClick={signOut}>Sign Out</button>
         </div>
       </div>
+
+      <SubNav trail={[{ label: 'Dashboard' }, { label: TAB_LABELS[tab] || 'Overview' }]} />
 
       {navOpen && <div className="cgd-backdrop" onClick={() => setNavOpen(false)} aria-hidden="true" />}
 

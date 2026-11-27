@@ -6,6 +6,8 @@ import {
 } from 'react-icons/fi'
 import { agencyApi, requestApi, recognitionApi, verificationApi, accountabilityApi, caregiverApi, uploadApi, auth, authApi } from '../../lib/api'
 import ProfileAvatar from '../../components/ProfileAvatar'
+import SubNav from '../../components/SubNav'
+import { homePath } from '../../lib/navTrail'
 import './AgencyDashboard.css'
 import { fixMojibake } from '../../lib/fixText'
 import JourneyStepper from '../../components/hiring/JourneyStepper'
@@ -430,14 +432,16 @@ export default function AgencyDashboard() {
 
   if (loading) return (
     <div className="adb-page">
-      <div className="adb-topbar"><Link to="/"><img src="/Main Logo.png" alt="The Care Integrity Project" style={{ height: 42 }} /></Link></div>
+      <div className="adb-topbar"><Link to={homePath()}><img src="/Main Logo.png" alt="The Care Integrity Project" style={{ height: 42 }} /></Link></div>
+      <SubNav />
       <div style={{ textAlign: 'center', padding: '80px 24px', color: 'var(--charcoal-light)' }}>Loading dashboard…</div>
     </div>
   )
 
   if (error) return (
     <div className="adb-page">
-      <div className="adb-topbar"><Link to="/"><img src="/Main Logo.png" alt="The Care Integrity Project" style={{ height: 42 }} /></Link></div>
+      <div className="adb-topbar"><Link to={homePath()}><img src="/Main Logo.png" alt="The Care Integrity Project" style={{ height: 42 }} /></Link></div>
+      <SubNav />
       <div style={{ textAlign: 'center', padding: '80px 24px', color: '#c0392b' }}>{error}</div>
     </div>
   )
@@ -456,7 +460,7 @@ export default function AgencyDashboard() {
           >
             {navOpen ? <FiX aria-hidden="true" /> : <FiMenu aria-hidden="true" />}
           </button>
-          <Link to="/" className="adb-topbar__logo"><img src="/Main Logo.png" alt="The Care Integrity Project" /></Link>
+          <Link to={homePath()} className="adb-topbar__logo"><img src="/Main Logo.png" alt="The Care Integrity Project" /></Link>
         </div>
         <div className="adb-topbar__right">
           {agency && <span className="adb-topbar__verif"><VerifBadge status={agency.verificationStatus} /></span>}
@@ -469,6 +473,8 @@ export default function AgencyDashboard() {
           <button className="btn btn-sm cgd-logout-btn adb-topbar__desktop" onClick={signOut}>Sign Out</button>
         </div>
       </div>
+
+      <SubNav trail={tab === 'overview' ? [{ label: 'Dashboard' }] : [{ label: 'Dashboard' }, { label: NAV_ITEMS.find(n => n.key === tab)?.label || 'Overview' }]} />
 
       {navOpen && <div className="adb-backdrop" onClick={() => setNavOpen(false)} aria-hidden="true" />}
 

@@ -1,5 +1,6 @@
-﻿import { useState, useRef } from 'react'
+import { useState, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import BackButton from '../../components/BackButton'
 import ProgressBar from '../../components/onboarding/ProgressBar'
 import ChipSelect from '../../components/onboarding/ChipSelect'
 import { authApi, agencyApi, uploadApi, auth } from '../../lib/api'
@@ -505,6 +506,7 @@ export default function AgencyOnboarding() {
           </p>
         </div>
       </div>
+      <div style={{ padding: '0 24px 8px' }}><BackButton /></div>
 
       <ProgressBar steps={STEPS} current={step} />
 

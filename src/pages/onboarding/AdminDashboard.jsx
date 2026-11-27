@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { authApi, agencyApi, caregiverApi, auth } from '../../lib/api'
 import trainingApi from '../../lib/trainingApi'
+import SubNav from '../../components/SubNav'
+import { homePath } from '../../lib/navTrail'
 import './AgencyDashboard.css'
 
 export default function AdminDashboard() {
@@ -138,7 +140,7 @@ export default function AdminDashboard() {
   return (
     <div className="adb-page">
       <div className="adb-topbar">
-        <Link to="/" className="adb-topbar__logo"><img src="/Main Logo.png" alt="The Care Integrity Project" /></Link>
+        <Link to={homePath()} className="adb-topbar__logo"><img src="/Main Logo.png" alt="The Care Integrity Project" /></Link>
         <div className="adb-topbar__right">
           <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 600 }}>Admin Dashboard</h2>
           <button className="btn btn-sm cgd-logout-btn" onClick={async () => {
@@ -148,6 +150,7 @@ export default function AdminDashboard() {
           }}>Sign Out</button>
         </div>
       </div>
+      <SubNav />
 
       <div className="adb-container" style={{ padding: '40px', maxWidth: '1200px', margin: '0 auto' }}>
         

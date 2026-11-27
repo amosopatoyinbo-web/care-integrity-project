@@ -1,8 +1,7 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
-import BackButton from './components/BackButton'
-import PageNav from './components/PageNav'
+import SubNav from './components/SubNav'
 import Home from './pages/Home'
 import About from './pages/About'
 import ForCaregivers from './pages/ForCaregivers'
@@ -52,15 +51,14 @@ function Layout({ children }) {
   const isStandalone = [...STANDALONE].some(p => pathname === p || pathname.startsWith(p + '?') || pathname.startsWith(p + '/'))
 
   if (isStandalone) {
-    /* Dashboards have their own sidebar menu: back button only. Other standalone pages get the slim menu. */
-    const hasSidebar = pathname === '/agency/dashboard' || pathname === '/caregiver/dashboard' || pathname === '/admin/dashboard'
-    return (<>{hasSidebar ? <div className="cip-backbar"><BackButton /></div> : <PageNav />}{children}</>)
+    /* Standalone pages render their own header and place <SubNav /> directly below it. */
+    return <>{children}</>
   }
 
   return (
     <>
       <Navbar />
-      {pathname !== '/' && <div className="cip-backbar"><BackButton /></div>}
+      {pathname !== '/' && <SubNav />}
       <main>{children}</main>
       <Footer />
     </>

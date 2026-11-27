@@ -4,6 +4,7 @@ import { caregiverApi, uploadApi, auth } from '../../lib/api'
 import { TRAVEL_DISTANCES, KENTUCKY_COUNTIES } from '../../constants/locations'
 import { PROFESSIONAL_ROLES, EMPLOYMENT_STATUS_OPTIONS, US_STATES, requiresLicense } from '../../constants/professionalCategories'
 import ProfileAvatar from '../../components/ProfileAvatar'
+import SubNav from '../../components/SubNav'
 import './CaregiverProfile.css'
 import '../../components/PhotoUpload.css'
 
@@ -192,11 +193,9 @@ export default function CaregiverProfileEdit() {
 
   return (
     <div className="cp-page">
+      <SubNav />
       <div className="cp-container">
         <header className="cp-header">
-          <button className="cp-back" onClick={() => navigate('/caregiver/dashboard')}>
-            ← Back to Dashboard
-          </button>
           <h1 className="cp-heading">Edit Your Profile</h1>
           <p className="cp-sub">Update your information to reflect your current experience and qualifications.</p>
         </header>
