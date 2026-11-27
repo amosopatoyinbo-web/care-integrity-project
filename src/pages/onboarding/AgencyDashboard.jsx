@@ -4,12 +4,15 @@ import { agencyApi, requestApi, recognitionApi, verificationApi, accountabilityA
 import ProfileAvatar from '../../components/ProfileAvatar'
 import './AgencyDashboard.css'
 
-/* â”€â”€ Badges â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* â"€â"€ Badges â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ */
 const REQ_STATUS = {
   pending:  { label: 'Pending',   cls: 'adb-badge--pending'  },
   accepted: { label: 'Accepted',  cls: 'adb-badge--accepted' },
   declined: { label: 'Declined',  cls: 'adb-badge--declined' },
   withdrawn:{ label: 'Withdrawn', cls: 'adb-badge--grey'     },
+  scheduled:{ label: 'Scheduled', cls: 'adb-badge--accepted' },
+  completed:{ label: 'Completed', cls: 'adb-badge--review'   },
+  hired:    { label: 'Hired',     cls: 'adb-badge--accepted' },
 }
 function RequestBadge({ status }) {
   const s = REQ_STATUS[status] || REQ_STATUS.pending
@@ -27,7 +30,7 @@ function VerifBadge({ status }) {
   return <span className={`adb-badge ${s.cls}`}>{s.label}</span>
 }
 
-/* â”€â”€ Accountability form â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* â"€â"€ Accountability form â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ */
 function AccountabilityForm({ agencyId, caregiverId, onDone, onRefresh }) {
   const [fact, setFact]         = useState('')
   const [evidence, setEvidence] = useState('')
@@ -58,7 +61,7 @@ function AccountabilityForm({ agencyId, caregiverId, onDone, onRefresh }) {
       </div>
       <div>
         <label style={{ display: 'block', fontSize: '0.84rem', fontWeight: 600, marginBottom: 5 }}>
-          Fact â€” what happened <span style={{ color: '#c0392b' }}>*</span>
+          Fact â€" what happened <span style={{ color: '#c0392b' }}>*</span>
         </label>
         <textarea className="adb-textarea" rows={4} placeholder="Describe what was observedâ€¦" value={fact} onChange={e => setFact(e.target.value)} required />
       </div>
@@ -77,7 +80,7 @@ function AccountabilityForm({ agencyId, caregiverId, onDone, onRefresh }) {
   )
 }
 
-/* â”€â”€ Main dashboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* â"€â"€ Main dashboard â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ */
 export default function AgencyDashboard() {
   const [tab, setTab]                   = useState('overview')
   const navigate                        = useNavigate()
@@ -91,6 +94,12 @@ export default function AgencyDashboard() {
   const [error, setError]               = useState('')
   const [showAcctForm, setShowAcctForm] = useState(false)
   const [acctCaregiverId, setAcctCgId]  = useState('')
+  const [schedulingId, setSchedulingId]           = useState(null)
+  const [scheduledAt, setScheduledAt]             = useState('')
+  const [scheduleLoading, setScheduleLoading]     = useState(false)
+  const [scheduleError, setScheduleError]         = useState(null)
+  const [hireLoading, setHireLoading]             = useState(null)
+  const [hireConfirm, setHireConfirm]             = useState(null)
 
   const loadData = useCallback(async () => {
     setLoading(true)
@@ -136,7 +145,7 @@ export default function AgencyDashboard() {
       }
     }
     } catch (err) {
-      // 404 = user logged in but never completed agency onboarding â€” send them to finish it
+      // 404 = user logged in but never completed agency onboarding â€" send them to finish it
       if (err.status === 404 || err.message?.toLowerCase().includes('not found')) {
         navigate('/agency/register', { replace: true })
         return
@@ -149,12 +158,41 @@ export default function AgencyDashboard() {
 
   useEffect(() => { loadData() }, [loadData, location])
 
+  const handleScheduleSubmit = async (requestId) => {
+    if (!scheduledAt) return
+    setScheduleLoading(true)
+    setScheduleError(null)
+    try {
+      const updated = await requestApi.schedule(requestId, { scheduledAt })
+      setRequests(prev => prev.map(r => r._id === requestId ? updated.data || updated : r))
+      setSchedulingId(null)
+      setScheduledAt('')
+    } catch (err) {
+      setScheduleError(err.response?.data?.message || err.message || 'Failed to schedule interview')
+    } finally {
+      setScheduleLoading(false)
+    }
+  }
+
+  const handleHireConfirm = async (requestId) => {
+    setHireLoading(requestId)
+    try {
+      const updated = await requestApi.hire(requestId)
+      setRequests(prev => prev.map(r => r._id === requestId ? updated.data || updated : r))
+      setHireConfirm(null)
+    } catch (err) {
+      console.error('Hire failed:', err)
+    } finally {
+      setHireLoading(null)
+    }
+  }
+
   const pending  = requests.filter(r => r.status === 'pending')
   const accepted = requests.filter(r => r.status === 'accepted')
   const declined = requests.filter(r => r.status === 'declined')
 
   const STAT_CARDS = [
-    { key: 'caregivers',     label: 'Caregivers',              value: 'â€”',                        sub: 'Browse profiles',              color: 'var(--trust-blue)' },
+    { key: 'caregivers',     label: 'Caregivers',              value: 'â€"',                        sub: 'Browse profiles',              color: 'var(--trust-blue)' },
     { key: 'requests',       label: 'Interview Requests',      value: requests.length,             sub: `${pending.length} awaiting`,   color: 'var(--integrity-green)' },
     { key: 'verifications',  label: 'Employment Verifications',value: pendingVerif.length,         sub: 'Pending review',               color: 'var(--calm-aqua)' },
     { key: 'recognition',    label: 'Recognition Given',       value: recognition.length,          sub: 'All time',                     color: 'var(--accent-gold)' },
@@ -218,7 +256,7 @@ export default function AgencyDashboard() {
 
         <main className="adb-main">
 
-          {/* â”€â”€ Overview â”€â”€ */}
+          {/* â"€â"€ Overview â"€â"€ */}
           {tab === 'overview' && (
             <>
               <div className="adb-welcome">
@@ -251,7 +289,7 @@ export default function AgencyDashboard() {
               <div className="adb-panel">
                 <div className="adb-panel__header">
                   <span className="adb-section-title">Recent Interview Requests</span>
-                  <button className="adb-panel__viewall" onClick={() => setTab('requests')}>View all ←’</button>
+                  <button className="adb-panel__viewall" onClick={() => setTab('requests')}>View all ←'</button>
                 </div>
                 {requests.slice(0, 3).map(r => (
                   <div key={r._id} className="adb-list-item">
@@ -268,7 +306,7 @@ export default function AgencyDashboard() {
             </>
           )}
 
-          {/* â”€â”€ Requests â”€â”€ */}
+          {/* â"€â"€ Requests â"€â"€ */}
           {tab === 'requests' && (
             <div className="adb-panel">
               <div className="adb-panel__header"><span className="adb-section-title">Interview Requests</span></div>
@@ -277,18 +315,105 @@ export default function AgencyDashboard() {
                 { label: `Pending (${pending.length})`, list: pending },
                 { label: `Accepted (${accepted.length})`, list: accepted },
                 { label: `Declined (${declined.length})`, list: declined },
+                { label: `Scheduled (${requests.filter(r => r.status === 'scheduled').length})`, list: requests.filter(r => r.status === 'scheduled') },
+                { label: `Completed (${requests.filter(r => r.status === 'completed').length})`, list: requests.filter(r => r.status === 'completed') },
+                { label: `Hired (${requests.filter(r => r.status === 'hired').length})`, list: requests.filter(r => r.status === 'hired') },
               ].map(group => group.list.length > 0 && (
                 <div key={group.label} className="adb-request-group">
                   <div className="adb-request-group__label">{group.label}</div>
-                  {group.list.map(r => (
-                    <div key={r._id} className="adb-list-item">
-                      <div className="adb-list-item__avatar">{r.caregiverId?.fullName?.split(' ').map(n=>n[0]).join('') || 'CG'}</div>
-                      <div className="adb-list-item__body">
-                        <div className="adb-list-item__name">{r.caregiverId?.fullName} <span className="adb-list-item__role">â€” {r.caregiverId?.role}</span></div>
-                        <div className="adb-list-item__meta">Reason: {r.reason} Â· Sent: {new Date(r.createdAt).toLocaleDateString()}</div>
-                        {r.caregiverResponse && <div className="adb-caregiver-response">{r.caregiverResponse}</div>}
+                  {group.list.map(req => (
+                    <div key={req._id} className="adb-list-item adb-list-item--column">
+                      <div className="adb-list-item__row">
+                        <div className="adb-list-item__avatar">{req.caregiverId?.fullName?.split(' ').map(n=>n[0]).join('') || 'CG'}</div>
+                        <div className="adb-list-item__body">
+                          <div className="adb-list-item__name">{req.caregiverId?.fullName} <span className="adb-list-item__role">â€" {req.caregiverId?.role}</span></div>
+                          <div className="adb-list-item__meta">Reason: {req.reason} Â· Sent: {new Date(req.createdAt).toLocaleDateString()}</div>
+                          {req.caregiverResponse && <div className="adb-caregiver-response">{req.caregiverResponse}</div>}
+                        </div>
+                        <RequestBadge status={req.status} />
                       </div>
-                      <RequestBadge status={r.status} />
+
+                      {/* Schedule Interview */}
+                      {req.status === 'accepted' && schedulingId !== req._id && (
+                        <button
+                          className="adb-action-btn"
+                          onClick={() => { setSchedulingId(req._id); setScheduleError(null) }}
+                        >
+                          Schedule Interview
+                        </button>
+                      )}
+                      {req.status === 'accepted' && schedulingId === req._id && (
+                        <div className="adb-schedule-form">
+                          <label htmlFor={`scheduledAt-${req._id}`}>Interview Date &amp; Time</label>
+                          <input
+                            id={`scheduledAt-${req._id}`}
+                            type="datetime-local"
+                            value={scheduledAt}
+                            min={new Date(Date.now() + 60000).toISOString().slice(0, 16)}
+                            onChange={e => setScheduledAt(e.target.value)}
+                          />
+                          {scheduleError && <p className="adb-error">{scheduleError}</p>}
+                          <div className="adb-schedule-actions">
+                            <button
+                              className="adb-action-btn"
+                              onClick={() => handleScheduleSubmit(req._id)}
+                              disabled={scheduleLoading || !scheduledAt}
+                            >
+                              {scheduleLoading ? 'Scheduling...' : 'Confirm Schedule'}
+                            </button>
+                            <button
+                              className="adb-link-btn"
+                              onClick={() => { setSchedulingId(null); setScheduledAt(''); setScheduleError(null) }}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Scheduled / Completed info + Hire */}
+                      {(req.status === 'scheduled' || req.status === 'completed') && (
+                        <div className="adb-scheduled-info">
+                          {req.scheduledAt && (
+                            <p><strong>Scheduled:</strong> {new Date(req.scheduledAt).toLocaleString()}</p>
+                          )}
+                          {req.meetLink && (
+                            <a href={req.meetLink} target="_blank" rel="noopener noreferrer" className="adb-meet-link">
+                              Join Google Meet
+                            </a>
+                          )}
+                          {hireConfirm !== req._id ? (
+                            <button
+                              className="adb-action-btn adb-hire-btn"
+                              onClick={() => setHireConfirm(req._id)}
+                            >
+                              Confirm Hire ✓
+                            </button>
+                          ) : (
+                            <div className="adb-hire-confirm">
+                              <span>Are you sure you want to confirm hire?</span>
+                              <button
+                                className="adb-action-btn"
+                                onClick={() => handleHireConfirm(req._id)}
+                                disabled={hireLoading === req._id}
+                              >
+                                {hireLoading === req._id ? 'Hiring...' : 'Yes, Confirm Hire'}
+                              </button>
+                              <button
+                                className="adb-link-btn"
+                                onClick={() => setHireConfirm(null)}
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Hired badge */}
+                      {req.status === 'hired' && (
+                        <div className="adb-hired-badge">Hired ✓</div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -300,7 +425,7 @@ export default function AgencyDashboard() {
             </div>
           )}
 
-          {/* â”€â”€ Verifications â”€â”€ */}
+          {/* â"€â"€ Verifications â"€â"€ */}
           {tab === 'verifications' && (
             <div className="adb-panel">
               <div className="adb-section-title" style={{ marginBottom: 12 }}>Employment Verification</div>
@@ -310,7 +435,7 @@ export default function AgencyDashboard() {
                   <div className="adb-list-item__avatar">{item.caregiverName?.split(' ').map(n=>n[0]).join('') || 'CG'}</div>
                   <div className="adb-list-item__body">
                     <div className="adb-list-item__name">{item.caregiverName}</div>
-                    <div className="adb-list-item__meta">{item.employment?.role} Â· {item.employment?.startDate} â€“ {item.employment?.endDate || 'Present'}</div>
+                    <div className="adb-list-item__meta">{item.employment?.role} Â· {item.employment?.startDate} â€" {item.employment?.endDate || 'Present'}</div>
                   </div>
                   <div style={{ display: 'flex', gap: 8 }}>
                     <button className="btn btn-green btn-sm" onClick={async () => {
@@ -327,7 +452,7 @@ export default function AgencyDashboard() {
             </div>
           )}
 
-          {/* â”€â”€ Recognition â”€â”€ */}
+          {/* â"€â"€ Recognition â"€â"€ */}
           {tab === 'recognition' && (
             <div className="adb-panel">
               <div className="adb-section-title" style={{ marginBottom: 12 }}>Professional Recognition</div>
@@ -348,11 +473,11 @@ export default function AgencyDashboard() {
             </div>
           )}
 
-          {/* â”€â”€ Accountability â”€â”€ */}
+          {/* â"€â"€ Accountability â"€â"€ */}
           {tab === 'accountability' && (
             <div className="adb-panel">
               <div className="adb-section-title" style={{ marginBottom: 12 }}>Accountability</div>
-              <p className="adb-panel__note">Document concerns using the FACT ←’ EVIDENCE ←’ RESPONSE ←’ RESOLUTION process. Caregivers are always given an opportunity to respond.</p>
+              <p className="adb-panel__note">Document concerns using the FACT ←' EVIDENCE ←' RESPONSE ←' RESOLUTION process. Caregivers are always given an opportunity to respond.</p>
               {accountability.length > 0 ? accountability.map((a, i) => (
                 <div key={i} className="adb-list-item">
                   <div className="adb-list-item__avatar">{a.caregiverId?.fullName?.split(' ').map(n=>n[0]).join('') || 'CG'}</div>
@@ -386,7 +511,7 @@ export default function AgencyDashboard() {
             </div>
           )}
 
-          {/* â”€â”€ Caregivers â”€â”€ */}
+          {/* â"€â"€ Caregivers â"€â"€ */}
           {tab === 'caregivers' && (
             <div className="adb-panel">
               <div className="adb-section-title" style={{ marginBottom: 12 }}>Caregivers</div>
@@ -397,7 +522,7 @@ export default function AgencyDashboard() {
             </div>
           )}
 
-          {/* â”€â”€ Profile â”€â”€ */}
+          {/* â"€â"€ Profile â"€â"€ */}
           {tab === 'profile' && agency && (
             <div className="adb-panel">
               <div className="adb-section-title" style={{ marginBottom: 16 }}>Organization Profile</div>

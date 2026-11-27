@@ -243,6 +243,8 @@ export const requestApi = {
   send:     (data)        => api.post('/requests', data),
   respond:  (id, data)    => api.patch(`/requests/${id}`, data),
   withdraw: (id)          => api.delete(`/requests/${id}`),
+  schedule: (id, data)    => api.patch(`/requests/${id}/schedule`, data),
+  hire:     (id)          => api.patch(`/requests/${id}/hire`),
 }
 
 /* -- Recognition endpoints --------------------------------- */

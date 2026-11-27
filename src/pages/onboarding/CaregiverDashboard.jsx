@@ -7,10 +7,13 @@ import './CaregiverDashboard.css'
 
 /* ── Status badge ─────────────────────────────────────── */
 const STATUS_MAP = {
-  pending:  { label: 'New Request', cls: 'cgd-badge--pending'  },
-  accepted: { label: 'Accepted',    cls: 'cgd-badge--accepted' },
-  declined: { label: 'Declined',    cls: 'cgd-badge--declined' },
-  withdrawn:{ label: 'Withdrawn',   cls: 'cgd-badge--grey'     },
+  pending:  { label: 'New Request',         cls: 'cgd-badge--pending'  },
+  accepted: { label: 'Accepted',            cls: 'cgd-badge--accepted' },
+  declined: { label: 'Declined',            cls: 'cgd-badge--declined' },
+  withdrawn:{ label: 'Withdrawn',           cls: 'cgd-badge--grey'     },
+  scheduled:{ label: 'Interview Scheduled', cls: 'cgd-badge--accepted' },
+  completed:{ label: 'Interview Completed', cls: 'cgd-badge--accepted' },
+  hired:    { label: 'Hired',               cls: 'cgd-badge--accepted' },
 }
 function StatusBadge({ status }) {
   const s = STATUS_MAP[status] || STATUS_MAP.pending
@@ -171,6 +174,39 @@ function RequestCard({ req, onRefresh }) {
           <div className="cgd-request-card__decline-reason">Declined · {req.declineReason}</div>
         )}
         {error && <p style={{ color: '#c0392b', fontSize: '0.8rem', marginTop: 6 }}>{error}</p>}
+
+        {req.status === 'scheduled' && (
+          <div className="request-scheduled">
+            <span className="status-badge scheduled">Interview Scheduled</span>
+            {req.scheduledAt && (
+              <p className="scheduled-time">
+                <strong>Scheduled:</strong> {new Date(req.scheduledAt).toLocaleString()}
+              </p>
+            )}
+            {req.meetLink && (
+              <a
+                href={req.meetLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="join-meeting-btn"
+              >
+                Join Meeting
+              </a>
+            )}
+            <p className="reminder-note">Check your email for reminders before the interview.</p>
+          </div>
+        )}
+        {req.status === 'hired' && (
+          <div className="request-hired">
+            <span className="status-badge hired">Hired ✓</span>
+            <p>Congratulations! You have been hired{req.agencyId?.orgName ? ` by ${req.agencyId.orgName}` : (req.agencyId?.name ? ` by ${req.agencyId.name}` : '')}.</p>
+          </div>
+        )}
+        {req.status === 'completed' && (
+          <div className="request-completed">
+            <span className="status-badge completed">Interview Completed</span>
+          </div>
+        )}
 
         <div className="cgd-request-card__actions">
           <button className="cgd-action-link" onClick={() => setExpanded(e => !e)}>
@@ -354,6 +390,24 @@ export default function CaregiverDashboard() {
                 <div className="cgd-request-group">
                   <div className="cgd-request-group__label">Declined ({declined.length})</div>
                   {declined.map(r => <RequestCard key={r._id} req={r} onRefresh={loadData} />)}
+                </div>
+              )}
+              {requests.filter(r => r.status === 'scheduled').length > 0 && (
+                <div className="cgd-request-group">
+                  <div className="cgd-request-group__label">Interview Scheduled ({requests.filter(r => r.status === 'scheduled').length})</div>
+                  {requests.filter(r => r.status === 'scheduled').map(r => <RequestCard key={r._id} req={r} onRefresh={loadData} />)}
+                </div>
+              )}
+              {requests.filter(r => r.status === 'completed').length > 0 && (
+                <div className="cgd-request-group">
+                  <div className="cgd-request-group__label">Interview Completed ({requests.filter(r => r.status === 'completed').length})</div>
+                  {requests.filter(r => r.status === 'completed').map(r => <RequestCard key={r._id} req={r} onRefresh={loadData} />)}
+                </div>
+              )}
+              {requests.filter(r => r.status === 'hired').length > 0 && (
+                <div className="cgd-request-group">
+                  <div className="cgd-request-group__label">Hired ({requests.filter(r => r.status === 'hired').length})</div>
+                  {requests.filter(r => r.status === 'hired').map(r => <RequestCard key={r._id} req={r} onRefresh={loadData} />)}
                 </div>
               )}
               {requests.length === 0 && (
