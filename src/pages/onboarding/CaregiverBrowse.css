@@ -180,6 +180,8 @@
 .cbr-card__footer {
   padding: 12px 20px 18px;
   display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   justify-content: center;
 }
 .cbr-card__view-btn { width: 100%; justify-content: center; }

@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import {
   FiSearch, FiUsers, FiCalendar, FiCheckSquare, FiAward, FiFileText,
@@ -7,6 +7,7 @@ import {
 import { agencyApi, requestApi, recognitionApi, verificationApi, accountabilityApi, caregiverApi, uploadApi, auth, authApi } from '../../lib/api'
 import ProfileAvatar from '../../components/ProfileAvatar'
 import './AgencyDashboard.css'
+import { fixMojibake } from '../../lib/fixText'
 
 /* ── Helpers ─────────────────────────────────────────── */
 const pad = n => String(n).padStart(2, '0')
@@ -819,7 +820,7 @@ export default function AgencyDashboard() {
                   </div>
                 )}
                 <div className="adb-org-profile-card__meta-row">
-                  {agency.serviceArea    && <span><strong>Service Area:</strong> {agency.serviceArea}</span>}
+                  {agency.serviceArea    && <span><strong>Service Area:</strong> {fixMojibake(agency.serviceArea)}</span>}
                   {agency.yearEstablished && <span><strong>Est.</strong> {agency.yearEstablished}</span>}
                   {agency.size           && <span><strong>Size:</strong> {agency.size}</span>}
                   {agency.website        && <a

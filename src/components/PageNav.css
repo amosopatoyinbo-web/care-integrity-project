@@ -1,0 +1,42 @@
+.cip-pagenav { background: #fff; border-bottom: 1px solid rgba(0, 0, 0, 0.07); }
+.cip-pagenav__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 8px 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.cip-pagenav__toggle {
+  display: none;
+  min-height: 44px;
+  margin-left: auto;
+  padding: 0 14px;
+  border: 1.5px solid rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  background: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.cip-pagenav__links { display: flex; flex-wrap: wrap; gap: 4px; list-style: none; margin: 0; padding: 0; }
+.cip-pagenav__links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: 8px;
+  color: var(--charcoal, #333);
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+.cip-pagenav__links a:hover,
+.cip-pagenav__links a.is-active { background: rgba(0, 0, 0, 0.05); }
+@media (max-width: 720px) {
+  .cip-pagenav__toggle { display: inline-flex; align-items: center; }
+  .cip-pagenav__links { display: none; width: 100%; flex-direction: column; }
+  .cip-pagenav__links.is-open { display: flex; }
+  .cip-pagenav__links a { width: 100%; }
+}

@@ -5,6 +5,7 @@ import TrainingTab from '../../components/training/TrainingTab'
 import ProfileAvatar from '../../components/ProfileAvatar'
 import { FiMenu, FiX, FiVideo, FiCalendar } from 'react-icons/fi'
 import './CaregiverDashboard.css'
+import { fixMojibake } from '../../lib/fixText'
 
 /* ── Helpers ──────────────────────────────────────────── */
 const pad = n => String(n).padStart(2, '0')
@@ -569,8 +570,8 @@ export default function CaregiverDashboard() {
                 {[
                   ['Name',         profile?.fullName],
                   ['Role',         profile?.role],
-                  ['Service Area', profile?.serviceArea],
-                  ['Experience',   profile?.yearsExp],
+                  ['Service Area', fixMojibake(profile?.serviceArea)],
+                  ['Experience',   fixMojibake(profile?.yearsExp)],
                 ].map(([label, val]) => val && (
                   <div key={label} className="cgd-profile-summary__row">
                     <span>{label}</span><strong>{val}</strong>

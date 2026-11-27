@@ -1,0 +1,24 @@
+.cip-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1.5px solid rgba(0, 0, 0, 0.12);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--charcoal, #333);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.cip-back:hover { background: rgba(0, 0, 0, 0.04); }
+.cip-back:focus-visible { outline: 2px solid var(--calm-aqua, #2a9d8f); outline-offset: 2px; }
+.cip-backbar {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  background: #fff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+}

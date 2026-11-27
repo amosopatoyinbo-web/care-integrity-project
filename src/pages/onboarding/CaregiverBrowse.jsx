@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { caregiverApi, auth, authApi } from '../../lib/api'
 import RecognitionModal from './RecognitionModal'
+import InterviewRequestModal from './InterviewRequestModal'
+import { fixMojibake } from '../../lib/fixText'
 import { formatTravelDistance, getCountyShortName } from '../../constants/locations'
 import { PROFESSIONAL_ROLES, EMPLOYMENT_STATUS_OPTIONS } from '../../constants/professionalCategories'
 import './CaregiverBrowse.css'
@@ -28,6 +30,7 @@ export default function CaregiverBrowse() {
   const [statusFilter, setStatusFilter] = useState('')
   const [areaFilter, setAreaFilter] = useState('')
   const [recognitionCaregiver, setRecognitionCaregiver] = useState(null)
+  const [interviewCaregiver, setInterviewCaregiver] = useState(null)
   const navigate = useNavigate()
   const limit = 12
 
@@ -198,15 +201,15 @@ export default function CaregiverBrowse() {
                   }
                 </div>
                 <div className="cbr-card__body">
-                  <h3 className="cbr-card__name">{cg.fullName}</h3>
+                  <h3 className="cbr-card__name">{fixMojibake(cg.fullName)}</h3>
                   <p className="cbr-card__role">{cg.role || 'Caregiver'}</p>
                   {cg.employmentStatus && (
                     <p className="cbr-card__status" style={{ fontSize: '0.8rem', color: 'var(--calm-aqua)', marginTop: '4px', fontWeight: 500 }}>
                       {EMPLOYMENT_STATUS_OPTIONS.find(opt => opt.value === cg.employmentStatus)?.label || cg.employmentStatus}
                     </p>
                   )}
-                  <p className="cbr-card__area">{cg.serviceArea}</p>
-                  {cg.yearsExp && <p className="cbr-card__years">{cg.yearsExp} experience</p>}
+                  <p className="cbr-card__area">{fixMojibake(cg.serviceArea)}</p>
+                  {cg.yearsExp && <p className="cbr-card__years">{fixMojibake(cg.yearsExp)} experience</p>}
 
                   {cg.standards?.length > 0 && (
                     <div className="cbr-card__standards">
@@ -265,6 +268,13 @@ export default function CaregiverBrowse() {
                     View Profile
                   </Link>
                   <button
+                    className="btn btn-blue btn-sm"
+                    style={{ flex: 1 }}
+                    onClick={() => setInterviewCaregiver(cg)}
+                  >
+                    Connect
+                  </button>
+                  <button
                     className="btn btn-green btn-sm"
                     style={{ flex: 1 }}
                     onClick={() => setRecognitionCaregiver(cg)}
@@ -301,6 +311,14 @@ export default function CaregiverBrowse() {
         )}
       </div>
 
+      {/* Connect = same Request an Interview flow as the profile page */}
+      {interviewCaregiver && (
+        <InterviewRequestModal
+          caregiverName={interviewCaregiver.fullName}
+          caregiverId={interviewCaregiver._id}
+          onClose={() => setInterviewCaregiver(null)}
+        />
+      )}
       {/* Recognition Modal */}
       {recognitionCaregiver && (
         <RecognitionModal

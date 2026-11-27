@@ -6,6 +6,7 @@ import trainingApi from '../../lib/trainingApi'
 import { formatTravelDistance, formatWorkAreas } from '../../constants/locations'
 import ProfileAvatar from '../../components/ProfileAvatar'
 import './CaregiverProfile.css'
+import { fixMojibake } from '../../lib/fixText'
 
 /* ── Status badge map ─────────────────────────────────── */
 const STATUS_MAP = {
@@ -291,9 +292,9 @@ export default function CaregiverProfile() {
             <div className="cp-verified-ring" aria-label="Profile active" />
           </div>
 
-          <h1 className="cp-name">{profile.fullName}</h1>
+          <h1 className="cp-name">{fixMojibake(profile.fullName)}</h1>
           <p className="cp-role">{profile.role}</p>
-          <p className="cp-meta">{profile.serviceArea}{profile.yearsExp ? ` · ${profile.yearsExp}` : ''}</p>
+          <p className="cp-meta">{fixMojibake(profile.serviceArea)}{profile.yearsExp ? ` · ${fixMojibake(profile.yearsExp)}` : ''}</p>
           <p className="cp-member">Member since {profile.memberSince || new Date(profile.createdAt).getFullYear()}</p>
 
           {/* Action button */}
@@ -363,7 +364,7 @@ export default function CaregiverProfile() {
           {/* Bio */}
           <section className="cp-section">
             <h2 className="cp-section-title">Professional Bio</h2>
-            <p className="cp-bio">{profile.bio || 'No bio provided yet.'}</p>
+            <p className="cp-bio">{fixMojibake(profile.bio) || 'No bio provided yet.'}</p>
             {profile.carePhilosophy && (
               <>
                 <h3 className="cp-subsection-title">Care Philosophy</h3>
