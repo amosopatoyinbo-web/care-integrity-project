@@ -487,3 +487,6 @@ a.adb-nav__item { text-decoration: none; box-sizing: border-box; }
   .adb-search__row { flex-direction: column; }
   .adb-form__actions .btn { flex: 1 1 auto; }
 }
+
+/* Sidebar dot: organization profile incomplete */
+.adb-nav__dot { width: 8px; height: 8px; border-radius: 50%; background: #d4af37; margin-left: auto; flex-shrink: 0; }

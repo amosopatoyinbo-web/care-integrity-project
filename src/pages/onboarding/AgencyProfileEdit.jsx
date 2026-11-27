@@ -5,10 +5,12 @@ import ProfileAvatar from '../../components/ProfileAvatar'
 import SubNav from '../../components/SubNav'
 import './AgencyOnboarding.css'
 import '../../components/PhotoUpload.css'
+import useScrollToHash from '../../components/profileCompletion/useScrollToHash'
 
 export default function AgencyProfileEdit() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
+  useScrollToHash(!loading)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
@@ -185,7 +187,7 @@ export default function AgencyProfileEdit() {
         <form className="ob-page__form" onSubmit={handleSubmit}>
           
           {/* Logo */}
-          <div className="ob-field">
+          <div id="sec-logo" className="ob-field">
             <label className="ob-label">Organization Logo</label>
             <div className="ob-logo-upload">
               <div className="cp-photo-circle">
@@ -208,7 +210,7 @@ export default function AgencyProfileEdit() {
           </div>
 
           {/* Organization Name */}
-          <div className="ob-field">
+          <div id="sec-details" className="ob-field">
             <label className="ob-label">Organization Name *</label>
             <input
               type="text"
@@ -267,7 +269,7 @@ export default function AgencyProfileEdit() {
           </div>
 
           {/* Website */}
-          <div className="ob-field">
+          <div id="sec-website" className="ob-field">
             <label className="ob-label">Website</label>
             <input
               type="url"
@@ -308,7 +310,7 @@ export default function AgencyProfileEdit() {
           </div>
 
           {/* Description */}
-          <div className="ob-field">
+          <div id="sec-description" className="ob-field">
             <label className="ob-label">Organization Description</label>
             <textarea
               className="ob-textarea"
@@ -320,7 +322,7 @@ export default function AgencyProfileEdit() {
           </div>
 
           {/* Care Types */}
-          <div className="ob-field">
+          <div id="sec-caretypes" className="ob-field">
             <label className="ob-label">Care Types You Specialize In</label>
             <div className="ob-chips">
               {careTypeOptions.map(type => (

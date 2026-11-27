@@ -13,6 +13,8 @@ import { fixMojibake } from '../../lib/fixText'
 import JourneyStepper from '../../components/hiring/JourneyStepper'
 import AgencyJourneyPanel from '../../components/hiring/AgencyJourneyPanel'
 import { REQUEST_TAB_DEFS, matchesTab, needsAction } from '../../components/hiring/hiringJourney'
+import { ProfileCompletionCard, WelcomeGuide } from '../../components/profileCompletion/ProfileCompletion'
+import { agencyChecklist, progress, isNewProfile } from '../../components/profileCompletion/profileChecklist'
 
 /* ── Helpers ─────────────────────────────────────────── */
 const pad = n => String(n).padStart(2, '0')
@@ -420,6 +422,11 @@ export default function AgencyDashboard() {
     { label: 'Accountability Reports', icon: FiFileText,    tab: 'accountability' },
   ]
 
+  const checklist = agencyChecklist(agency)
+  const profileIncomplete = checklist.length > 0 && progress(checklist).done < checklist.length
+  const pcUser = auth.getUser()
+  const pcUserId = pcUser?.id || pcUser?._id || agency?._id
+
   const NAV_ITEMS = [
     { key: 'overview',       label: 'Overview' },
     { key: 'caregivers',     label: 'Caregivers' },
@@ -427,7 +434,7 @@ export default function AgencyDashboard() {
     { key: 'verifications',  label: 'Employment Verification', count: pendingVerif.length },
     { key: 'recognition',    label: 'Professional Recognition' },
     { key: 'accountability', label: 'Accountability Reports' },
-    { key: 'profile',        label: 'Organization Profile' },
+    { key: 'profile',        label: 'Organization Profile', dot: profileIncomplete },
   ]
 
   if (loading) return (
@@ -485,6 +492,15 @@ export default function AgencyDashboard() {
 
       {navOpen && <div className="adb-backdrop" onClick={() => setNavOpen(false)} aria-hidden="true" />}
 
+      <WelcomeGuide
+        items={checklist}
+        userId={pcUserId}
+        show={isNewProfile(agency)}
+        onTab={goTab}
+        heading={`Welcome to The Care Integrity Project${agency?.name ? `, ${agency.name}` : ''}`}
+        intro="Let's finish your organization profile so caregivers know who they are talking to. It only takes a few minutes."
+      />
+
       <div className="adb-layout">
 
         {/* Sidebar nav (slides in as an overlay on mobile) */}
@@ -493,6 +509,7 @@ export default function AgencyDashboard() {
             <button key={item.key} className={`adb-nav__item${tab === item.key ? ' active' : ''}`} onClick={() => goTab(item.key)}>
               {item.label}
               {item.count > 0 && <span className="adb-nav__count">{item.count}</span>}
+              {item.dot && <span className="adb-nav__dot" aria-label="Profile incomplete" />}
             </button>
           ))}
           <div className="adb-nav__mobile-only">
@@ -510,6 +527,8 @@ export default function AgencyDashboard() {
                 <h1 className="adb-welcome__heading">Welcome, {agency?.name}</h1>
                 <p className="adb-welcome__sub">{agency?.location} · {agency?.size}</p>
               </div>
+
+              <ProfileCompletionCard items={checklist} userId={pcUserId} onTab={goTab} title="Complete your organization profile" />
 
               <div className="adb-stat-grid">
                 {STAT_CARDS.map(c => (

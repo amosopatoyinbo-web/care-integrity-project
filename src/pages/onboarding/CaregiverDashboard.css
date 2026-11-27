@@ -406,3 +406,6 @@ a.cgd-nav__item { text-decoration: none; box-sizing: border-box; }
 /* Panel header with a right-aligned action (e.g. Edit Profile) */
 .cgd-panel__header--row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .cgd-edit-btn { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; }
+
+/* Sidebar dot: profile incomplete */
+.cgd-nav__dot { width: 8px; height: 8px; border-radius: 50%; background: #d4af37; margin-left: auto; flex-shrink: 0; }

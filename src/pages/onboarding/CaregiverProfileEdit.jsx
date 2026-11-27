@@ -8,10 +8,12 @@ import SubNav from '../../components/SubNav'
 import { homePath } from '../../lib/navTrail'
 import './CaregiverProfile.css'
 import '../../components/PhotoUpload.css'
+import useScrollToHash from '../../components/profileCompletion/useScrollToHash'
 
 export default function CaregiverProfileEdit() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
+  useScrollToHash(!loading)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
@@ -210,7 +212,7 @@ export default function CaregiverProfileEdit() {
         <form className="cp-form" onSubmit={handleSubmit}>
           
           {/* Photo */}
-          <div className="cp-field">
+          <div id="sec-photo" className="cp-field">
             <label className="cp-label">Profile Photo</label>
             <div className="cp-photo-upload">
               <div className="cp-photo-circle">
@@ -245,7 +247,7 @@ export default function CaregiverProfileEdit() {
           </div>
 
           {/* Role */}
-          <div className="cp-field">
+          <div id="sec-role" className="cp-field">
             <label className="cp-label">Professional Category *</label>
             <select
               className="cp-input"
@@ -344,7 +346,7 @@ export default function CaregiverProfileEdit() {
           </div>
 
           {/* Bio */}
-          <div className="cp-field">
+          <div id="sec-bio" className="cp-field">
             <label className="cp-label">Professional Bio</label>
             <textarea
               className="cp-textarea"
@@ -356,7 +358,7 @@ export default function CaregiverProfileEdit() {
           </div>
 
           {/* Care Philosophy */}
-          <div className="cp-field">
+          <div id="sec-philosophy" className="cp-field">
             <label className="cp-label">Care Philosophy</label>
             <textarea
               className="cp-textarea"
@@ -368,7 +370,7 @@ export default function CaregiverProfileEdit() {
           </div>
 
           {/* Care Types */}
-          <div className="cp-field">
+          <div id="sec-caretypes" className="cp-field">
             <label className="cp-label">Care Types You Provide</label>
             <div className="cp-chips">
               {careTypeOptions.map(type => (
@@ -437,7 +439,7 @@ export default function CaregiverProfileEdit() {
           </div>
 
           {/* Travel Distance */}
-          <div className="cp-field">
+          <div id="sec-travel" className="cp-field">
             <label className="cp-label">Travel Distance</label>
             <p className="cp-field-hint">How far are you willing to travel for work?</p>
             <select

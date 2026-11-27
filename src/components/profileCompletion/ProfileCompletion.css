@@ -1,0 +1,61 @@
+/* Profile completion card + welcome pop-up. All classes prefixed pc-. */
+.pc-card {
+  background: #fff; border-radius: var(--radius-lg, 16px); box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(0,0,0,0.05); border-left: 4px solid var(--integrity-green, #2eaf8f); padding: 20px 24px;
+}
+.pc-card--complete { border-left-color: var(--integrity-green, #2eaf8f); }
+.pc-card__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.pc-card__title { font-family: var(--font-heading); font-size: 1.1rem; color: var(--trust-blue, #0f4c81); margin: 0 0 4px; }
+.pc-card__sub { font-size: 0.84rem; color: var(--charcoal-light, #555); margin: 0; }
+.pc-card__percent { font-family: var(--font-heading); font-size: 1.6rem; font-weight: 800; color: var(--integrity-green, #2eaf8f); line-height: 1; }
+.pc-card__close { background: none; border: none; cursor: pointer; color: var(--charcoal-pale, #888); font-size: 1.1rem; min-width: 44px; min-height: 44px; }
+
+.pc-bar { height: 8px; border-radius: 999px; background: rgba(46,175,143,0.15); margin: 14px 0 8px; overflow: hidden; }
+.pc-bar__fill { display: block; height: 100%; border-radius: inherit; background: var(--integrity-green, #2eaf8f); transition: width 0.4s ease; }
+
+.pc-list { list-style: none; margin: 8px 0 0; padding: 0; }
+.pc-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid rgba(0,0,0,0.06); }
+.pc-item:first-child { border-top: none; }
+.pc-item__check {
+  flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%;
+  border: 2px solid rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center; font-size: 0.8rem;
+}
+.pc-item--done .pc-item__check { background: var(--integrity-green, #2eaf8f); border-color: var(--integrity-green, #2eaf8f); color: #fff; }
+.pc-item__text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.pc-item__label { font-size: 0.88rem; font-weight: 600; color: var(--charcoal, #222); }
+.pc-item--done .pc-item__label { color: var(--charcoal-pale, #888); text-decoration: line-through; font-weight: 500; }
+.pc-item__hint { font-size: 0.76rem; color: var(--charcoal-pale, #888); }
+.pc-item__btn {
+  flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px; min-height: 40px; padding: 0 14px;
+  border-radius: 999px; border: 1.5px solid var(--trust-blue, #0f4c81); background: #fff; color: var(--trust-blue, #0f4c81);
+  font-family: var(--font-body); font-weight: 600; font-size: 0.8rem; text-decoration: none; cursor: pointer;
+}
+.pc-item__btn:hover { background: rgba(15,76,129,0.06); }
+
+/* Welcome pop-up */
+.pc-modal { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.pc-modal__backdrop { position: absolute; inset: 0; background: rgba(10,25,45,0.5); }
+.pc-modal__box {
+  position: relative; width: 100%; max-width: 480px; max-height: calc(100vh - 32px); overflow-y: auto;
+  background: #fff; border-radius: var(--radius-lg, 16px); padding: 28px 24px 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+}
+.pc-modal__x { position: absolute; top: 8px; right: 8px; background: none; border: none; cursor: pointer; font-size: 1.2rem; color: var(--charcoal-pale, #888); min-width: 44px; min-height: 44px; }
+.pc-modal__title { font-family: var(--font-heading); font-size: 1.35rem; color: var(--trust-blue, #0f4c81); margin: 0 32px 8px 0; }
+.pc-modal__intro { font-size: 0.9rem; color: var(--charcoal-light, #555); line-height: 1.6; margin: 0 0 14px; }
+.pc-modal__count { font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--charcoal-pale, #888); margin: 0 0 6px; }
+.pc-modal__list { margin: 0 0 20px; padding-left: 20px; font-size: 0.88rem; color: var(--charcoal, #222); line-height: 1.8; }
+.pc-modal__actions { display: flex; flex-direction: column; gap: 10px; }
+.pc-modal__start, .pc-modal__later { width: 100%; justify-content: center; text-align: center; min-height: 46px; }
+
+/* Field highlight when arriving from a checklist link */
+.pc-highlight { animation: pc-flash 2.2s ease; border-radius: 10px; }
+@keyframes pc-flash {
+  0%, 60% { box-shadow: 0 0 0 4px rgba(46,175,143,0.35); background: rgba(46,175,143,0.06); }
+  100% { box-shadow: 0 0 0 0 rgba(46,175,143,0); background: transparent; }
+}
+
+@media (max-width: 768px) {
+  .pc-card { padding: 16px; }
+  .pc-modal { align-items: flex-end; padding: 0; }
+  .pc-modal__box { max-width: none; border-radius: 16px 16px 0 0; max-height: 88vh; }
+}

@@ -11,6 +11,8 @@ import { fixMojibake } from '../../lib/fixText'
 import JourneyStepper from '../../components/hiring/JourneyStepper'
 import CaregiverJourneyPanel from '../../components/hiring/CaregiverJourneyPanel'
 import { REQUEST_TAB_DEFS, matchesTab, needsAction } from '../../components/hiring/hiringJourney'
+import { ProfileCompletionCard, WelcomeGuide } from '../../components/profileCompletion/ProfileCompletion'
+import { caregiverChecklist, progress, isNewProfile } from '../../components/profileCompletion/profileChecklist'
 
 /* ── Helpers ──────────────────────────────────────────── */
 const pad = n => String(n).padStart(2, '0')
@@ -428,6 +430,9 @@ export default function CaregiverDashboard() {
 
   /* Overview data (derived from what is already loaded) */
   const goTab = key => { setTab(key); setNavOpen(false) }
+  const checklist = caregiverChecklist(profile)
+  const profileIncomplete = checklist.length > 0 && progress(checklist).done < checklist.length
+  const pcUserId = currentUser?.id || currentUser?._id || profile?._id
   const now = Date.now()
   const upcoming = requests
     .filter(r => r.status === 'scheduled' && r.scheduledAt && new Date(r.scheduledAt).getTime() > now)
@@ -496,6 +501,15 @@ export default function CaregiverDashboard() {
 
       {navOpen && <div className="cgd-backdrop" onClick={() => setNavOpen(false)} aria-hidden="true" />}
 
+      <WelcomeGuide
+        items={checklist}
+        userId={pcUserId}
+        show={isNewProfile(profile)}
+        onTab={goTab}
+        heading={`Welcome to The Care Integrity Project${profile?.fullName ? `, ${profile.fullName.split(' ')[0]}` : ''}`}
+        intro="Let's finish your profile so agencies can find you. It only takes a few minutes, and you can stop at any time."
+      />
+
       <div className="cgd-layout">
 
         {/* Sidebar nav (slides in as an overlay on mobile) */}
@@ -514,7 +528,7 @@ export default function CaregiverDashboard() {
           {[
             { key: 'overview',    label: 'Overview' },
             { key: 'requests',    label: 'Interview Requests', count: pending.length },
-            { key: 'profile',     label: 'My Profile' },
+            { key: 'profile',     label: 'My Profile', dot: profileIncomplete },
             { key: 'credentials', label: 'Credentials & Training' },
             { key: 'employment',  label: 'Employment History' },
             { key: 'recognition', label: 'Recognition' },
@@ -522,6 +536,7 @@ export default function CaregiverDashboard() {
             <button key={item.key} className={`cgd-nav__item${tab === item.key ? ' active' : ''}`} onClick={() => { setTab(item.key); setNavOpen(false) }}>
               {item.label}
               {item.count > 0 && <span className="cgd-nav__count">{item.count}</span>}
+              {item.dot && <span className="cgd-nav__dot" aria-label="Profile incomplete" />}
             </button>
           ))}
           <div className="cgd-nav__mobile-only">
@@ -544,6 +559,8 @@ export default function CaregiverDashboard() {
                   {[profile?.role, fixMojibake(profile?.serviceArea), fixMojibake(profile?.yearsExp)].filter(Boolean).join(' · ')}
                 </p>
               </div>
+
+              <ProfileCompletionCard items={checklist} userId={pcUserId} onTab={goTab} />
 
               <div className="cgd-ov-stats">
                 {OVERVIEW_STATS.map(s => (
