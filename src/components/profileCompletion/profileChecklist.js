@@ -44,6 +44,8 @@ export const flags = {
   setWelcomeSeen: id => localStorage.setItem(key(id, 'welcome'), '1'),
   cardDismissed: id => localStorage.getItem(key(id, 'done')) === '1',
   setCardDismissed: id => localStorage.setItem(key(id, 'done'), '1'),
+  cardExpanded:  id => localStorage.getItem(key(id, 'open')) === '1',
+  setCardExpanded: (id, open) => localStorage.setItem(key(id, 'open'), open ? '1' : '0'),
 }
 
 /* "New user" = profile created in the last 30 days. Profiles without a createdAt are treated as not new. */

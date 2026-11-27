@@ -9,6 +9,29 @@
 .pc-card__sub { font-size: 0.84rem; color: var(--charcoal-light, #555); margin: 0; }
 .pc-card__percent { font-family: var(--font-heading); font-size: 1.6rem; font-weight: 800; color: var(--integrity-green, #2eaf8f); line-height: 1; }
 .pc-card__close { background: none; border: none; cursor: pointer; color: var(--charcoal-pale, #888); font-size: 1.1rem; min-width: 44px; min-height: 44px; }
+.pc-card__head > div { min-width: 0; }
+
+/* Collapsible header */
+.pc-card__toggle {
+  flex: 1; display: flex; align-items: center; gap: 12px; width: 100%; min-height: 44px; padding: 0;
+  background: none; border: none; cursor: pointer; text-align: left; font-family: var(--font-body);
+}
+.pc-card__toggle-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.pc-card__toggle .pc-card__title { display: block; margin: 0 0 2px; }
+.pc-card__toggle .pc-card__sub { display: block; }
+.pc-card__toggle .pc-card__percent { font-size: 1.3rem; }
+.pc-card__chevron { flex-shrink: 0; font-size: 1.3rem; color: var(--trust-blue, #0f4c81); transition: transform 0.2s ease; }
+.pc-card.is-open .pc-card__chevron { transform: rotate(180deg); }
+.pc-card__toggle:focus-visible { outline: 2px solid var(--trust-blue, #0f4c81); outline-offset: 4px; border-radius: 8px; }
+.pc-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Collapsed state: next step only */
+.pc-next { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 4px; }
+.pc-next__label { min-width: 0; font-size: 0.88rem; font-weight: 600; color: var(--charcoal, #222); display: flex; align-items: center; gap: 8px; }
+.pc-next__tag {
+  flex-shrink: 0; font-size: 0.66rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 999px; background: rgba(46,175,143,0.12); color: var(--integrity-green-dark, #1f8a6f);
+}
 
 .pc-bar { height: 8px; border-radius: 999px; background: rgba(46,175,143,0.15); margin: 14px 0 8px; overflow: hidden; }
 .pc-bar__fill { display: block; height: 100%; border-radius: inherit; background: var(--integrity-green, #2eaf8f); transition: width 0.4s ease; }
@@ -56,6 +79,7 @@
 
 @media (max-width: 768px) {
   .pc-card { padding: 16px; }
+  .pc-next { flex-wrap: wrap; }
   .pc-modal { align-items: flex-end; padding: 0; }
   .pc-modal__box { max-width: none; border-radius: 16px 16px 0 0; max-height: 88vh; }
 }

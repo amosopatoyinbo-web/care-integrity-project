@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { FiCheck, FiChevronRight, FiX } from 'react-icons/fi'
+import { FiCheck, FiChevronRight, FiChevronDown, FiX } from 'react-icons/fi'
 import { progress, flags } from './profileChecklist'
 import './ProfileCompletion.css'
 
@@ -12,32 +12,58 @@ function ItemAction({ item, onTab, onClick, className, children }) {
 
 /* "Complete your profile" card for the dashboard Overview. */
 export function ProfileCompletionCard({ items, userId, onTab, title = 'Complete your profile' }) {
-  const { done, total, percent } = progress(items)
+  const { done, total, percent, next } = progress(items)
   const [dismissed, setDismissed] = useState(() => flags.cardDismissed(userId))
+  // Collapsed by default; the user's choice is remembered on this device.
+  const [expanded, setExpanded] = useState(() => flags.cardExpanded(userId))
   if (!items.length) return null
   const complete = done === total
   if (complete && dismissed) return null
+  const listId = `pc-list-${userId || 'me'}`
+
+  function toggle() {
+    setExpanded(v => { flags.setCardExpanded(userId, !v); return !v })
+  }
 
   return (
-    <section className={`pc-card${complete ? ' pc-card--complete' : ''}`} aria-label="Profile completion">
+    <section className={`pc-card${complete ? ' pc-card--complete' : ''}${expanded ? ' is-open' : ''}`} aria-label="Profile completion">
       <div className="pc-card__head">
-        <div>
-          <h2 className="pc-card__title">{complete ? 'Profile complete ✓' : title}</h2>
-          <p className="pc-card__sub">
-            {complete
-              ? 'Great work. Agencies now see your full profile.'
-              : `${done} of ${total} steps done. A complete profile helps you get noticed.`}
-          </p>
-        </div>
-        {complete
-          ? <button type="button" className="pc-card__close" aria-label="Dismiss" onClick={() => { flags.setCardDismissed(userId); setDismissed(true) }}><FiX /></button>
-          : <span className="pc-card__percent">{percent}%</span>}
+        {complete ? (
+          <div>
+            <h2 className="pc-card__title">Profile complete ✓</h2>
+            <p className="pc-card__sub">Great work. Your full profile is now visible.</p>
+          </div>
+        ) : (
+          <button type="button" className="pc-card__toggle" onClick={toggle} aria-expanded={expanded} aria-controls={listId}>
+            <span className="pc-card__toggle-text">
+              <span className="pc-card__title">{title}</span>
+              <span className="pc-card__sub">{done} of {total} steps done</span>
+            </span>
+            <span className="pc-card__percent">{percent}%</span>
+            <FiChevronDown className="pc-card__chevron" aria-hidden="true" />
+            <span className="pc-sr">{expanded ? 'Hide steps' : 'Show all steps'}</span>
+          </button>
+        )}
+        {complete && (
+          <button type="button" className="pc-card__close" aria-label="Dismiss" onClick={() => { flags.setCardDismissed(userId); setDismissed(true) }}><FiX /></button>
+        )}
       </div>
       <div className="pc-bar" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent}>
         <span className="pc-bar__fill" style={{ width: `${percent}%` }} />
       </div>
-      {!complete && (
-        <ul className="pc-list">
+
+      {/* Collapsed: only the next step */}
+      {!complete && !expanded && next && (
+        <div className="pc-next">
+          <span className="pc-next__label"><span className="pc-next__tag">Next</span>{next.label}</span>
+          <ItemAction item={next} onTab={onTab} className="pc-item__btn">
+            Add <FiChevronRight aria-hidden="true" />
+          </ItemAction>
+        </div>
+      )}
+
+      {!complete && expanded && (
+        <ul className="pc-list" id={listId}>
           {items.map(item => (
             <li key={item.key} className={`pc-item${item.done ? ' pc-item--done' : ''}`}>
               <span className="pc-item__check" aria-hidden="true">{item.done ? <FiCheck /> : null}</span>
