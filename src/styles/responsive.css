@@ -1,0 +1,137 @@
+/* ============================================================
+   RESPONSIVE LAYER — tablet and mobile
+   Loaded last (see main.jsx) so it refines the page stylesheets.
+   Breakpoints: tablet 768–1023px · mobile ≤767px · small phone ≤380px
+   Desktop (≥1024px) is not changed by this file, except the
+   width-safety rules in section 1, which have no visible effect
+   when content already fits.
+   ============================================================ */
+
+/* ── 1. Width safety (all sizes) ─────────────────────────────
+   Grid and flex children default to min-width:auto, so one wide
+   child (a row of tabs, a long email or URL) stretches the whole
+   page wider than the phone. On mobile Chrome that widens the
+   layout viewport and shows the navy page background on the right.
+   These rules let columns shrink and long text wrap instead. */
+#root { overflow-x: clip; }
+body { overflow-wrap: break-word; }
+img, video { max-width: 100%; }
+
+.cgd-layout > *, .cgd-main, .cgd-panel,
+.adb-layout > *, .adb-main, .adb-panel,
+.cp-layout > *, .cp-main, .cp-section,
+.h-why__inner > *, .about__why > *,
+.cgd-request-card, .cgd-request-card__top, .cgd-request-card__body,
+.adb-req-card, .adb-req-card__main, .adb-req-card__body,
+.cgd-entry-card__left, .cgd-ov-next__body, .cgd-ov-recent__body,
+.pc-card, .pc-item__text, .hj-panel {
+  min-width: 0;
+}
+.cgd-request-card__response, .cgd-request-card__preview, .cgd-request-card__full-msg,
+.adb-req-card__body, .cgd-entry-card__sub, .cp-section p, .cp-private-block {
+  overflow-wrap: anywhere;
+}
+
+/* Card grids: never demand more than the available width. */
+.cbr-grid { grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); }
+.cp-certificates-grid { grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); }
+
+/* ── 2. Tablet (768px – 1023px) ─────────────────────────── */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .cgd-layout { grid-template-columns: 200px minmax(0, 1fr); gap: 16px; padding: 20px 16px; }
+  .adb-layout { grid-template-columns: 200px minmax(0, 1fr); gap: 16px; }
+  .cgd-nav__item, .adb-nav__item { font-size: 0.8rem; padding: 9px 10px; }
+
+  .cgd-ov-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .cgd-ov-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .adb-stat-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .adb-quick-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  .cgd-topbar__right, .adb-topbar__right { gap: 8px; }
+  .cgd-topbar__right .btn, .adb-topbar__right .btn { padding-left: 14px; padding-right: 14px; }
+
+  /* Profile page: two columns start at 860px; keep the sidebar in flow below that. */
+  .cp-layout { padding: 0 16px; }
+}
+@media (min-width: 768px) and (max-width: 859px) {
+  .cp-sidebar { position: static; }
+}
+
+/* ── 3. Mobile (≤767px) ──────────────────────────────────── */
+@media (max-width: 767px) {
+  /* Inputs at 16px stop iOS Safari from zooming in on focus. */
+  input, select, textarea { font-size: 16px; }
+
+  /* Things that stick while scrolling on desktop sit in normal flow on phones.
+     (On a single-column layout they slid over the content below them.) */
+  .h-why__left, .about__why-left, .cp-sidebar { position: static; top: auto; }
+
+  /* Page gutters */
+  .container, .section-pad-inner { padding-left: 20px; padding-right: 20px; }
+
+  /* Dashboards */
+  .cgd-layout, .adb-layout { grid-template-columns: minmax(0, 1fr); padding: 14px 12px; gap: 14px; }
+  .cgd-panel, .adb-panel { padding: 16px 14px; border-radius: 14px; }
+  .cgd-ov-welcome__title, .adb-welcome__heading { font-size: 1.3rem; line-height: 1.25; }
+  .cgd-ov-welcome__sub, .adb-welcome__sub { font-size: 0.82rem; }
+  .cgd-ov-stats, .adb-stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .cgd-ov-stat, .adb-stat-card { padding: 12px; }
+  .cgd-ov-stat__value { font-size: 1.5rem; }
+  .cgd-ov-actions, .adb-quick-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .cgd-ov-action { font-size: 0.8rem; padding: 8px 10px; min-height: 46px; }
+
+  /* Tab bars: scroll sideways inside their panel, not the page. */
+  .cgd-tabs, .adb-tabs {
+    max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain;
+    margin-left: -2px; margin-right: -2px; scrollbar-width: none;
+  }
+  .cgd-tabs::-webkit-scrollbar, .adb-tabs::-webkit-scrollbar { display: none; }
+  .cgd-tabs__tab, .adb-tabs__tab { padding: 0 10px; font-size: 0.82rem; }
+
+  /* Request / entry cards */
+  .cgd-request-card, .adb-req-card { padding: 14px 12px; }
+  .cgd-request-card__top, .adb-req-card__main { gap: 10px; }
+  .cgd-request-card__top { flex-wrap: wrap; }
+  .cgd-request-card__top > .cgd-badge { order: -1; margin-left: auto; }
+  .adb-req-card__main { flex-wrap: wrap; }
+  .cgd-entry-card { flex-direction: column; align-items: stretch; gap: 10px; }
+  .cgd-entry-card > div:last-child { align-items: flex-start !important; }
+  .rec-entry-actions { justify-content: flex-start; }
+  .hj-stepper { overflow-x: auto; }
+
+  /* Sub-navigation row (Back + breadcrumbs) */
+  .cip-subnav__inner { padding-left: 12px; padding-right: 12px; gap: 10px; }
+
+  /* Caregiver profile page header: one compact row. Edit Profile and
+     My Dashboard are already the main buttons in the profile card,
+     so the header keeps only the actions that exist nowhere else. */
+  .cp-topbar { padding: 10px 14px; gap: 10px; }
+  .cp-topbar__logo img { height: 34px; }
+  .cp-topbar__right { flex-wrap: nowrap; justify-content: flex-end; gap: 8px; min-width: 0; }
+  .cp-topbar__right a.btn-green-outline,
+  .cp-topbar__right a.btn-blue { display: none; }
+  .cp-topbar__right .btn { white-space: nowrap; padding: 8px 12px; font-size: 0.76rem; }
+  .cp-preview-banner { flex-wrap: wrap; gap: 8px; padding: 10px 14px; font-size: 0.8rem; }
+
+  .cp-layout { margin: 16px auto; padding: 0 12px; gap: 14px; }
+  .cp-sidebar { padding: 22px 16px; }
+  .cp-section { padding: 18px 16px; }
+
+  /* Browse */
+  .cbr-grid { gap: 12px; }
+
+  /* Edit pages */
+  .cp-container, .ob-page { padding-left: 14px; padding-right: 14px; }
+  .cp-form, .ob-page__form { padding: 18px 14px; }
+  .cp-photo-upload { flex-direction: column; text-align: center; }
+  .cp-actions, .ob-actions { flex-direction: column-reverse; gap: 10px; }
+  .cp-actions .btn, .ob-actions .btn { width: 100%; }
+}
+
+/* ── 4. Small phones (≤380px) ────────────────────────────── */
+@media (max-width: 380px) {
+  .cgd-ov-stats, .adb-stat-grid { grid-template-columns: minmax(0, 1fr); }
+  .cgd-ov-actions, .adb-quick-grid { grid-template-columns: minmax(0, 1fr); }
+  .cp-topbar__right .btn { padding: 7px 10px; font-size: 0.72rem; }
+  .cgd-ov-welcome__title, .adb-welcome__heading { font-size: 1.2rem; }
+}

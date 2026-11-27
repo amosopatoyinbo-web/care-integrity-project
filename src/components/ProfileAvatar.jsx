@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react'
+﻿import { useState, useEffect, useRef } from 'react'
 import './ProfileAvatar.css'
 
 /**
@@ -28,8 +28,12 @@ export default function ProfileAvatar({
   const [loading, setLoading] = useState(!!photoUrl)
   const [error, setError] = useState(false)
 
-  // A new URL (e.g. just uploaded, or data arrived after first render) gets a fresh attempt.
+  // A *changed* URL (e.g. just uploaded) gets a fresh attempt. Skipping the first run matters:
+  // a cached image can fire onLoad before this effect, and resetting then would hide it forever.
+  const prevUrl = useRef(photoUrl)
   useEffect(() => {
+    if (prevUrl.current === photoUrl) return
+    prevUrl.current = photoUrl
     setError(false)
     setLoading(!!photoUrl)
   }, [photoUrl])
