@@ -474,7 +474,14 @@ export default function AgencyDashboard() {
         </div>
       </div>
 
-      <SubNav trail={tab === 'overview' ? [{ label: 'Dashboard' }] : [{ label: 'Dashboard' }, { label: NAV_ITEMS.find(n => n.key === tab)?.label || 'Overview' }]} />
+      {/* Overview is the dashboard "home": no Back there; elsewhere Back and the Dashboard crumb return to it. */}
+      <SubNav
+        showBack={tab !== 'overview'}
+        onBack={() => goTab('overview')}
+        trail={tab === 'overview'
+          ? [{ label: 'Dashboard' }]
+          : [{ label: 'Dashboard', onClick: () => goTab('overview') }, { label: NAV_ITEMS.find(n => n.key === tab)?.label || 'Overview' }]}
+      />
 
       {navOpen && <div className="adb-backdrop" onClick={() => setNavOpen(false)} aria-hidden="true" />}
 

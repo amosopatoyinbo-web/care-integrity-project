@@ -11,13 +11,15 @@ export function fallbackPath() {
   return '/'
 }
 
-export default function BackButton({ className = '' }) {
+/* onBack: optional override (dashboards use it to return to their Overview tab). */
+export default function BackButton({ className = '', onBack }) {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   if (pathname === '/') return null
 
   function goBack() {
-    if ((window.history.state?.idx ?? 0) > 0) navigate(-1)
+    if (onBack) onBack()
+    else if ((window.history.state?.idx ?? 0) > 0) navigate(-1)
     else navigate(fallbackPath())
   }
 

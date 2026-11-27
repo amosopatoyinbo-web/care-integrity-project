@@ -335,6 +335,7 @@ function RequestCard({ req, onRefresh, onOpenEmployment }) {
 }
 
 const TAB_LABELS = {
+  overview: 'Overview',
   requests: 'Interview Requests',
   profile: 'My Profile',
   credentials: 'Credentials & Training',
@@ -345,7 +346,7 @@ const TAB_LABELS = {
 
 /* ── Main dashboard ───────────────────────────────────── */
 export default function CaregiverDashboard() {
-  const [tab, setTab]               = useState('requests')
+  const [tab, setTab]               = useState('overview')
   const navigate                    = useNavigate()
   const location                    = useLocation()
   const [profile, setProfile]       = useState(null)
@@ -425,6 +426,25 @@ export default function CaregiverDashboard() {
   const accepted = requests.filter(r => r.status === 'accepted')
   const declined = requests.filter(r => r.status === 'declined')
 
+  /* Overview data (derived from what is already loaded) */
+  const goTab = key => { setTab(key); setNavOpen(false) }
+  const now = Date.now()
+  const upcoming = requests
+    .filter(r => r.status === 'scheduled' && r.scheduledAt && new Date(r.scheduledAt).getTime() > now)
+    .sort((a, b) => new Date(a.scheduledAt) - new Date(b.scheduledAt))
+  const nextInterview = upcoming[0]
+  const openOffers = requests.filter(r => r.status === 'offer_sent')
+  const recentRequests = [...requests]
+    .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+    .slice(0, 3)
+  const OVERVIEW_STATS = [
+    { key: 'requests',    value: pending.length,                   label: 'Awaiting Your Reply', sub: 'New interview requests', color: 'var(--trust-blue)' },
+    { key: 'requests',    value: upcoming.length,                  label: 'Upcoming Interviews', sub: 'Scheduled',              color: 'var(--integrity-green)' },
+    { key: 'requests',    value: openOffers.length,                label: 'Job Offers',          sub: 'Waiting for your answer', color: '#d4af37' },
+    { key: 'recognition', value: recognition.length,               label: 'Recognition',         sub: 'From employers',         color: '#7b5cd6' },
+    { key: 'employment',  value: profile?.employment?.length || 0, label: 'Employment Records',  sub: 'On your profile',        color: '#2f8fbf' },
+  ]
+
   if (loading) return (
     <div className="cgd-page">
       <div className="cgd-topbar"><Link to={homePath()}><img src="/Main Logo.png" alt="The Care Integrity Project" style={{ height: 42 }} /></Link></div>
@@ -465,7 +485,14 @@ export default function CaregiverDashboard() {
         </div>
       </div>
 
-      <SubNav trail={[{ label: 'Dashboard' }, { label: TAB_LABELS[tab] || 'Overview' }]} />
+      {/* Overview is the dashboard "home": no Back there; elsewhere Back and the Dashboard crumb return to it. */}
+      <SubNav
+        showBack={tab !== 'overview'}
+        onBack={() => goTab('overview')}
+        trail={tab === 'overview'
+          ? [{ label: 'Dashboard' }]
+          : [{ label: 'Dashboard', onClick: () => goTab('overview') }, { label: TAB_LABELS[tab] || 'Overview' }]}
+      />
 
       {navOpen && <div className="cgd-backdrop" onClick={() => setNavOpen(false)} aria-hidden="true" />}
 
@@ -485,12 +512,12 @@ export default function CaregiverDashboard() {
             </div>
           </div>
           {[
+            { key: 'overview',    label: 'Overview' },
             { key: 'requests',    label: 'Interview Requests', count: pending.length },
             { key: 'profile',     label: 'My Profile' },
             { key: 'credentials', label: 'Credentials & Training' },
             { key: 'employment',  label: 'Employment History' },
             { key: 'recognition', label: 'Recognition' },
-            { key: 'standards',   label: 'Care Integrity Standards' },
           ].map(item => (
             <button key={item.key} className={`cgd-nav__item${tab === item.key ? ' active' : ''}`} onClick={() => { setTab(item.key); setNavOpen(false) }}>
               {item.label}
@@ -507,6 +534,72 @@ export default function CaregiverDashboard() {
 
         {/* Main content */}
         <main className="cgd-main">
+
+          {/* ── Overview (dashboard home) ── */}
+          {tab === 'overview' && (
+            <>
+              <div className="cgd-ov-welcome">
+                <h1 className="cgd-ov-welcome__title">Welcome, {profile?.fullName?.split(' ')[0] || 'Caregiver'}</h1>
+                <p className="cgd-ov-welcome__sub">
+                  {[profile?.role, fixMojibake(profile?.serviceArea), fixMojibake(profile?.yearsExp)].filter(Boolean).join(' · ')}
+                </p>
+              </div>
+
+              <div className="cgd-ov-stats">
+                {OVERVIEW_STATS.map(s => (
+                  <button key={s.label} type="button" className="cgd-ov-stat" style={{ '--card-color': s.color }} onClick={() => goTab(s.key)}>
+                    <span className="cgd-ov-stat__value" style={{ color: s.color }}>{s.value}</span>
+                    <span className="cgd-ov-stat__label">{s.label}</span>
+                    <span className="cgd-ov-stat__sub">{s.sub}</span>
+                  </button>
+                ))}
+              </div>
+
+              {nextInterview && (
+                <div className="cgd-panel cgd-ov-next">
+                  <div className="cgd-ov-next__icon" aria-hidden="true"><FiCalendar /></div>
+                  <div className="cgd-ov-next__body">
+                    <span className="cgd-ov-label">Next interview</span>
+                    <strong className="cgd-ov-next__time">{fmtDateTime(nextInterview.scheduledAt)}</strong>
+                    <span className="cgd-ov-next__agency">with {nextInterview.agencyId?.name || 'Agency'}</span>
+                    {!nextInterview.caregiverConfirmed && <span className="cgd-ov-next__hint">Please confirm this time in Interview Requests.</span>}
+                  </div>
+                  <div className="cgd-ov-next__actions">
+                    {nextInterview.caregiverConfirmed && nextInterview.meetLink
+                      ? <a href={nextInterview.meetLink} target="_blank" rel="noopener noreferrer" className="btn btn-green btn-sm"><FiVideo aria-hidden="true" /> Join Meeting</a>
+                      : <button type="button" className="btn btn-blue-outline btn-sm" onClick={() => goTab('requests')}>View details</button>}
+                  </div>
+                </div>
+              )}
+
+              <div className="cgd-panel">
+                <span className="cgd-ov-label">Quick actions</span>
+                <div className="cgd-ov-actions">
+                  <Link to="/caregiver/profile/edit" className="cgd-ov-action cgd-ov-action--primary">Edit Profile</Link>
+                  <Link to={`/caregiver/profile?id=${profile?._id}`} className="cgd-ov-action">View Public Profile</Link>
+                  <button type="button" className="cgd-ov-action" onClick={() => goTab('requests')}>Interview Requests</button>
+                  <button type="button" className="cgd-ov-action" onClick={() => goTab('credentials')}>Credentials & Training</button>
+                </div>
+              </div>
+
+              <div className="cgd-panel">
+                <div className="cgd-ov-recent__head">
+                  <span className="cgd-ov-label">Recent interview requests</span>
+                  {requests.length > 0 && <button type="button" className="cgd-ov-viewall" onClick={() => goTab('requests')}>View all →</button>}
+                </div>
+                {recentRequests.length > 0 ? recentRequests.map(r => (
+                  <button key={r._id} type="button" className="cgd-ov-recent__item" onClick={() => goTab('requests')}>
+                    <ProfileAvatar photoUrl={r.agencyId?.logoUrl} fullName={r.agencyId?.name} size="small" />
+                    <span className="cgd-ov-recent__body">
+                      <span className="cgd-ov-recent__name">{r.agencyId?.name || 'Agency'}</span>
+                      <span className="cgd-ov-recent__meta">{fixMojibake(r.reason)}{r.createdAt ? ` · ${fmtDate(r.createdAt)}` : ''}</span>
+                    </span>
+                    <StatusBadge status={r.status} />
+                  </button>
+                )) : <div className="cgd-empty">No interview requests yet. Agencies can find you once your profile is complete.</div>}
+              </div>
+            </>
+          )}
 
           {/* ── Requests ── */}
           {tab === 'requests' && (

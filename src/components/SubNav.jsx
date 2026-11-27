@@ -5,7 +5,9 @@ import { getTrail } from '../lib/navTrail'
 import './SubNav.css'
 
 /* One slim row: Back button + breadcrumbs. Always rendered directly below the site/page header. */
-export default function SubNav({ trail, crumbs = true }) {
+/* showBack=false hides the Back button (dashboard Overview is "home").
+   onBack overrides Back. A trail item may carry onClick instead of `to`. */
+export default function SubNav({ trail, crumbs = true, showBack = true, onBack }) {
   const { pathname, search } = useLocation()
   const items = trail || getTrail(pathname, search)
   const crumbsRef = useRef(null)
@@ -19,7 +21,7 @@ export default function SubNav({ trail, crumbs = true }) {
   return (
     <div className="cip-subnav">
       <div className="cip-subnav__inner">
-        <BackButton />
+        {showBack && <BackButton onBack={onBack} />}
         {crumbs && (
         <nav className="cip-subnav__crumbs" aria-label="Breadcrumb" ref={crumbsRef}>
           <ol>
@@ -29,7 +31,9 @@ export default function SubNav({ trail, crumbs = true }) {
                 <li key={`${item.label}-${i}`} className={last ? 'is-current' : ''}>
                   {item.to && !last
                     ? <Link to={item.to}>{item.label}</Link>
-                    : <span aria-current={last ? 'page' : undefined}>{item.label}</span>}
+                    : item.onClick && !last
+                      ? <button type="button" className="cip-subnav__crumb-btn" onClick={item.onClick}>{item.label}</button>
+                      : <span aria-current={last ? 'page' : undefined}>{item.label}</span>}
                 </li>
               )
             })}
