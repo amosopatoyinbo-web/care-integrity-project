@@ -58,7 +58,7 @@ function Layout({ children }) {
   return (
     <>
       <Navbar />
-      {pathname !== '/' && <SubNav />}
+      {pathname !== '/' && <SubNav crumbs={false} />}
       <main>{children}</main>
       <Footer />
     </>

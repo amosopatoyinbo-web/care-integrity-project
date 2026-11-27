@@ -5,7 +5,7 @@ import { getTrail } from '../lib/navTrail'
 import './SubNav.css'
 
 /* One slim row: Back button + breadcrumbs. Always rendered directly below the site/page header. */
-export default function SubNav({ trail }) {
+export default function SubNav({ trail, crumbs = true }) {
   const { pathname, search } = useLocation()
   const items = trail || getTrail(pathname, search)
   const crumbsRef = useRef(null)
@@ -20,6 +20,7 @@ export default function SubNav({ trail }) {
     <div className="cip-subnav">
       <div className="cip-subnav__inner">
         <BackButton />
+        {crumbs && (
         <nav className="cip-subnav__crumbs" aria-label="Breadcrumb" ref={crumbsRef}>
           <ol>
             {items.map((item, i) => {
@@ -34,6 +35,7 @@ export default function SubNav({ trail }) {
             })}
           </ol>
         </nav>
+        )}
       </div>
     </div>
   )
