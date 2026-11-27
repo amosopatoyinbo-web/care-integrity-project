@@ -744,7 +744,10 @@ export default function AgencyDashboard() {
           {/* ── Profile ── */}
           {tab === 'profile' && agency && (
             <div className="adb-panel">
-              <div className="adb-section-title" style={{ marginBottom: 16 }}>Organization Profile</div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 16 }}>
+                <div className="adb-section-title" style={{ marginBottom: 0 }}>Organization Profile</div>
+                <Link to="/agency/profile/edit" className="btn btn-blue btn-sm adb-tap">Edit Profile</Link>
+              </div>
               <div className="adb-org-profile-card">
                 <div className="adb-org-profile-card__top">
                   <div className="adb-logo-upload">

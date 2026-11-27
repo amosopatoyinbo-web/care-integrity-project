@@ -267,6 +267,7 @@ export default function CaregiverProfile() {
         <div className="cp-topbar__right">
           {isCaregiver && !previewMode && (
             <>
+              <Link to="/caregiver/profile/edit" className="btn btn-green-outline btn-sm">Edit Profile</Link>
               <button className="btn btn-blue-outline btn-sm" onClick={() => setPreview(true)}>Public Profile Preview</button>
               <Link to="/caregiver/dashboard" className="btn btn-blue btn-sm">My Dashboard</Link>
             </>
@@ -320,7 +321,10 @@ export default function CaregiverProfile() {
               Request an Interview
             </button>
           ) : isCaregiver && !previewMode ? (
-            <Link to="/caregiver/dashboard" className="btn btn-blue cp-interview-btn">My Dashboard</Link>
+            <>
+              <Link to="/caregiver/profile/edit" className="btn btn-green cp-interview-btn">Edit Profile</Link>
+              <Link to="/caregiver/dashboard" className="btn btn-blue-outline cp-interview-btn" style={{ marginTop: 10 }}>My Dashboard</Link>
+            </>
           ) : null}
 
           {/* Private block — caregiver only, not in preview */}

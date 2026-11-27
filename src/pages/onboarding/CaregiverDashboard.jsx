@@ -5,7 +5,7 @@ import { homePath } from '../../lib/navTrail'
 import { caregiverApi, requestApi, recognitionApi, auth, authApi, verificationApi } from '../../lib/api'
 import TrainingTab from '../../components/training/TrainingTab'
 import ProfileAvatar from '../../components/ProfileAvatar'
-import { FiMenu, FiX, FiVideo, FiCalendar } from 'react-icons/fi'
+import { FiMenu, FiX, FiVideo, FiCalendar, FiEdit2 } from 'react-icons/fi'
 import './CaregiverDashboard.css'
 import { fixMojibake } from '../../lib/fixText'
 import JourneyStepper from '../../components/hiring/JourneyStepper'
@@ -642,7 +642,10 @@ export default function CaregiverDashboard() {
           {/* ── Profile summary ── */}
           {tab === 'profile' && (
             <div className="cgd-panel">
-              <div className="cgd-panel__header"><h2 className="cgd-section-title">My Profile</h2></div>
+              <div className="cgd-panel__header cgd-panel__header--row">
+                <h2 className="cgd-section-title">My Profile</h2>
+                <Link to="/caregiver/profile/edit" className="btn btn-green btn-sm cgd-edit-btn"><FiEdit2 aria-hidden="true" /> Edit Profile</Link>
+              </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '24px', marginBottom: '24px', padding: '20px', background: 'var(--soft-cream)', borderRadius: 'var(--radius-md)' }}>
                 <ProfileAvatar 
                   photoUrl={profile?.photoUrl} 
@@ -673,6 +676,7 @@ export default function CaregiverDashboard() {
                 </div>
               )}
               <div className="cgd-panel__actions">
+                <Link to="/caregiver/profile/edit" className="btn btn-green btn-sm">Edit Profile</Link>
                 <Link to="/caregiver/profile?view=caregiver" className="btn btn-blue-outline btn-sm">View Full Profile</Link>
                 <Link to={`/caregiver/profile?id=${profile?._id}`} className="btn btn-blue btn-sm">Preview Public Profile</Link>
               </div>
