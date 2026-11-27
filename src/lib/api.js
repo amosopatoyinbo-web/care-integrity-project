@@ -247,6 +247,10 @@ export const requestApi = {
   hire:     (id)          => api.patch(`/requests/${id}/hire`),
   confirmSchedule: (id)       => api.patch(`/requests/${id}/confirm-schedule`),
   proposeTime:     (id, data) => api.patch(`/requests/${id}/propose-time`, data),
+  setMeetingLink:  (id, data) => api.patch(`/requests/${id}/meeting-link`, data),
+  notSelected:     (id)       => api.patch(`/requests/${id}/not-selected`),
+  sendOffer:       (id, data) => api.patch(`/requests/${id}/offer`, data),
+  respondOffer:    (id, data) => api.patch(`/requests/${id}/offer/respond`, data),
 }
 
 /* -- Recognition endpoints --------------------------------- */

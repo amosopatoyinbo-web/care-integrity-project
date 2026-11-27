@@ -8,6 +8,9 @@ import { agencyApi, requestApi, recognitionApi, verificationApi, accountabilityA
 import ProfileAvatar from '../../components/ProfileAvatar'
 import './AgencyDashboard.css'
 import { fixMojibake } from '../../lib/fixText'
+import JourneyStepper from '../../components/hiring/JourneyStepper'
+import AgencyJourneyPanel from '../../components/hiring/AgencyJourneyPanel'
+import { REQUEST_TAB_DEFS, matchesTab, needsAction } from '../../components/hiring/hiringJourney'
 
 /* ── Helpers ─────────────────────────────────────────── */
 const pad = n => String(n).padStart(2, '0')
@@ -29,6 +32,10 @@ const REQ_STATUS = {
   scheduled:{ label: 'Scheduled', cls: 'adb-badge--accepted' },
   completed:{ label: 'Completed', cls: 'adb-badge--review'   },
   hired:    { label: 'Hired',     cls: 'adb-badge--accepted' },
+  offer_sent:     { label: 'Offer Sent',     cls: 'adb-badge--review'   },
+  offer_accepted: { label: 'Offer Accepted', cls: 'adb-badge--accepted' },
+  offer_declined: { label: 'Offer Declined', cls: 'adb-badge--declined' },
+  not_selected:   { label: 'Not Selected',   cls: 'adb-badge--grey'     },
 }
 function RequestBadge({ status }) {
   const s = REQ_STATUS[status] || REQ_STATUS.pending
@@ -52,7 +59,6 @@ function AgencyRequestCard({ req, onUpdated }) {
   const [when, setWhen]               = useState('')
   const [busy, setBusy]               = useState(false)
   const [error, setError]             = useState('')
-  const [hireConfirm, setHireConfirm] = useState(false)
 
   const cg = req.caregiverId || {}
 
@@ -80,22 +86,6 @@ function AgencyRequestCard({ req, onUpdated }) {
     }
     schedule(d.toISOString())
   }
-
-  async function confirmHire() {
-    setBusy(true)
-    setError('')
-    try {
-      const updated = await requestApi.hire(req._id)
-      onUpdated(updated.data || updated)
-      setHireConfirm(false)
-    } catch (err) {
-      setError(err.message || 'Could not confirm hire.')
-    } finally {
-      setBusy(false)
-    }
-  }
-
-  const showScheduled = req.status === 'scheduled' || req.status === 'completed'
 
   return (
     <div className="adb-req-card">
@@ -159,44 +149,8 @@ function AgencyRequestCard({ req, onUpdated }) {
         </div>
       )}
 
-      {showScheduled && (
-        <div className="adb-scheduled-info">
-          {req.scheduledAt && <p className="adb-scheduled-info__time"><FiCalendar aria-hidden="true" /> {fmtDateTime(req.scheduledAt)}</p>}
-          {req.status === 'scheduled' && (
-            <p className="adb-hint">
-              {req.caregiverConfirmed ? 'Caregiver confirmed this time.' : 'Waiting for the caregiver to confirm this time.'}
-            </p>
-          )}
-          <div className="adb-req-card__actions">
-            {req.meetLink && (
-              <a href={req.meetLink} target="_blank" rel="noopener noreferrer" className="btn btn-green btn-sm adb-tap">
-                <FiVideo aria-hidden="true" /> Join Meeting
-              </a>
-            )}
-            {!hireConfirm && (
-              <button className="btn btn-blue btn-sm adb-tap" onClick={() => setHireConfirm(true)}>Confirm Hire</button>
-            )}
-          </div>
-          {hireConfirm && (
-            <div className="adb-hire-confirm">
-              <span>Confirm that you want to hire {cg.fullName || 'this caregiver'}?</span>
-              <div className="adb-req-card__actions">
-                <button className="btn btn-blue btn-sm adb-tap" onClick={confirmHire} disabled={busy}>
-                  {busy ? 'Hiring…' : 'Yes, Confirm Hire'}
-                </button>
-                <button className="btn btn-blue-outline btn-sm adb-tap" onClick={() => setHireConfirm(false)}>Cancel</button>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {req.status === 'hired' && (
-        <div className="adb-hired-info">
-          <span className="adb-badge adb-badge--accepted">Hired</span>
-          {req.hiredAt && <span className="adb-hint">on {fmtDate(req.hiredAt)}</span>}
-        </div>
-      )}
+      <JourneyStepper req={req} />
+      <AgencyJourneyPanel req={req} onUpdated={onUpdated} />
 
       {error && <p className="adb-error">{error}</p>}
     </div>
@@ -310,14 +264,7 @@ function AccountabilityForm({ knownCaregivers, onDone, onRefresh }) {
 }
 
 /* ── Main dashboard ──────────────────────────────────── */
-const REQUEST_TABS = [
-  { key: 'all',       label: 'All' },
-  { key: 'pending',   label: 'Pending' },
-  { key: 'accepted',  label: 'Accepted' },
-  { key: 'scheduled', label: 'Scheduled' },
-  { key: 'hired',     label: 'Hired' },
-  { key: 'declined',  label: 'Declined' },
-]
+const REQUEST_TABS = REQUEST_TAB_DEFS
 
 export default function AgencyDashboard() {
   const [tab, setTab]                   = useState('overview')
@@ -435,14 +382,7 @@ export default function AgencyDashboard() {
   const byStatus = s => requests.filter(r => r.status === s)
   const pending  = byStatus('pending')
   const hired    = byStatus('hired')
-  const tabFilter = {
-    all:       () => true,
-    pending:   r => r.status === 'pending',
-    accepted:  r => r.status === 'accepted',
-    scheduled: r => r.status === 'scheduled' || r.status === 'completed',
-    hired:     r => r.status === 'hired',
-    declined:  r => r.status === 'declined',
-  }
+  const tabFilter = Object.fromEntries(REQUEST_TABS.map(t => [t.key, r => matchesTab(t.key, r)]))
   const visibleRequests = requests.filter(tabFilter[reqTab])
 
   // Caregivers the agency already knows about (for the accountability lookup)
@@ -644,6 +584,9 @@ export default function AgencyDashboard() {
                     >
                       {t.label}
                       <span className="adb-tabs__count">{count}</span>
+                      {requests.some(r => tabFilter[t.key](r) && needsAction(r, 'agency')) && (
+                        <span className="adb-tabs__dot" aria-label="Needs your action" style={{ width: 8, height: 8, borderRadius: '50%', background: '#c0392b', display: 'inline-block', marginLeft: 6 }} />
+                      )}
                     </button>
                   )
                 })}

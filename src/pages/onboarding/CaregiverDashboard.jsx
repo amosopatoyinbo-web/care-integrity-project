@@ -6,6 +6,9 @@ import ProfileAvatar from '../../components/ProfileAvatar'
 import { FiMenu, FiX, FiVideo, FiCalendar } from 'react-icons/fi'
 import './CaregiverDashboard.css'
 import { fixMojibake } from '../../lib/fixText'
+import JourneyStepper from '../../components/hiring/JourneyStepper'
+import CaregiverJourneyPanel from '../../components/hiring/CaregiverJourneyPanel'
+import { REQUEST_TAB_DEFS, matchesTab, needsAction } from '../../components/hiring/hiringJourney'
 
 /* ── Helpers ──────────────────────────────────────────── */
 const pad = n => String(n).padStart(2, '0')
@@ -17,14 +20,7 @@ const minProposeValue = () => localInputValue(new Date(Date.now() + 60 * 60 * 10
 const fmtDate = d => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 const fmtDateTime = d => new Date(d).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })
 
-const REQUEST_TABS = [
-  { key: 'all',       label: 'All',       match: () => true },
-  { key: 'pending',   label: 'Pending',   match: r => r.status === 'pending' },
-  { key: 'accepted',  label: 'Accepted',  match: r => r.status === 'accepted' },
-  { key: 'scheduled', label: 'Scheduled', match: r => r.status === 'scheduled' || r.status === 'completed' },
-  { key: 'hired',     label: 'Hired',     match: r => r.status === 'hired' },
-  { key: 'declined',  label: 'Declined',  match: r => r.status === 'declined' },
-]
+const REQUEST_TABS = REQUEST_TAB_DEFS.map(t => ({ ...t, match: r => matchesTab(t.key, r) }))
 
 /* ── Status badge ─────────────────────────────────────── */
 const STATUS_MAP = {
@@ -35,6 +31,10 @@ const STATUS_MAP = {
   scheduled:{ label: 'Interview Scheduled', cls: 'cgd-badge--accepted' },
   completed:{ label: 'Interview Completed', cls: 'cgd-badge--accepted' },
   hired:    { label: 'Hired',               cls: 'cgd-badge--accepted' },
+  offer_sent:     { label: 'Job Offer',      cls: 'cgd-badge--pending'  },
+  offer_accepted: { label: 'Offer Accepted', cls: 'cgd-badge--accepted' },
+  offer_declined: { label: 'Offer Declined', cls: 'cgd-badge--declined' },
+  not_selected:   { label: 'Not Selected',   cls: 'cgd-badge--grey'     },
 }
 function StatusBadge({ status }) {
   const s = STATUS_MAP[status] || STATUS_MAP.pending
@@ -245,7 +245,9 @@ function RequestCard({ req, onRefresh, onOpenEmployment }) {
           </div>
         )}
 
-        {req.status === 'scheduled' && (
+        <JourneyStepper req={req} />
+
+        {req.status === 'scheduled' && !req.caregiverConfirmed && (
           <div className="cgd-sched">
             <div className="cgd-sched__head">
               <FiCalendar aria-hidden="true" />
@@ -253,16 +255,7 @@ function RequestCard({ req, onRefresh, onOpenEmployment }) {
               {req.caregiverConfirmed && <span className="cgd-badge cgd-badge--accepted">Confirmed</span>}
             </div>
 
-            {req.caregiverConfirmed ? (
-              <>
-                {req.meetLink && (
-                  <a href={req.meetLink} target="_blank" rel="noopener noreferrer" className="btn btn-green btn-sm cgd-tap">
-                    <FiVideo aria-hidden="true" /> Join Meeting
-                  </a>
-                )}
-                <p className="cgd-sched__hint">Check your email for reminders before the interview.</p>
-              </>
-            ) : (
+            {(
               <>
                 <p className="cgd-sched__hint">The agency proposed this time. Confirm it to receive the meeting link.</p>
                 {!proposing && (
@@ -311,23 +304,7 @@ function RequestCard({ req, onRefresh, onOpenEmployment }) {
             {schedError && <p className="cgd-sched__error">{schedError}</p>}
           </div>
         )}
-        {req.status === 'hired' && (
-          <div className="request-hired cgd-hired">
-            <span className="cgd-badge cgd-badge--accepted">Hired</span>
-            <p>
-              Congratulations! You have been hired by <strong>{req.agencyId?.orgName || req.agencyId?.name || 'the agency'}</strong>
-              {req.hiredAt ? ` on ${fmtDate(req.hiredAt)}` : ''}.
-            </p>
-            {onOpenEmployment && (
-              <button className="cgd-action-link" onClick={onOpenEmployment}>View Employment History →</button>
-            )}
-          </div>
-        )}
-        {req.status === 'completed' && (
-          <div className="request-completed">
-            <span className="status-badge completed">Interview Completed</span>
-          </div>
-        )}
+        <CaregiverJourneyPanel req={req} onUpdated={onRefresh} onOpenEmployment={onOpenEmployment} />
 
         <div className="cgd-request-card__actions">
           <button className="cgd-action-link" onClick={() => setExpanded(e => !e)}>
@@ -536,6 +513,9 @@ export default function CaregiverDashboard() {
                     >
                       {t.label}
                       <span className="cgd-tabs__count">{count}</span>
+                      {requests.some(r => t.match(r) && needsAction(r, 'caregiver')) && (
+                        <span aria-label="Needs your action" style={{ width: 8, height: 8, borderRadius: '50%', background: '#c0392b', display: 'inline-block', marginLeft: 6 }} />
+                      )}
                     </button>
                   )
                 })}
